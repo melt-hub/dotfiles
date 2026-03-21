@@ -1,0 +1,76 @@
+/* =============== NIGHTFOX MONOCHROME =============== */
+@define-color background  #192330;
+@define-color foreground  #cdcecf; /* Il grigio chiaro per tutto il testo */
+@define-color selection   #2d3848; /* Grigio medio per evidenziare */
+@define-color comment     #6b7a8c; /* Grigio scuro per elementi inattivi */
+
+/* =============== RESET TOTALE =============== */
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    background-color: transparent;
+    box-shadow: none;
+    text-shadow: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* =============== LA BARRA =============== */
+window#waybar {
+    background-color: @background;
+    color: @foreground;
+    /* Una linea sottile in alto per dare definizione */
+    border-top: 1px solid @selection;
+}
+
+/* =============== SPAZIATURA MODULI =============== */
+/* Diamo respiro ai moduli senza usare colori */
+#workspaces,
+#window,
+#cpu,
+#memory,
+#temperature,
+#network,
+#pulseaudio,
+#battery,
+#clock,
+#tray,
+#disk {
+    padding: 0 8px;
+    color: @foreground; /* Forza tutto il testo al grigio Nightfox */
+}
+
+/* =============== WORKSPACES (UNICO ELEMENTO DINAMICO) =============== */
+#workspaces button {
+    color: @comment; /* I desktop non attivi sono grigio scuro */
+    padding: 0 8px;
+    transition: all 0.2s ease;
+}
+
+#workspaces button.focused {
+    color: @foreground; /* Il desktop attuale è grigio chiaro */
+    background-color: @selection; /* Leggero stacco di grigio sullo sfondo */
+}
+
+#workspaces button.urgent {
+    color: #c94f6d; /* Solo l'urgenza resta colorata (rosso) per sicurezza */
+}
+
+/* =============== DETTAGLI FINEZZA =============== */
+
+/* Rende l'orologio leggermente più visibile tra gli altri grigi */
+#clock {
+    font-weight: bold;
+}
+
+/* Rimuove eventuali icone colorate se presenti (forza il bianco/grigio) */
+#cpu, #memory, #network, #pulseaudio, #battery {
+    background-image: none;
+}
+
+/* Tray (Icone di sistema) */
+#tray {
+    margin-left: 10px;
+}

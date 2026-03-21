@@ -1,0 +1,36 @@
+
+# =============== WALLPAPER ===============
+image=/home/melt/.config/wallpapers/moonblurred.png
+
+# =============== RING ===============
+
+# waiting
+ring-color=50a5a4
+inside-color=192330
+text-color=cdcecf
+
+# typing
+key-hl-color=8c6c9a
+bs-hl-color=f4a261
+
+# verifying
+ring-ver-color=50a5a4
+inside-ver-color=192330
+text-ver-color=cdcecf
+
+# wrong
+ring-wrong-color=c94f6d
+inside-wrong-color=c94f6d
+text-wrong-color=192330
+
+# cleared
+ring-clear-color=e9c46a
+inside-clear-color=192330
+text-clear-color=e9c46a
+
+# separator
+line-color=00000000
+separator-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+line-clear-color=00000000

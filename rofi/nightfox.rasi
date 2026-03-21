@@ -1,0 +1,18 @@
+/* =============== NIGHTFOX =============== */
+
+* {
+    background: #192330;
+    foreground: #cdcecf;
+    selection: #2d3848;
+    comment: #6b7a8c;
+    red: #c94f6d;
+    orange: #f4a261;
+    yellow: #e9c46a;
+    green: #58b57a;
+    cyan: #50a5a4;
+    blue: #4c7a9e;
+    purple: #8c6c9a;
+
+    background-color: @background;
+    text-color: @foreground;
+  }
