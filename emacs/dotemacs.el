@@ -317,6 +317,23 @@
   (setq magit-process-find-password-functions
         '(magit-process-password-auth-source)))
 
+;; =========================| LATEX |====================
+
+; the best emacs latex environment
+(use-package tex
+  :ensure auctex
+  :config
+  (setq-default TeX-master nil)
+  (setq TeX-parse-self t)
+  (setq TeX-auto-save t))
+
+; auto latex rendering (like obsidian)
+(use-package org-fragtog
+  :ensure t
+  :hook (org-mode . org-fragtog-mode))
+
+;; =========================| END LATEX |====================
+
 ;; ====================| END PACKAGES |====================
 
 ;; ====================| THEMING |====================
@@ -366,18 +383,48 @@
 ; org mode configuration
 (use-package org
   :config
+
+  ; agenda files pointers
   (setq org-agenda-files
-	(list
-	  (expand-file-name "agenda.org" org-dir-path)
-		(setq org-blank-before-new-entry
-			'((heading . nil) (plain-list-item . nil)))
-  (global-set-key (kbd "C-c a") 'org-agenda))))
+    (list (expand-file-name "agenda.org" org-dir-path)))
+	
+  ; prevent emacs from inserting a newline '\n' when using 'M-RET' to generate
+  ; a new list item.
+  (setq org-blank-before-new-entry
+    '((heading . nil) (plain-list-item . nil)))
+  
+  ; agenda keybind
+  (global-set-key (kbd "C-c a") 'org-agenda)
+  
+  ; hides markup characters
+  (setq org-hide-emphasis-markers t)
+
+  ; latex rendering scaling  
+  (setq org-format-latex-options
+    (plist-put org-format-latex-options :scale 1))
+
+  ; compile latex code into SVG files
+  (setq org-preview-latex-default-process 'dvisvgm)
+
+  ; enable latex syntax highlighting
+  (setq org-highlight-latex-and-related '(latex))
+
+  ; support for TikZ and advanced TikZ graphs in latex rendering 
+  (setq org-format-latex-header
+        (concat org-format-latex-header
+                "\n\\usepackage{tikz}"
+                "\n\\usepackage{pgfplots}"
+                "\n\\usepackage{forest}"
+                "\n\\usetikzlibrary{positioning, calc, arrows.meta,
+  shapes.multipart, automata, matrix, intersections}"          
+                "\n\\usepgfplotslibrary{fillbetween, statistics}"
+                "\n\\pgfplotsset{compat=newest}")))
 
 ;; ====================| END ORG MODE |====================
 
 ;; ====================| MY FUNCTIONS |====================
 
-; my/ tangle dotfiles
+; my/tangle dotfiles
 ;
 ; this function autotangles the org config file
 (defun my/tangle-dotfiles ()
