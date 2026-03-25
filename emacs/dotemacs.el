@@ -403,6 +403,10 @@
   (setq org-format-latex-options
     (plist-put org-format-latex-options :scale 1))
 
+  ; latex aligning
+  (setq org-format-latex-options
+    (plist-put org-format-latex-options :justify 'center))
+
   ; compile latex code into SVG files
   (setq org-preview-latex-default-process 'dvisvgm)
 
@@ -434,6 +438,29 @@
     (message "[CIRO]: Org Configuration file tangled!")))
 
 (add-hook 'after-save-hook #'my/tangle-dotfiles)
+
+(defun my/org-center-latex ()
+  (interactive)
+  (dolist (ov (overlays-in (point-min) (point-max)))
+    (when (eq (overlay-get ov 'org-overlay-type) 'org-latex-overlay)
+      (overlay-put ov
+        'before-string
+        (propertize " " 'display (my/build-space ov))))))
+
+(defun my/build-space (overlay)
+  `(space :align-to (- center ,(/ (my/get-image-width-px overlay)
+                                   2
+                                   (frame-char-width)))))
+
+(defun my/get-image-width-px (overlay)
+  (car (image-size (overlay-get overlay 'display) t)))
+
+;; (add-hook 'org-mode-hook
+;;   (lambda ()
+;;     (add-hook 'after-save-hook #'my/org-center-latex nil t)))
+
+(advice-add 'org-latex-preview :after
+  (lambda (&rest _) (my/org-center-latex)))
 
 ;; ====================| END MY FUNCTIONS |====================
 
