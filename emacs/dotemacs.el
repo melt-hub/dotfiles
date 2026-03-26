@@ -176,7 +176,7 @@
  ; fit window width
  (setq-default pdf-view-display-size 'fit-width)
  ; dark mode colors
- (setq pdf-view-midnight-colors '("#b2b2b2" . "#1c1e1f"))
+ (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
 
  ; automaticclly enable nightmode and annotations
  (add-hook 'pdf-view-mode-hook
@@ -401,7 +401,7 @@
 
   ; latex rendering scaling  
   (setq org-format-latex-options
-    (plist-put org-format-latex-options :scale 1.6))
+    (plist-put org-format-latex-options :scale 1.2))
 
   ; latex aligning
   (setq org-format-latex-options
@@ -459,9 +459,9 @@
   (let ((text (buffer-substring-no-properties
                 (overlay-start overlay)
                 (overlay-end overlay))))
-    (or (string-match-p "\\`\\$\\$" text)
-        (string-match-p "\\`\\\\\\[" text)
-        (string-match-p "\\`\\\\begin{" text))))
+    (or (string-match-p "\\`\\s-*\\$\\$" text)
+        (string-match-p "\\`\\s-*\\\\\\[" text)
+        (string-match-p "\\`\\s-*\\\\begin{" text))))
 
 ;; (add-hook 'org-mode-hook
 ;;   (lambda ()
