@@ -708,7 +708,7 @@
 
       ; latex rendering scaling  
       (setq org-format-latex-options
-        (plist-put org-format-latex-options :scale 1))
+        (plist-put org-format-latex-options :scale 1.6))
 
       ; latex aligning
       (setq org-format-latex-options
@@ -762,9 +762,9 @@
 
   #+begin_src emacs-lisp
     (defun my/org-center-latex ()
-      (interactive)
       (dolist (ov (overlays-in (point-min) (point-max)))
-        (when (eq (overlay-get ov 'org-overlay-type) 'org-latex-overlay)
+        (when (and (eq (overlay-get ov 'org-overlay-type) 'org-latex-overlay)
+          (my/org-latex-block-p ov))
           (overlay-put ov
             'before-string
             (propertize " " 'display (my/build-space ov))))))
@@ -776,6 +776,14 @@
 
     (defun my/get-image-width-px (overlay)
       (car (image-size (overlay-get overlay 'display) t)))
+
+    (defun my/org-latex-block-p (overlay)
+      (let ((text (buffer-substring-no-properties
+                    (overlay-start overlay)
+                    (overlay-end overlay))))
+        (or (string-match-p "\\`\\$\\$" text)
+            (string-match-p "\\`\\\\\\[" text)
+            (string-match-p "\\`\\\\begin{" text))))
 
     ;; (add-hook 'org-mode-hook
     ;;   (lambda ()
