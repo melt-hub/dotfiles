@@ -337,6 +337,73 @@
 
 ;; =========================| END LATEX |====================
 
+;; (require 'tetris)
+;; (require 'pong)
+;; (require 'doctor)
+;; (require 'dunnet)
+;; (require 'zone)
+;; (require '5x5)
+;; (require 'bubbles)
+;; (require 'gomoku)
+;; (require 'hanoi)
+;; (require 'life)
+;; (require 'mpuz)
+;; (require 'blackbox)
+;; (require 'solitaire)
+
+; --------------- sql developement ---------------
+(use-package sql
+  :config
+  ; default dbms
+  (setq sql-product 'mysql)
+
+  ; connection profiles
+  (setq sql-connection-alist
+    '((mysql-melt
+       (sql-product  'mysql)
+       (sql-server   "127.0.0.1")
+       (sql-port     3306)
+       (sql-user     "melt")
+       (sql-password (auth-source-pass-get 'secret "mysql/melt"))
+       (sql-database ""))
+      (mysql-root
+       (sql-product  'mysql)
+       (sql-server   "127.0.0.1")
+       (sql-port     3306)
+       (sql-user     "root")
+       (sql-password (auth-source-pass-get 'secret "mysql/root"))
+       (sql-database ""))))
+
+  ; enable syntax highlighting in sql buffers
+  (add-hook 'sql-mode-hook
+    (lambda ()
+      (sql-set-product 'mysql)))
+
+  ; prevent visual-line-mode from breaking table formatting
+  (add-hook 'sql-interactive-mode-hook
+    (lambda ()
+      (toggle-truncate-lines t)))
+
+  ; force table printing in ascii, disable buffering
+  (setq sql-mysql-options '("--table" "--unbuffered")))
+
+; auto uppercasing keywords
+(use-package sqlup-mode
+  :ensure t
+  :hook
+  ((sql-mode . sqlup-mode)
+    (sql-interactive-mode . sqlup-mode))
+  :config
+  ; upcasing blacklist
+  (add-to-list 'sqlup-blacklist "name"))
+
+; smart indentation for SQL
+(use-package sql-indent
+  :ensure t
+  :hook (sql-mode . sqlind-minor-mode))
+
+; --------------- end sql development ---------------
+
 ;; ====================| END PACKAGES |====================
 
 ;; ====================| THEMING |====================
@@ -404,7 +471,7 @@
 
   ; latex rendering scaling  
   (setq org-format-latex-options
-    (plist-put org-format-latex-options :scale 1.2))
+    (plist-put org-format-latex-options :scale 1.4))
 
   ; latex aligning
   (setq org-format-latex-options
