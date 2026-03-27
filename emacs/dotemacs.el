@@ -27,6 +27,9 @@
 ; do not shoew startup screen
 (setq inhibit-startup-screen t)
 
+; always display inline images
+(setq org-startup-with-inline-images t)
+
 ; load use-package
 (add-to-list 'load-path (concat os-packages-path "use-package/"))
 
@@ -413,16 +416,17 @@
   ; enable latex syntax highlighting
   (setq org-highlight-latex-and-related '(latex))
 
-  ; support for TikZ and advanced TikZ graphs in latex rendering 
+   ; support for TikZ and advanced TikZ graphs in latex rendering 
   (setq org-format-latex-header
-        (concat org-format-latex-header
-                "\n\\usepackage{tikz}"
-                "\n\\usepackage{pgfplots}"
-                "\n\\usepackage{forest}"
-                "\n\\usetikzlibrary{positioning, calc, arrows.meta,
-  shapes.multipart, automata, matrix, intersections}"          
-                "\n\\usepgfplotslibrary{fillbetween, statistics}"
-                "\n\\pgfplotsset{compat=newest}")))
+    (concat org-format-latex-header
+      "\n\\usepackage{clrscode3e}"      
+      "\n\\usepackage{tikz}"
+      "\n\\usepackage{pgfplots}"
+      "\n\\usepackage{forest}"
+      "\n\\usetikzlibrary{positioning, calc, arrows.meta,"
+      "shapes.multipart, automata, matrix, intersections}"          
+      "\n\\usepgfplotslibrary{fillbetween, statistics}"
+      "\n\\pgfplotsset{compat=newest}")))
 
 ;; ====================| END ORG MODE |====================
 
