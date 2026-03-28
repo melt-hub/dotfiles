@@ -231,6 +231,19 @@
     :config
     (org-roam-setup))
 
+(use-package org-roam-ui
+  :ensure t
+  :after org-roam
+  :config
+  ; sync emacs theme with the graph
+  (setq org-roam-ui-sync-theme t)
+  ; keep the graph focused on the current buffer
+  (setq org-roam-ui-follow t)
+  ; update the graph on save
+  (setq org-roam-ui-update-on-save t)
+  ; open the graph in the browser on startup
+  (setq org-roam-ui-open-on-start t))
+
 ; --------------- fuzzy finding and completion ---------------
 
 
@@ -471,7 +484,7 @@
 
   ; latex rendering scaling  
   (setq org-format-latex-options
-    (plist-put org-format-latex-options :scale 1.4))
+    (plist-put org-format-latex-options :scale 1.8))
 
   ; latex aligning
   (setq org-format-latex-options
@@ -540,6 +553,13 @@
 
 (advice-add 'org-latex-preview :after
   (lambda (&rest _) (my/org-center-latex)))
+
+(defun my/loop-invariant ()
+  "Insert a loop invariant proof structure."
+  (interactive)
+  (insert "- *Initialization*:\n"
+          "- *Maintenance*:\n"
+          "- *Termination*:\n"))
 
 ;; ====================| END MY FUNCTIONS |====================
 
