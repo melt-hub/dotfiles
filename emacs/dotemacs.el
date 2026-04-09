@@ -101,6 +101,11 @@
 ; autoindent after '\n', '\b' and '}'
 (setq-default electric-indent-chars '(?\n ?\^? ?\}))
 
+; set zoom at +1
+(add-hook 'find-file-hook
+  (lambda ()
+    (text-scale-set 1)))
+
 ;; ; enables line number visualization in source files
 ;; (global-display-line-numbers-mode t)
 ;; (dolist (mode '(org-mode-hook
@@ -315,12 +320,6 @@
   :config
   (auth-source-pass-enable))
 
-(use-package pinentry
-  :ensure t
-  :config
-  (setenv "EMACS" "t")
-  (pinentry-start))
-
 ; --------------- end password management ---------------
 
 (use-package magit
@@ -349,20 +348,6 @@
   :hook (org-mode . org-fragtog-mode))
 
 ;; =========================| END LATEX |====================
-
-;; (require 'tetris)
-;; (require 'pong)
-;; (require 'doctor)
-;; (require 'dunnet)
-;; (require 'zone)
-;; (require '5x5)
-;; (require 'bubbles)
-;; (require 'gomoku)
-;; (require 'hanoi)
-;; (require 'life)
-;; (require 'mpuz)
-;; (require 'blackbox)
-;; (require 'solitaire)
 
 ; --------------- sql developement ---------------
 (use-package sql
@@ -416,6 +401,9 @@
   :hook (sql-mode . sqlind-minor-mode))
 
 ; --------------- end sql development ---------------
+
+(use-package ada-mode
+  :ensure t)
 
 ;; ====================| END PACKAGES |====================
 
@@ -484,7 +472,11 @@
 
   ; latex rendering scaling  
   (setq org-format-latex-options
-    (plist-put org-format-latex-options :scale 1.8))
+    (plist-put org-format-latex-options :scale 1.1))
+
+  ; fixed dpi
+  (setq org-format-latex-options
+    (plist-put org-format-latex-options :dpi 120))
 
   ; latex aligning
   (setq org-format-latex-options
@@ -496,7 +488,12 @@
   ; enable latex syntax highlighting
   (setq org-highlight-latex-and-related '(latex))
 
-   ; support for TikZ and advanced TikZ graphs in latex rendering 
+  ; auto preview latex in whole buffer
+  (add-hook 'org-mode-hook
+    (lambda ()
+      (org-latex-preview '(16))))
+
+  ; support for TikZ and advanced TikZ graphs in latex rendering 
   (setq org-format-latex-header
     (concat org-format-latex-header
       "\n\\usepackage{clrscode3e}"      
@@ -557,9 +554,26 @@
 (defun my/loop-invariant ()
   "Insert a loop invariant proof structure."
   (interactive)
-  (insert "- *Initialization*:\n"
-          "- *Maintenance*:\n"
-          "- *Termination*:\n"))
+  (insert "+ *Initialization*:\n"
+          "+ *Maintenance*:\n"
+          "+ *Termination*:\n"))
+
+(defun my/each-half-hour-between (start end)
+  (interactive "nStart (hour): \nnEnd (hour): ")
+  (let ((steps (* (- end start) 2)))
+  (dotimes (i (+ steps 1))
+  (insert (format "| %02d:%02d | |\n"
+    (+ start (/ i 2))
+    (* 30 (mod i 2)))))))
+
+(defun my/latex-switch-scaling ()
+  "Toggle LaTeX preview scaling between 1.1 and 1.8."
+  (interactive)
+  (let* ((current (plist-get org-format-latex-options :scale))
+         (next (if (< current 1.5) 1.8 1.1)))
+    (setq org-format-latex-options
+          (plist-put org-format-latex-options :scale next))
+    (message "[CIRO]: LaTeX scaling set to %.1f" next)))
 
 ;; ====================| END MY FUNCTIONS |====================
 
