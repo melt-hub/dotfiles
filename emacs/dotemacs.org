@@ -563,7 +563,7 @@
   Allows the system to prompt the user asking for the GPG passphrase in the
   minibuffer:
 
-\  #+begin_src emacs-lisp
+  #+begin_src emacs-lisp
     (use-package pinentry
       :ensure t
       :config
