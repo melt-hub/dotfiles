@@ -234,7 +234,16 @@
      :map org-mode-map
      ("C-M-i" . completion-at-point))
     :config
-    (org-roam-setup))
+    (org-roam-setup)
+    (setq org-roam-capture-templates
+      '(("d" "default" plain "%?"
+         :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                            "#+title: ${title}\n")
+         :unnarrowed t)
+        ("r" "dream" plain "%?"
+         :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
+                            "#+title: ${title}\n#+filetags: :dream:\n")
+         :unnarrowed t))))
 
 (use-package org-roam-ui
   :ensure t
@@ -493,17 +502,28 @@
     (lambda ()
       (org-latex-preview '(16))))
 
-  ; support for TikZ and advanced TikZ graphs in latex rendering 
+  ; support for TikZ and advanced TikZ graphs in latex preview
   (setq org-format-latex-header
     (concat org-format-latex-header
       "\n\\usepackage{clrscode3e}"      
       "\n\\usepackage{tikz}"
       "\n\\usepackage{pgfplots}"
       "\n\\usepackage{forest}"
+      "\n\\usepackage{xcolor}"
+      "\n\\usepackage{mdframed}"
       "\n\\usetikzlibrary{positioning, calc, arrows.meta,"
       "shapes.multipart, automata, matrix, intersections}"          
       "\n\\usepgfplotslibrary{fillbetween, statistics}"
-      "\n\\pgfplotsset{compat=newest}")))
+      "\n\\pgfplotsset{compat=newest}"))
+  
+  ; support for TikZ and advanced TikZ graphs in latex export
+  (setq org-latex-packages-alist
+    '(("" "clrscode3e" t)
+       ("" "tikz" t)
+       ("" "pgfplots" t)
+       ("" "forest" t)
+       ("" "xcolor" t)
+       ("" "mdframed" t)))
 
 ;; ====================| END ORG MODE |====================
 
