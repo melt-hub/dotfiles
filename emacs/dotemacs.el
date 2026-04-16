@@ -329,6 +329,12 @@
   :config
   (auth-source-pass-enable))
 
+(use-package pinentry
+  :ensure t
+  :config
+  (setenv "EMACS" "t")
+  (pinentry-start))
+
 ; --------------- end password management ---------------
 
 (use-package magit
@@ -344,12 +350,12 @@
 ;; =========================| LATEX |====================
 
 ; the best emacs latex environment
-(use-package tex
-  :ensure auctex
-  :config
-  (setq-default TeX-master nil)
-  (setq TeX-parse-self t)
-  (setq TeX-auto-save t))
+; (use-package tex
+;  :ensure auctex
+;  :config
+;  (setq-default TeX-master nil)
+;  (setq TeX-parse-self t)
+;  (setq TeX-auto-save t))
 
 ; auto latex rendering (like obsidian)
 (use-package org-fragtog
@@ -494,9 +500,6 @@
   ; compile latex code into SVG files
   (setq org-preview-latex-default-process 'dvisvgm)
 
-  ; enable latex syntax highlighting
-  (setq org-highlight-latex-and-related '(latex))
-
   ; auto preview latex in whole buffer
   (add-hook 'org-mode-hook
     (lambda ()
@@ -509,8 +512,6 @@
       "\n\\usepackage{tikz}"
       "\n\\usepackage{pgfplots}"
       "\n\\usepackage{forest}"
-      "\n\\usepackage{xcolor}"
-      "\n\\usepackage{mdframed}"
       "\n\\usetikzlibrary{positioning, calc, arrows.meta,"
       "shapes.multipart, automata, matrix, intersections}"          
       "\n\\usepgfplotslibrary{fillbetween, statistics}"
@@ -521,9 +522,7 @@
     '(("" "clrscode3e" t)
        ("" "tikz" t)
        ("" "pgfplots" t)
-       ("" "forest" t)
-       ("" "xcolor" t)
-       ("" "mdframed" t)))
+       ("" "forest" t))))
 
 ;; ====================| END ORG MODE |====================
 
@@ -590,9 +589,10 @@
   "Toggle LaTeX preview scaling between 1.1 and 1.8."
   (interactive)
   (let* ((current (plist-get org-format-latex-options :scale))
-         (next (if (< current 1.5) 1.8 1.1)))
+          (next (if (< current 1.5) 1.8 1.1)))
     (setq org-format-latex-options
-          (plist-put org-format-latex-options :scale next))
+      (plist-put org-format-latex-options :scale next))
+    (execute-kbd-macro (kbd "C-u C-u C-c C-x C-l"))
     (message "[CIRO]: LaTeX scaling set to %.1f" next)))
 
 ;; ====================| END MY FUNCTIONS |====================
