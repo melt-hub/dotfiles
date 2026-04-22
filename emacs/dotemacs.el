@@ -242,7 +242,7 @@
          :unnarrowed t)
         ("r" "dream" plain "%?"
          :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
-                            "#+title: ${title}\n#+filetags: :dream:\n")
+                            "#+title: ${title}\n#+filetags: :dream:\n\n:PROPERTIES:\n:created: %<%Y-%m-%d %H:%M>\n:END:\n")
          :unnarrowed t))))
 
 (use-package org-roam-ui
@@ -490,8 +490,8 @@
     (plist-put org-format-latex-options :scale 1.1))
 
   ; fixed dpi
-  (setq org-format-latex-options
-    (plist-put org-format-latex-options :dpi 120))
+  ; (setq org-format-latex-options
+  ;  (plist-put org-format-latex-options :dpi 120))
 
   ; latex aligning
   (setq org-format-latex-options
@@ -501,9 +501,9 @@
   (setq org-preview-latex-default-process 'dvisvgm)
 
   ; auto preview latex in whole buffer
-  (add-hook 'org-mode-hook
-    (lambda ()
-      (org-latex-preview '(16))))
+  ;; (add-hook 'org-mode-hook
+  ;;   (lambda ()
+  ;;     (org-latex-preview '(16))))
 
   ; support for TikZ and advanced TikZ graphs in latex preview
   (setq org-format-latex-header
