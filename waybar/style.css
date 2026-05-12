@@ -1,14 +1,16 @@
-/* =============== NIGHTFOX MONOCHROME =============== */
-@define-color background  #192330;
-@define-color foreground  #cdcecf; /* Il grigio chiaro per tutto il testo */
-@define-color selection   #2d3848; /* Grigio medio per evidenziare */
-@define-color comment     #6b7a8c; /* Grigio scuro per elementi inattivi */
+/* ==========| MELT's WAYBAR CONFIGURATION |========== */
 
-/* =============== RESET TOTALE =============== */
+/* Nightfox Monochrome Palette */
+@define-color background  #192330;
+@define-color foreground  #cdcecf;
+@define-color selection   #2d3848;
+@define-color comment     #6b7a8c;
+
+/* Global Reset */
 * {
     border: none;
     border-radius: 0;
-    font-family: "JetBrains Mono", monospace;
+    font-family: "JetBrainsMono Nerd Font", monospace;
     font-size: 13px;
     background-color: transparent;
     box-shadow: none;
@@ -17,60 +19,74 @@
     margin: 0;
 }
 
-/* =============== LA BARRA =============== */
+/* Main Bar Window */
 window#waybar {
     background-color: @background;
     color: @foreground;
-    /* Una linea sottile in alto per dare definizione */
-    border-top: 1px solid @selection;
+    border-bottom: 1px solid @selection;
 }
 
-/* =============== SPAZIATURA MODULI =============== */
-/* Diamo respiro ai moduli senza usare colori */
+/* Base Module Styling */
 #workspaces,
 #window,
+#mpd,
+#disk,
 #cpu,
 #memory,
 #temperature,
 #network,
+#bluetooth,
 #pulseaudio,
-#battery,
 #clock,
 #tray,
-#disk {
-    padding: 0 8px;
-    color: @foreground; /* Forza tutto il testo al grigio Nightfox */
+#battery {
+    padding: 0 12px;
 }
 
-/* =============== WORKSPACES (UNICO ELEMENTO DINAMICO) =============== */
+/* Visual Separators (Right Border) */
+#disk, 
+#cpu, 
+#memory, 
+#temperature, 
+#network, 
+#bluetooth, 
+#pulseaudio,
+#clock,
+#tray {
+    border-right: 1px solid @selection;
+}
+
+/* Workspaces */
 #workspaces button {
-    color: @comment; /* I desktop non attivi sono grigio scuro */
+    color: @comment;
     padding: 0 8px;
-    transition: all 0.2s ease;
 }
 
 #workspaces button.focused {
-    color: @foreground; /* Il desktop attuale è grigio chiaro */
-    background-color: @selection; /* Leggero stacco di grigio sullo sfondo */
+    color: @foreground;
+    background-color: @selection;
 }
 
 #workspaces button.urgent {
-    color: #c94f6d; /* Solo l'urgenza resta colorata (rosso) per sicurezza */
+    color: #c94f6d;
 }
 
-/* =============== DETTAGLI FINEZZA =============== */
-
-/* Rende l'orologio leggermente più visibile tra gli altri grigi */
+/* Specific Module Adjustments */
 #clock {
     font-weight: bold;
 }
 
-/* Rimuove eventuali icone colorate se presenti (forza il bianco/grigio) */
-#cpu, #memory, #network, #pulseaudio, #battery {
-    background-image: none;
+#battery {
+    margin-right: 4px;
 }
 
-/* Tray (Icone di sistema) */
-#tray {
-    margin-left: 10px;
+#mpd {
+    color: @comment;
+    font-style: italic;
 }
+/* Adjust margin for Tray to offset the separator */
+#tray {
+    margin-left: 4px;
+}
+
+/* ==========| MELT's WAYBAR CONFIGURATION |========== */
