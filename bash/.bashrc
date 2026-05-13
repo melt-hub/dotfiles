@@ -60,3 +60,26 @@ __set_title() {
 
 # Safely append the title setter to PROMPT_COMMAND
 PROMPT_COMMAND="__set_title${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+
+# Bluetooth connection
+alias bt-on='bluetoothctl power on'
+alias bt-off='bluetoothctl power off'
+alias bt-speakers='bluetoothctl connect 10:94:97:3B:1F:2B'
+alias bt-earbuds='bluetoothctl connect 2C:BE:EB:77:51:EB'
+
+# Network connection
+alias nw-hotspot='nmcli connection up "hotspot"'
+alias nw-home='nmcli connection up "home"'
+alias nw-home-guest='nmcli connection up "home-guest"'
+alias nw-home-2ghz='nmcli connection up "home-2ghz"'
+alias nw-uni='nmcli connection up "uni"'
+
+# Dotfiles sync shortcut
+function dotpush() {
+    local msg="${1:-Update: $(date +'%Y-%m-%d %H:%M')}"
+    cd ~/dotfiles && \
+    git add . && \
+    git commit -m "$msg" && \
+    git push origin main && \
+    cd -
+}

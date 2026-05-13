@@ -26,6 +26,14 @@ window#waybar {
     padding: 0 12px;
 }
 
+#custom-updates {
+    color: @cyan;
+    font-weight: bold;
+    padding: 0 12px;
+    border-right: 1px solid @selection;
+    border-left: 1px solid @selection;
+}
+
 #mpd, #disk, #cpu, #memory, #temperature, #network, 
 #bluetooth, #pulseaudio, #clock, #tray {
     border-right: 1px solid @selection;
