@@ -1,84 +1,91 @@
 /* import palette */
-
 configuration {
   show-icons: true;
   icon-theme: "Papirus-Dark";
+  /* Rimuove la dicitura "drun" o "run" prima del nome */
+  display-combi: "󰀻 "; 
 }
 
-/* theme */
 @import "nightfox.rasi"
 
-/* window configuration */
 window {
   width: 600px;
-  padding: 15px;
-  border: 2px;
+  border: 1px;
   border-radius: 8px;
-  border-color: @blue;
+  border-color: @cyan;
   background-color: @background;
 }
 
-/* inputbar configuration */
+mainbox {
+  padding: 15px;
+  background-color: transparent;
+}
+
 inputbar {
   children: [prompt, entry];
   spacing: 10px;
-  padding: 5px;
+  padding: 10px;
   border-radius: 5px;
   background-color: @selection;
 }
 
 prompt {
-  text-colot: @green;
+  background-color: transparent;
+  text-color: @cyan;
 }
 
 entry {
+  background-color: transparent;
   text-color: @foreground;
+  placeholder: "Type to filter";
+  placeholder-color: @comment;
 }
 
-/* elements list */
 listview {
   lines: 8;
   columns: 1;
-  padding: 10px 0px;
-  background-color: @background;
+  padding: 10px 0px 0px 0px;
+  background-color: transparent;
+  border: 0px;
+  /* Rimuove la scrollbar per un look più pulito */
+  scrollbar: false;
 }
+
+/* --- LOGICA ELEMENTI (FIX RIGHE BIANCHE) --- */
 
 element {
   padding: 8px;
   border-radius: 5px;
-  background-color: transparent;
+  background-color: transparent; /* Reset per tutti */
+  text-color: @foreground;
 }
 
-element normal.normal {
-  background-color: transparent;
+/* Forza tutti gli stati normali e alternati a essere trasparenti */
+element normal.normal,
+element alternate.normal,
+element normal.active,
+element alternate.active,
+element normal.urgent,
+element alternate.urgent {
+    background-color: transparent;
+    text-color: @foreground;
 }
 
-element alternate.normal {
-  background-color: transparent;
-}
-
-/* non selected elements */
-element-text, element-icon{
-  background-color: transparent;
-  text-color: inherit;
+/* Solo l'elemento selezionato ha lo sfondo */
+element selected.normal,
+element selected.active {
+  background-color: @selection;
+  text-color: @cyan;
 }
 
 element-icon {
   size: 24px;
   margin: 0px 10px 0px 0px;
+  background-color: transparent;
 }
 
 element-text {
-  text-color: @foreground;
   vertical-align: 0.5;
+  background-color: transparent;
+  text-color: inherit;
 }
-
-/* selected element */
-elected.selected {
-  background-color: @selection;
-}
-
-element-text.selected {
-  text-color: @cyan;
-}
-

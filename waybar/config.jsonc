@@ -2,15 +2,12 @@
     "layer": "top",
     "position": "top",
     "height": 28,
+    "fixed-center": true,
     "spacing": 0,
-    "modules-left": [
-        "sway/workspaces"
-    ],
-    "modules-center": [
-        "sway/window",
-        "mpd"
-    ],
+    "modules-left": ["sway/workspaces"],
+    "modules-center": ["sway/window"],
     "modules-right": [
+        "mpd",
         "disk#home",
         "cpu",
         "memory",
@@ -22,51 +19,99 @@
         "tray",
         "battery"
     ],
+
     "sway/workspaces": {
-        "format": "{name}"
+        "disable-scroll": true,
+        "all-outputs": false,
+        "format": "{icon}",
+        "tooltip": false,
+        "format-icons": {
+            "focused": "",
+            "visible": "",
+            "default": ""
+        }
     },
+
     "sway/window": {
         "format": "{title}",
-        "max-length": 30
+        "max-length": 20,
+        "tooltip": false,
+        "rewrite": {
+            "^$": "let's get to work!",
+            "(.*) — Mozilla Firefox": "󰈹 firefox",
+            "(.*)GNU Emacs(.*)": " emacs",
+            "(.*) - Emacs": " emacs",
+            "^~$": " kitty",
+            "^.*melt@fedora: (.*)$": " $1",
+            "^kitty$": " kitty",
+            "(.*)": "$1"
+        }
     },
+
+    "mpd": {
+        "format": "{stateIcon} {artist} - {title}",
+        "format-disconnected": "Disconnected ",
+        "format-stopped": "Stopped ",
+        "tooltip": false,
+        "state-icons": {
+            "paused": "",
+            "playing": ""
+        }
+    },
+
     "disk#home": {
         "format": "HOME {free}",
-        "path": "/home"
+        "path": "/home",
+        "tooltip": false
     },
+
     "cpu": {
         "format": "CPU {usage}%",
-        "interval": 2
+        "interval": 2,
+        "tooltip": false
     },
+
     "memory": {
         "format": "MEM {used:0.1f}G",
-        "interval": 30
+        "interval": 30,
+        "tooltip": false
     },
+
     "temperature": {
         "critical-threshold": 80,
-        "format": "TEMP {temperatureC}°C"
+        "format": "TEMP {temperatureC}°C",
+        "tooltip": false
     },
+
     "network": {
         "format-wifi": "WIFI {essid}",
         "format-ethernet": "ETH {ipaddr}",
-        "format-disconnected": "OFFLINE"
+        "format-disconnected": "OFFLINE",
+        "tooltip": false
     },
+
     "bluetooth": {
         "format": " {status}",
         "format-connected": " {device_alias}",
-        "tooltip-format": "{num_connections} connected",
-        "tooltip-format-connected": "{device_enumerate}",
-        "on-click": ""
+        "on-click": "",
+        "tooltip": false
     },
+
     "pulseaudio": {
-        "format": "VOL {volume}%"
+        "format": "VOL {volume}%",
+        "tooltip": false
     },
+
     "clock": {
         "format": "{:%a %d.%m %H:%M}",
         "tooltip": false
     },
+
     "tray": {
         "spacing": 10
+        // Il tray non supporta "tooltip": false perché dipende dalle app esterne
     },
+
     "battery": {
         "states": {
             "good": 95,
@@ -74,21 +119,7 @@
             "critical": 15
         },
         "format": "BAT {capacity}% {icon}",
-        "format-icons": [
-            "",
-            "",
-            "",
-            "",
-            ""
-        ]
-    },
-    "mpd": {
-        "format": "{stateIcon} {artist} - {title}",
-        "format-disconnected": "Disconnected ",
-        "format-stopped": "Stopped ",
-        "state-icons": {
-            "paused": "",
-            "playing": ""
-        }
+        "format-icons": ["", "", "", "", ""],
+        "tooltip": false
     }
 }

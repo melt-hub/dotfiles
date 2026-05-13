@@ -1,77 +1,70 @@
-/* ==========| MELT's WAYBAR CONFIGURATION |========== */
-
-/* Nightfox Monochrome Palette */
 @define-color background  #192330;
 @define-color foreground  #cdcecf;
 @define-color selection   #2d3848;
 @define-color comment     #6b7a8c;
+@define-color cyan        #50a5a4;
+@define-color red         #c94f6d;
 
-/* Global Reset */
 * {
     border: none;
     border-radius: 0;
     font-family: "JetBrainsMono Nerd Font", monospace;
     font-size: 13px;
     background-color: transparent;
-    box-shadow: none;
-    text-shadow: none;
     padding: 0;
     margin: 0;
 }
 
-/* Main Bar Window */
 window#waybar {
     background-color: @background;
     color: @foreground;
     border-bottom: 1px solid @selection;
 }
 
-/* Base Module Styling */
-#workspaces,
-#window,
-#mpd,
-#disk,
-#cpu,
-#memory,
-#temperature,
-#network,
-#bluetooth,
-#pulseaudio,
-#clock,
-#tray,
-#battery {
+#workspaces, #mpd, #disk, #cpu, #memory, #temperature, 
+#network, #bluetooth, #pulseaudio, #clock, #tray, #battery {
     padding: 0 12px;
 }
 
-/* Visual Separators (Right Border) */
-#disk, 
-#cpu, 
-#memory, 
-#temperature, 
-#network, 
-#bluetooth, 
-#pulseaudio,
-#clock,
-#tray {
+#mpd, #disk, #cpu, #memory, #temperature, #network, 
+#bluetooth, #pulseaudio, #clock, #tray {
     border-right: 1px solid @selection;
 }
 
-/* Workspaces */
+/* --- Workspaces Logic --- */
+
+/* 1. Inattivi sul monitor CORRENTE: Bianchi Vuoti */
 #workspaces button {
-    color: @comment;
-    padding: 0 8px;
+    color: @foreground;
+    padding: 0 6px;
 }
 
+/* 2. Inattivi (attivi sull'altro monitor): Grigini Vuoti */
+#workspaces button.visible {
+    color: @comment;
+}
+
+/* 3. Attivo sul monitor CORRENTE: Ciano Pieno */
 #workspaces button.focused {
-    color: @foreground;
-    background-color: @selection;
+    color: @cyan;
 }
 
 #workspaces button.urgent {
-    color: #c94f6d;
+    color: @red;
 }
 
-/* Specific Module Adjustments */
+/* --- Window & Modules --- */
+
+#window {
+    color: @cyan;
+    font-weight: bold;
+}
+
+#mpd {
+    color: @comment;
+    font-style: italic;
+}
+
 #clock {
     font-weight: bold;
 }
@@ -80,13 +73,6 @@ window#waybar {
     margin-right: 4px;
 }
 
-#mpd {
-    color: @comment;
-    font-style: italic;
-}
-/* Adjust margin for Tray to offset the separator */
 #tray {
     margin-left: 4px;
 }
-
-/* ==========| MELT's WAYBAR CONFIGURATION |========== */
