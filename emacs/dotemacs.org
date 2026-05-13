@@ -8,7 +8,8 @@
   variables setting for Emacs's startup phase:
 
   #+begin_src emacs-lisp
-    ; dotemacs.el
+    ;;; dotemacs.el
+    ;;; ====================| MELT's EMACS CONFIGURATION |===============
   #+end_src
   
   #+begin_src emacs-lisp
@@ -103,7 +104,7 @@
   #+end_src
 
   #+begin_src emacs-lisp
-    ; --------------- modeline ----------
+    ;; --------------- modeline ----------
     ; display line number
     (setq line-number-mode t)
 
@@ -124,9 +125,22 @@
 
     ; disable tool bar
     (tool-bar-mode 0)
-    ; --------------- end modeline ----------
+    ;; --------------- end modeline ----------
 
-    ; --------------- spacing/indentation ---------------
+    ;; --------------- spacing/indentation ---------------
+    ; prevent Emacs from automatically adding a newline at the end of the file
+    (setq require-final-newline nil)
+    (setq mode-require-final-newline nil)
+
+    ; remove all trailing whitespace and newlines 
+    ; from the end of the file before saving
+    (add-hook 'before-save-hook
+              (lambda ()
+                (save-excursion
+                  (goto-char (point-max))
+                  (skip-chars-backward " \t\n\r")
+                  (delete-region (point) (point-max)))))
+
     ; visual newline for very long lines
     (global-visual-line-mode t)
 
@@ -210,7 +224,7 @@
   smoother.
 
     #+begin_src emacs-lisp
-    ; --------------- lisp developement  ---------------
+    ;; --------------- lisp developement  ---------------
    #+end_src
 
 *** slime
@@ -273,7 +287,7 @@
 
   
     #+begin_src emacs-lisp
-    ; --------------- end lisp developement  ---------------
+    ;; --------------- end lisp developement  ---------------
    #+end_src
 
 ** PDF Viewing
@@ -282,7 +296,7 @@
   advanced feautures like theming, scaling, highlighting and annotations:
 
   #+begin_src emacs-lisp
-    ; --------------- pdf viewing ---------------
+    ;; --------------- pdf viewing ---------------
   #+end_src
 
 *** pdf-tools
@@ -345,7 +359,7 @@
   #+end_src
   
   #+begin_src emacs-lisp
-    ; --------------- end pdf viewing ---------------
+    ;; --------------- end pdf viewing ---------------
   #+end_src
 
 ** org-roam
@@ -409,7 +423,7 @@
   completion tools:
 
   #+begin_src emacs-lisp
-    ; --------------- fuzzy finding and completion ---------------
+    ;; --------------- fuzzy finding and completion ---------------
   #+end_src
   
 *** Helm
@@ -496,7 +510,7 @@
   #+end_src
 
   #+begin_src emacs-lisp
-    ; --------------- end fuzzy finding and completion ---------------
+    ;; --------------- end fuzzy finding and completion ---------------
   #+end_src
 
 ** Password Management
@@ -505,7 +519,7 @@
   management system:
 
   #+begin_src emacs-lisp
-    ; --------------- password management ---------------
+    ;; --------------- password management ---------------
   #+end_src
 
 *** pass
@@ -572,7 +586,7 @@
   #+end_src
 
   #+begin_src emacs-lisp
-    ; --------------- end password management ---------------
+    ;; --------------- end password management ---------------
   #+end_src
 
 ** Magit
@@ -588,6 +602,10 @@
   workflows the user has already set up:
 
   #+begin_src emacs-lisp
+    ;; --------------- git integration ---------------
+  #+end_src
+
+  #+begin_src emacs-lisp
     (use-package magit
       :ensure t
       :bind
@@ -599,13 +617,18 @@
             '(magit-process-password-auth-source)))
   #+end_src
 
+  #+begin_src emacs-lisp
+    ;; --------------- end git integration ---------------
+  #+end_src
+
+
 ** LaTeX
   
   The following lines install a few packages in order to make writing LaTeX
   smoother:
 
   #+begin_src emacs-lisp
-    ;; =========================| LATEX |====================
+    ;; --------------- latex ---------------
   #+end_src
 
 *** TeX - AUCTeX
@@ -636,9 +659,7 @@
   #+end_src
 
   #+begin_src emacs-lisp
-    ;; =========================| END LATEX |====================
-  #+end_src
-
+    ;; --------------- end latex ---------------
   #+end_src
   
 ** SQL Developement
@@ -646,7 +667,7 @@
   The following lines bla bla bla:
 
   #+begin_src emacs-lisp
-    ; --------------- sql developement ---------------
+    ;; --------------- sql developement ---------------
     (use-package sql
       :config
       ; default dbms
@@ -696,8 +717,10 @@
     (use-package sql-indent
       :ensure t
       :hook (sql-mode . sqlind-minor-mode))
+  #+end_src
 
-    ; --------------- end sql development ---------------
+  #+begin_src emacs-lisp
+    ;; --------------- end sql development ---------------
   #+end_src
 
 ** Ada Developement
@@ -854,6 +877,32 @@
            ("" "forest" t))))
   #+end_src
 
+** autoinsert
+
+  Bla bla bla
+
+  #+begin_src emacs-lisp
+    (use-package autoinsert
+      :hook (find-file-hook . auto-insert)
+      :config
+      (setq auto-insert-query nil)
+      ;; Puliamo eventuali vecchie definizioni per evitare raddoppi
+      (setq auto-insert-alist
+        (delete (assoc "\\.org\\'" auto-insert-alist) auto-insert-alist))
+      
+      (define-auto-insert
+        '("\\.org\\'" . "Org Header")
+        '((let ((file-name
+                  (file-name-sans-extension
+                    (file-name-nondirectory
+                      (buffer-file-name)))))
+            ;; Verifica se siamo fuori da org-roam
+            (if (not (string-prefix-p
+                       (expand-file-name org-dir-path) (buffer-file-name)))
+              (concat "#+TITLE: " file-name "\n#+AUTHOR: melt\n\n")
+              "")))))
+  #+end_src
+
   #+begin_src emacs-lisp
     ;; ====================| END ORG MODE |====================
   #+end_src
@@ -951,5 +1000,6 @@
   #+end_src
 
   #+begin_src emacs-lisp
-    ; end dotemacs.el
+    ;;; ====================| END MELT's EMACS CONFIGURATION |===============
+    ;;; end dotemacs.el
   #+end_src

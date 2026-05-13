@@ -1,4 +1,5 @@
-; dotemacs.el
+;;; dotemacs.el
+;;; ====================| MELT's EMACS CONFIGURATION |===============
 
 ;; ====================| STARTUP |====================
 
@@ -54,7 +55,7 @@
 
 ;; ====================| GENERAL |====================
 
-; --------------- modeline ----------
+;; --------------- modeline ----------
 ; display line number
 (setq line-number-mode t)
 
@@ -75,9 +76,22 @@
 
 ; disable tool bar
 (tool-bar-mode 0)
-; --------------- end modeline ----------
+;; --------------- end modeline ----------
 
-; --------------- spacing/indentation ---------------
+;; --------------- spacing/indentation ---------------
+; prevent Emacs from automatically adding a newline at the end of the file
+(setq require-final-newline nil)
+(setq mode-require-final-newline nil)
+
+; remove all trailing whitespace and newlines 
+; from the end of the file before saving
+(add-hook 'before-save-hook
+          (lambda ()
+            (save-excursion
+              (goto-char (point-max))
+              (skip-chars-backward " \t\n\r")
+              (delete-region (point) (point-max)))))
+
 ; visual newline for very long lines
 (global-visual-line-mode t)
 
@@ -136,7 +150,7 @@
 (package-initialize)
 (require 'use-package)
 
-; --------------- lisp developement  ---------------
+;; --------------- lisp developement  ---------------
 
 ; SLIME setup
 (use-package slime
@@ -167,9 +181,9 @@
   :ensure t
   :hook (emacs-lisp-mode . highlight-defined-mode))
 
-; --------------- end lisp developement  ---------------
+;; --------------- end lisp developement  ---------------
 
-; --------------- pdf viewing ---------------
+;; --------------- pdf viewing ---------------
 
 ; advanced PDF viewer
 (use-package pdf-tools
@@ -219,7 +233,7 @@
   (setq pdf-view-restore-filename
 	(expand-file-name ".pdf-view-restore" user-emacs-directory)))
 
-; --------------- end pdf viewing ---------------
+;; --------------- end pdf viewing ---------------
 
 ; org-roam setup
 (use-package org-roam
@@ -258,7 +272,7 @@
   ; open the graph in the browser on startup
   (setq org-roam-ui-open-on-start t))
 
-; --------------- fuzzy finding and completion ---------------
+;; --------------- fuzzy finding and completion ---------------
 
 
 
@@ -308,9 +322,9 @@
 ;;    ("C-h f"   . counsel-describe-function)
 ;;    ("C-h v"   . counsel-describe-variable)))
 
-; --------------- end fuzzy finding and completion ---------------
+;; --------------- end fuzzy finding and completion ---------------
 
-; --------------- password management ---------------
+;; --------------- password management ---------------
 
 ; wrapper package for Unix standard password manager
 (use-package pass
@@ -335,7 +349,9 @@
   (setenv "EMACS" "t")
   (pinentry-start))
 
-; --------------- end password management ---------------
+;; --------------- end password management ---------------
+
+;; --------------- git integration ---------------
 
 (use-package magit
   :ensure t
@@ -347,7 +363,9 @@
   (setq magit-process-find-password-functions
         '(magit-process-password-auth-source)))
 
-;; =========================| LATEX |====================
+;; --------------- end git integration ---------------
+
+;; --------------- latex ---------------
 
 ; the best emacs latex environment
 ; (use-package tex
@@ -362,9 +380,9 @@
   :ensure t
   :hook (org-mode . org-fragtog-mode))
 
-;; =========================| END LATEX |====================
+;; --------------- end latex ---------------
 
-; --------------- sql developement ---------------
+;; --------------- sql developement ---------------
 (use-package sql
   :config
   ; default dbms
@@ -415,7 +433,7 @@
   :ensure t
   :hook (sql-mode . sqlind-minor-mode))
 
-; --------------- end sql development ---------------
+;; --------------- end sql development ---------------
 
 (use-package ada-mode
   :ensure t)
@@ -524,6 +542,26 @@
        ("" "pgfplots" t)
        ("" "forest" t))))
 
+(use-package autoinsert
+  :hook (find-file-hook . auto-insert)
+  :config
+  (setq auto-insert-query nil)
+  ;; Puliamo eventuali vecchie definizioni per evitare raddoppi
+  (setq auto-insert-alist
+    (delete (assoc "\\.org\\'" auto-insert-alist) auto-insert-alist))
+  
+  (define-auto-insert
+    '("\\.org\\'" . "Org Header")
+    '((let ((file-name
+              (file-name-sans-extension
+                (file-name-nondirectory
+                  (buffer-file-name)))))
+        ;; Verifica se siamo fuori da org-roam
+        (if (not (string-prefix-p
+                   (expand-file-name org-dir-path) (buffer-file-name)))
+          (concat "#+TITLE: " file-name "\n#+AUTHOR: melt\n\n")
+          "")))))
+
 ;; ====================| END ORG MODE |====================
 
 ;; ====================| MY FUNCTIONS |====================
@@ -597,4 +635,5 @@
 
 ;; ====================| END MY FUNCTIONS |====================
 
-; end dotemacs.el
+;;; ====================| END MELT's EMACS CONFIGURATION |===============
+;;; end dotemacs.el
