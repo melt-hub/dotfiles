@@ -1,91 +1,98 @@
-/* import palette */
+/* Import palette */
 configuration {
-  show-icons: true;
-  icon-theme: "Papirus-Dark";
-  /* Rimuove la dicitura "drun" o "run" prima del nome */
-  display-combi: "󰀻 "; 
+    show-icons: true;
+    icon-theme: "Papirus-Dark";
+    
+    /* Display icons for modes */
+    display-combi: "󰀻 ";
+    display-window: "󰖲 ";
+    
+    /* Clean formats */
+    drun-display-format: "{name}";
+    /* {c} shows only the app class/id, removing the long title */
+    window-format: "{c}";
+    
+    combi-hide-mode-prefix: true;
 }
 
 @import "nightfox.rasi"
 
+/* Window configuration */
 window {
-  width: 600px;
-  border: 1px;
-  border-radius: 8px;
-  border-color: @cyan;
-  background-color: @background;
+    width: 600px;
+    border: 1px;
+    border-radius: 8px;
+    border-color: @cyan;
+    background-color: @background;
 }
 
 mainbox {
-  padding: 15px;
-  background-color: transparent;
+    padding: 15px;
+    background-color: transparent;
 }
 
+/* Input bar */
 inputbar {
-  children: [prompt, entry];
-  spacing: 10px;
-  padding: 10px;
-  border-radius: 5px;
-  background-color: @selection;
+    children: [prompt, entry];
+    spacing: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: @selection;
 }
 
 prompt {
-  background-color: transparent;
-  text-color: @cyan;
+    background-color: transparent;
+    text-color: @cyan;
 }
 
 entry {
-  background-color: transparent;
-  text-color: @foreground;
-  placeholder: "Type to filter";
-  placeholder-color: @comment;
+    background-color: transparent;
+    text-color: @foreground;
+    /* Removes the "Type to filter" text */
+    placeholder: "";
 }
 
+/* Elements list */
 listview {
-  lines: 8;
-  columns: 1;
-  padding: 10px 0px 0px 0px;
-  background-color: transparent;
-  border: 0px;
-  /* Rimuove la scrollbar per un look più pulito */
-  scrollbar: false;
+    lines: 8;
+    columns: 1;
+    padding: 10px 0px 0px 0px;
+    background-color: transparent;
+    border: 0px;
+    scrollbar: false;
 }
-
-/* --- LOGICA ELEMENTI (FIX RIGHE BIANCHE) --- */
 
 element {
-  padding: 8px;
-  border-radius: 5px;
-  background-color: transparent; /* Reset per tutti */
-  text-color: @foreground;
-}
-
-/* Forza tutti gli stati normali e alternati a essere trasparenti */
-element normal.normal,
-element alternate.normal,
-element normal.active,
-element alternate.active,
-element normal.urgent,
-element alternate.urgent {
+    padding: 8px;
+    border-radius: 5px;
     background-color: transparent;
     text-color: @foreground;
 }
 
-/* Solo l'elemento selezionato ha lo sfondo */
+/* States reset */
+element normal.normal,
+element alternate.normal,
+element normal.active,
+element alternate.active {
+    background-color: transparent;
+    text-color: @foreground;
+}
+
+/* Selected element */
 element selected.normal,
 element selected.active {
-  background-color: @selection;
-  text-color: @cyan;
+    background-color: @selection;
+    text-color: @cyan;
 }
 
 element-icon {
-  size: 24px;
-  margin: 0px 10px 0px 0px;
-  background-color: transparent;
+    size: 24px;
+    margin: 0px 10px 0px 0px;
+    background-color: transparent;
 }
 
 element-text {
-  vertical-align: 0.5;
-  background-color: transparent;
-  text-color: inherit;
+    vertical-align: 0.5;
+    background-color: transparent;
+    text-color: inherit;
 }
