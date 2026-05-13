@@ -31,6 +31,13 @@ window#waybar {
     border-right: 1px solid @selection;
 }
 
+#mode {
+    background-color: @red;
+    color: @background;
+    font-weight: bold;
+    padding: 0 10px;
+}
+
 /* --- Workspaces Logic --- */
 
 /* 1. Inattivi sul monitor CORRENTE: Bianchi Vuoti */

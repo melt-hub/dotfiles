@@ -4,7 +4,10 @@
     "height": 28,
     "fixed-center": true,
     "spacing": 0,
-    "modules-left": ["sway/workspaces"],
+    "modules-left": [
+        "sway/workspaces",
+        "sway/mode"
+    ],
     "modules-center": ["sway/window"],
     "modules-right": [
         "mpd",
@@ -19,6 +22,11 @@
         "tray",
         "battery"
     ],
+
+    "sway/mode": {
+        "format": "<span style=\"italic\">{}</span>",
+        "tooltip": false
+    },
 
     "sway/workspaces": {
         "disable-scroll": true,
