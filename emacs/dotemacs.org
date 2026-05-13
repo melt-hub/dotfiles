@@ -218,6 +218,20 @@
     (require 'use-package)
   #+end_src
 
+** dashboard
+
+  bla bla bla
+
+  #+begin_src emacs-lisp
+    (use-package dashboard
+      :ensure t
+      :config
+      (dashboard-setup-startup-hook)
+      (setq dashboard-items '((recents  . 5)
+                             (agenda . 5)))
+      (setq dashboard-banner-logo-title "[CIRO]: Welcome back melt!"))
+  #+end_src
+
 ** Lisp Developement
 
   The following lines install a few packages in order to make Lisp developing

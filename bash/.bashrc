@@ -32,18 +32,7 @@ PROMPT_COMMAND="__set_title${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
 
 ## ---------- ALIASES ----------
 
-# Bluetooth connection
-alias bt-on='bluetoothctl power on'
-alias bt-off='bluetoothctl power off'
-alias bt-speakers='bluetoothctl connect 10:94:97:3B:1F:2B'
-alias bt-earbuds='bluetoothctl connect 2C:BE:EB:77:51:EB'
 
-# Network connection
-alias nw-hotspot='nmcli connection up "hotspot"'
-alias nw-home='nmcli connection up "home"'
-alias nw-home-guest='nmcli connection up "home-guest"'
-alias nw-home-2ghz='nmcli connection up "home-2ghz"'
-alias nw-uni='nmcli connection up "uni"'
 
 ## ---------- FUNCTIONS ----------
 
@@ -55,6 +44,69 @@ function dotpush() {
     git commit -m "$msg" && \
     git push origin main && \
     cd -
+}
+
+## ---------- FUNCTIONS ----------
+
+# --- Bluetooth Management ---
+
+bt-on() {
+    bluetoothctl power on && \
+    notify-send -i bluetooth "Bluetooth" "Powered ON"
+}
+
+bt-off() {
+    bluetoothctl power off && \
+    notify-send -i bluetooth "Bluetooth" "Powered OFF"
+}
+
+bt-speakers() {
+    bluetoothctl connect 10:94:97:3B:1F:2B && \
+    notify-send -i audio-speakers "Bluetooth" "Connected to Speakers"
+}
+
+bt-earbuds() {
+    bluetoothctl connect 2C:BE:EB:77:51:EB && \
+    notify-send -i audio-headphones "Bluetooth" "Connected to Earbuds"
+}
+
+# --- Network Management ---
+
+nw-hotspot() {
+    nmcli connection up "hotspot" && \
+    notify-send -i network-wireless "Network" "Connected to Hotspot"
+}
+
+nw-home() {
+    nmcli connection up "home" && \
+    notify-send -i network-wireless "Network" "Connected to Home Wi-Fi"
+}
+
+nw-home-guest() {
+    nmcli connection up "home-guest" && \
+    notify-send -i network-wireless "Network" "Connected to Guest Wi-Fi"
+}
+
+nw-home-2ghz() {
+    nmcli connection up "home-2ghz" && \
+    notify-send -i network-wireless "Network" "Connected to 2.4GHz Wi-Fi"
+}
+
+nw-uni() {
+    nmcli connection up "uni" && \
+    notify-send -i network-wireless "Network" "Connected to UNIMIB"
+}
+
+# --- Utility Functions ---
+
+# Dotfiles sync shortcut
+function dotpush() {
+    local msg="${1:-Update: $(date +'%Y-%m-%d %H:%M')}"
+    cd ~/dotfiles || return
+    git add .
+    git commit -m "$msg"
+    git push origin main
+    cd - > /dev/null
 }
 
 ### ====================| END MELT's BASHRC |====================

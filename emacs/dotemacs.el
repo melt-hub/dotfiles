@@ -150,6 +150,14 @@
 (package-initialize)
 (require 'use-package)
 
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook)
+  (setq dashboard-items '((recents  . 5)
+                         (agenda . 5)))
+  (setq dashboard-banner-logo-title "[CIRO]: Welcome back melt!"))
+
 ;; --------------- lisp developement  ---------------
 
 ; SLIME setup
@@ -637,3 +645,15 @@
 
 ;;; ====================| END MELT's EMACS CONFIGURATION |===============
 ;;; end dotemacs.el
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
