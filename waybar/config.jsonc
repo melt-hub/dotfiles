@@ -13,6 +13,7 @@
         "mpd"
     ],
     "modules-right": [
+        "custom/firware",
         "custom/updates",
         "disk#home",
         "cpu",
@@ -68,6 +69,14 @@
             "paused": "",
             "playing": ""
         }
+    },
+
+    "custom/firmware": {
+        "exec": "~/.local/bin/check_firmware.sh",
+        "interval": 21600,
+        "format": "{} |",
+        "tooltip": false,
+        "on-click": "kitty --hold sh -c 'fwupdmgr get-updates'"
     },
 
     "custom/updates": {

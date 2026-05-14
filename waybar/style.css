@@ -1,10 +1,14 @@
+/* Nightfox Palette Definitions */
 @define-color background  #192330;
 @define-color foreground  #cdcecf;
 @define-color selection   #2d3848;
 @define-color comment     #6b7a8c;
 @define-color cyan        #50a5a4;
 @define-color red         #c94f6d;
+@define-color yellow      #e9c46a;
+@define-color orange      #f4a261;
 
+/* Global Reset */
 * {
     border: none;
     border-radius: 0;
@@ -15,30 +19,38 @@
     margin: 0;
 }
 
+/* Main Bar Window */
 window#waybar {
     background-color: @background;
     color: @foreground;
     border-bottom: 1px solid @selection;
 }
 
+/* Common Module Padding */
 #workspaces, #mpd, #disk, #cpu, #memory, #temperature, 
-#network, #bluetooth, #pulseaudio, #clock, #tray, #battery {
+#network, #bluetooth, #pulseaudio, #clock, #tray, #battery,
+#custom-updates, #custom-firmware {
     padding: 0 12px;
 }
 
+/* Specific Colors for Custom Modules */
 #custom-updates {
-    color: @cyan;
+    color: @yellow;
     font-weight: bold;
-    padding: 0 12px;
-    border-right: 1px solid @selection;
-    border-left: 1px solid @selection;
 }
 
-#mpd, #disk, #cpu, #memory, #temperature, #network, 
-#bluetooth, #pulseaudio, #clock, #tray {
+#custom-firmware {
+    color: @orange;
+    font-weight: bold;
+}
+
+/* Visual Separators (Right Border) */
+#custom-updates, #custom-firmware, #mpd, #disk, #cpu, #memory, 
+#temperature, #network, #bluetooth, #pulseaudio, #clock, #tray {
     border-right: 1px solid @selection;
 }
 
+/* System Mode Indicator */
 #mode {
     background-color: @red;
     color: @background;
@@ -46,30 +58,30 @@ window#waybar {
     padding: 0 10px;
 }
 
-/* --- Workspaces Logic --- */
+/* Workspaces Logic */
 
-/* 1. Inattivi sul monitor CORRENTE: Bianchi Vuoti */
+/* Inactive on current monitor */
 #workspaces button {
     color: @foreground;
     padding: 0 6px;
 }
 
-/* 2. Inattivi (attivi sull'altro monitor): Grigini Vuoti */
+/* Active on other monitor */
 #workspaces button.visible {
     color: @comment;
 }
 
-/* 3. Attivo sul monitor CORRENTE: Ciano Pieno */
+/* Active on current monitor */
 #workspaces button.focused {
     color: @cyan;
 }
 
+/* Urgent state */
 #workspaces button.urgent {
     color: @red;
 }
 
-/* --- Window & Modules --- */
-
+/* Window & Module Styling */
 #window {
     color: @cyan;
     font-weight: bold;
