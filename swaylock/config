@@ -1,8 +1,9 @@
+### ====================| MELT's SWAYLOCK CONFIG FILE |====================
 
-# =============== WALLPAPER ===============
+# wallpaper
 image=/home/melt/pics/wallpapers/moon-blurred.png
 
-# =============== RING ===============
+## ---------- ring ----------
 
 # waiting
 ring-color=50a5a4

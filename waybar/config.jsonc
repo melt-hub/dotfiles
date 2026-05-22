@@ -9,14 +9,14 @@
         "sway/mode",
         "bluetooth",
         "network",
+        "custom/firmware",
+        "custom/updates",        
         "mpd"
     ],
     "modules-center": [
         "sway/window",
     ],
     "modules-right": [
-        "custom/firmware",
-        "custom/updates",
         "disk#home",
         "cpu",
         "memory",
@@ -105,7 +105,7 @@
     },
 
     "disk#home": {
-        "format": "HOME {free}",
+        "format": "DISK {free}",
         "path": "/home",
         "tooltip": false
     },

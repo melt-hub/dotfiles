@@ -1,3 +1,4 @@
+/* ====================| MELTs ROFI CONFIG |==================== */
 /* Import palette */
 configuration {
     show-icons: true;

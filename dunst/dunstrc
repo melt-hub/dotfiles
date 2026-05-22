@@ -1,3 +1,5 @@
+; ====================| MELT's DUNST CONFIG |===============
+
 [global]
 ; --- Display and Positioning ---
 monitor = 0

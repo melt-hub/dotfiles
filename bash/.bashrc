@@ -1,22 +1,23 @@
-
 ### ====================| MELT's BASHRC |====================
 
 ## ---------- GLOBAL DEFINITIONS ----------
+
 if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
 
 ## ---------- ENVIRONMENT & PATH ----------
-# Add local bins to PATH if they exist
+
+# add local bins to PATH if they exist
 export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 
-# Cargo/Rust environment
+# cargo/rust environment
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
-# Use systemd pager only when needed
+# use systemd pager only when needed
 # export SYSTEMD_PAGER=cat
 
-# Source additional snippets from .bashrc.d
+# source additional snippets from .bashrc.d
 if [ -d ~/.bashrc.d ]; then
     for rc in ~/.bashrc.d/*; do
         [ -f "$rc" ] && . "$rc"
@@ -24,7 +25,8 @@ if [ -d ~/.bashrc.d ]; then
 fi
 
 ## ---------- PROMPT & TTY TITLE ----------
-# Set terminal window title dynamically (User@Host: ~)
+
+# set terminal window title dynamically (User@Host: ~)
 __set_title() {
     echo -ne "\033]0;${USER}@${HOSTNAME}:${PWD/#$HOME/~}\007"
 }
@@ -32,11 +34,11 @@ PROMPT_COMMAND="__set_title${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
 
 ## ---------- ALIASES ----------
 
+# TODO
 
+## ---------- MY FUNCTIONS ----------
 
-## ---------- FUNCTIONS ----------
-
-# Dotfiles sync shortcut
+# dotfiles sync shortcut
 function dotpush() {
     local msg="${1:-Update: $(date +'%Y-%m-%d %H:%M')}"
     cd ~/dotfiles && \
@@ -46,9 +48,7 @@ function dotpush() {
     cd -
 }
 
-## ---------- FUNCTIONS ----------
-
-# --- Bluetooth Management ---
+# --- bluetooth management ---
 
 bt-on() {
     bluetoothctl power on && \
@@ -70,7 +70,7 @@ bt-earbuds() {
     notify-send -i audio-headphones "Bluetooth" "Connected to Earbuds"
 }
 
-# --- Network Management ---
+# --- network management ---
 
 nw-hotspot() {
     nmcli connection up "hotspot" && \
@@ -101,17 +101,3 @@ nw-uni() {
     nmcli connection up "uni" && \
     notify-send -i network-wireless "Network" "Connected to UNIMIB"
 }
-
-# --- Utility Functions ---
-
-# Dotfiles sync shortcut
-function dotpush() {
-    local msg="${1:-Update: $(date +'%Y-%m-%d %H:%M')}"
-    cd ~/dotfiles || return
-    git add .
-    git commit -m "$msg"
-    git push origin main
-    cd - > /dev/null
-}
-
-### ====================| END MELT's BASHRC |====================

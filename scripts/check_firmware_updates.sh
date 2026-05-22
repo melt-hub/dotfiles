@@ -8,7 +8,7 @@ fwupdmgr get-updates -q > /dev/null 2>&1
 updates=$(fwupdmgr get-updates -q | grep -c "·")
 
 if [ "$updates" -gt 0 ]; then
-    echo "󰏗 $updates"
+    echo "󰚰 $updates"
 else
     echo ""
 fi
