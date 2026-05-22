@@ -94,7 +94,6 @@
         "interval": 21600,
         "format": "{}",
         "tooltip": false,
-        "on-click": "kitty --hold sh -c 'fwupdmgr get-updates'"
     },
 
     "custom/updates": {

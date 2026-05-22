@@ -1,30 +1,46 @@
 #!/bin/bash
 
-# Notification ID for replacement
+# identifier for dunst to replace existing speedtest notifications
 NOTIF_ID=9993
-# Absolute path to the binary
+
+# path to the official ookla binary to ensure sway finds it without a full login
+# shell
 SPEEDTEST_BIN="/home/melt/.local/bin/speedtest"
 
-# 1. Initial notification
-notify-send -r $NOTIF_ID -i network-transmit "Speedtest" "Running Official Ookla Speedtest..."
+# create a temporary file to buffer error messages (stderr)
+ERROR_LOG=$(mktemp)
 
-# 2. Run the test with default format (human-readable)
-# We capture everything into a variable
-RESULTS=$($SPEEDTEST_BIN --accept-license --accept-gdpr 2>&1)
-STATUS=$?
+# send initial notification to provide immediate feedback
+notify-send -r $NOTIF_ID -i network-transmit "Speedtest" "Running Ookla's Speedtest..."
 
-if [ $STATUS -eq 0 ]; then
-    # 3. Extraction logic using AWK
-    # We look for lines starting with Latency, Download, and Upload
-    # Example line: "Download: 938.41 Mbps (data used: 1.1 GB)"
-    DOWN=$(echo "$RESULTS" | awk -F': ' '/Download:/ {print $2}' | awk '{print $1 " " $2}')
-    UP=$(echo "$RESULTS" | awk -F': ' '/Upload:/ {print $2}' | awk '{print $1 " " $2}')
-    PING=$(echo "$RESULTS" | awk -F': ' '/Latency:/ {print $2}' | awk '{print $1 " " $2}')
+# run the test in json format and capture the entire data object into a variable
+# --format=json provides a machine-readable output preventing parsing errors
+RAW_JSON=$($SPEEDTEST_BIN --accept-license --accept-gdpr --format=json 2>/dev/null)
 
-    # 4. Final notification (stays for 15 seconds)
+if [ $? -eq 0 ]; then
+    # the bandwidth field in the json is provided in bytes per second
+    # multiply by 8 to get bits and divide by 1.000.000 for megabits (mbps)
+    # jq -r extracts the raw value, then printf formats the float to 2 decimal
+    # digits
+    down_raw=$(echo "$RAW_JSON" | jq -r '.download.bandwidth * 8 / 1000000')
+    up_raw=$(echo "$RAW_JSON" | jq -r '.upload.bandwidth * 8 / 1000000')
+    ping_raw=$(echo "$RAW_JSON" | jq -r '.ping.latency')
+
+    # format numbers for the ui
+    DOWN=$(printf "%.2f Mbps" "$down_raw")
+    UP=$(printf "%.2f Mbps" "$up_raw")
+    PING=$(printf "%.0f ms" "$ping_raw")
+
     notify-send -r $NOTIF_ID -t 15000 -i network-receive "Speedtest Results" \
         "󰇚 Down: $DOWN\n󰕒 Up: $UP\n󰓅 Ping: $PING"
 else
-    # 5. If it fails, show the error
-    notify-send -r $NOTIF_ID -t 10000 -u critical -i network-error "Speedtest Failed" "$RESULTS"
+    # failure: read the specific error message from the log file
+    err_msg=$(cat "$ERROR_LOG")
+    # if the log is empty, fallback to a generic message
+    [ -z "$err_msg" ] && err_msg="Unknown connection error."
+    # send critical notification with the captured diagnostic information
+    notify-send -r $NOTIF_ID -u critical -t 10000 -i network-error "Speedtest Failed" "$err_msg"
 fi
+
+# cleanup: remove the temporary log file
+rm -f "$ERROR_LOG"
