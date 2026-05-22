@@ -77,6 +77,11 @@ nw-hotspot() {
     notify-send -i network-wireless "Network" "Connected to Hotspot"
 }
 
+nw-hotspot-dru() {
+    nmcli connection up "hotspot-dru" && \
+        notify-send -i network-wireless "Network" "Amorevol connection"
+}
+
 nw-home() {
     nmcli connection up "home" && \
     notify-send -i network-wireless "Network" "Connected to Home Wi-Fi"

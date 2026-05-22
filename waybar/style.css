@@ -40,7 +40,7 @@ window#waybar {
 }
 
 #custom-firmware {
-    color: @orange;
+    color: @yellow;
     font-weight: bold;
 }
 

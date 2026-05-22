@@ -10,7 +10,7 @@ configuration {
     /* Clean formats */
     drun-display-format: "{name}";
     /* {c} shows only the app class/id, removing the long title */
-    window-format: "{c}";
+    window-format: "{t}";
     
     combi-hide-mode-prefix: true;
 }

@@ -1,4 +1,4 @@
-{
+ {
     "layer": "top",
     "position": "top",
     "height": 28,
@@ -7,24 +7,24 @@
     "modules-left": [
         "sway/workspaces",
         "sway/mode",
-        "sway/window"
-    ],
-    "modules-center": [
+        "bluetooth",
+        "network",
         "mpd"
     ],
+    "modules-center": [
+        "sway/window",
+    ],
     "modules-right": [
-        "custom/firware",
+        "custom/firmware",
         "custom/updates",
         "disk#home",
         "cpu",
         "memory",
         "temperature",
-        "network",
-        "bluetooth",
         "pulseaudio",
+        "battery",
         "clock",
-        "tray",
-        "battery"
+        "tray"
     ],
 
     "sway/mode": {
@@ -44,19 +44,37 @@
         }
     },
 
-    "sway/window": {
+"sway/window": {
         "format": "{title}",
-        "max-length": 20,
+        "max-length": 50,
         "tooltip": false,
         "rewrite": {
-            "^$": "let's get to work!",
-            "(.*) — Mozilla Firefox": "󰈹 firefox",
-            "(.*)GNU Emacs(.*)": " emacs",
-            "(.*) - Emacs": " emacs",
-            "^~$": " kitty",
-            "^.*melt@fedora: (.*)$": " $1",
-            "^kitty$": " kitty",
-            "(.*)": "$1"
+            "^$": "Let's get to work!",
+
+            "^(.+) — Mozilla Firefox$": "󰈹 $1",
+            "^Mozilla Firefox$": "󰈹 Firefox",
+
+            "^(.+) - GNU Emacs.*$": " $1",
+            "^(.+) - Emacs.*$": " $1",
+            "^GNU Emacs.*$": " Emacs",
+            "^Emacs.*$": " Emacs",
+
+            "^.*melt@fedora: (.+)$": " $1",
+            "^~$": " Kitty",
+            "^kitty$": " Kitty",
+
+            "^Visual Paradigm.*$": "󰒫 Visual Paradigm",
+
+            "^WinBox.*$": "󱘖 WinBox",
+
+            "^btop$": "󰆼 btop",
+
+            "^(.+) - Obsidian.*$": "󱓧 $1",
+            "^Obsidian.*$": "󱓧 Obsidian",
+
+            "^Fedora Media Writer$": "󰛟 Media Writer",
+
+            "^(.+)$": "$1"
         }
     },
 
@@ -72,9 +90,9 @@
     },
 
     "custom/firmware": {
-        "exec": "~/.local/bin/check_firmware.sh",
+        "exec": "~/.local/bin/check_firmware_updates.sh",
         "interval": 21600,
-        "format": "{} |",
+        "format": "{}",
         "tooltip": false,
         "on-click": "kitty --hold sh -c 'fwupdmgr get-updates'"
     },
@@ -111,15 +129,16 @@
     },
 
     "network": {
-        "format-wifi": "WIFI {essid}",
-        "format-ethernet": "ETH {ipaddr}",
-        "format-disconnected": "OFFLINE",
+        "interval": 2,
+        "format-wifi": "WIFI {essid} 󰇚 {bandwidthDownBytes} 󰕒 {bandwidthUpBytes}",
+        "format-ethernet": "ETH {ipaddr} 󰇚 {bandwidthDownBytes} 󰕒 {bandwidthUpBytes}",
+        "format-disconnected": "status",
         "tooltip": false
     },
 
     "bluetooth": {
-        "format": " {status}",
-        "format-connected": " {device_alias}",
+        "format": "BT {status}",
+        "format-connected": "BT {device_alias}",
         "on-click": "",
         "tooltip": false
     },
@@ -136,7 +155,6 @@
 
     "tray": {
         "spacing": 10
-        // Il tray non supporta "tooltip": false perché dipende dalle app esterne
     },
 
     "battery": {
