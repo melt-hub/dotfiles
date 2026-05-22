@@ -8,9 +8,19 @@
 ; temporally extend garbage collector's threshold
 (setq gc-cons-threshold 100000000)
 (message "[CIRO]: Increasing garbage collecting threshold...")
+
+; Save original file-name-handler-alist and disable it during init
+(defvar my/file-name-handler-alist-original file-name-handler-alist)
+(setq file-name-handler-alist nil)
+
+(message "[CIRO]: Tuning startup performance...")
+
+; Restore everything after init
 (add-hook 'after-init-hook
-	  (lambda () (setq gc-cons-threshold 800000)))
-(message "[CIRO]: Decreasing garbage collecting threshold...")
+  (lambda ()
+    (setq gc-cons-threshold 800000)
+    (setq file-name-handler-alist my/file-name-handler-alist-original)
+    (message "[CIRO]: Startup completed in %s" (emacs-init-time))))
 
 ; set path variables
 (defvar os-packages-path "~/dotfiles/emacs/packages/")
@@ -146,23 +156,51 @@
  	  ("MELPA" . "https://melpa.org/packages/")
  	  ("gnu" . "https://elpa.gnu.org/packages/"))))
 
+(setq use-package-compute-statistics t)
+
 ; using 'package' to initialize 'use-package'
 (package-initialize)
 (require 'use-package)
 
 (use-package dashboard
   :ensure t
+  :init (recentf-mode 1)
   :config
   (dashboard-setup-startup-hook)
-  (setq dashboard-items '((recents  . 5)
-                         (agenda . 5)))
-  (setq dashboard-banner-logo-title "[CIRO]: Welcome back melt!"))
+
+  ; path to your custom banner image
+  (setq dashboard-startup-banner "~/pics/other/emacs-e-logo.png")
+  (setq dashboard-banner-logo-title "[CIRO]: Welcome back melt!")
+
+  ; standard items: recents and agenda
+  (setq dashboard-items '((recents  . 10)
+                         (agenda   . 5)))
+
+  ; appearance settings
+  ; IMPORTANT: we disable heading icons to prevent the 'nil icon' error
+  (setq dashboard-set-heading-icons nil)
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-icon-type 'nerd-icons)
+  
+  ; spacing and layout
+  (setq dashboard-center-content t)
+  (setq dashboard-section-gap 2) ; adds vertical space between sections
+  (setq dashboard-set-footer nil) ; cleaner look
+
+  ; dashboard keybindings and behavior
+  (add-hook 'dashboard-mode-hook
+            (lambda ()
+              (local-set-key (kbd "q") 'quit-window)
+              (setq buffer-read-only t)))
+
+  (message "[CIRO]: Dashboard is ready."))
 
 ;; --------------- lisp developement  ---------------
 
 ; SLIME setup
 (use-package slime
   :ensure t
+  :commands (slime slime-mode)
   :config
   (setq inferior-lisp-program "sbcl")
   (slime-setup '(slime-fancy)))
@@ -177,12 +215,14 @@
 ; better syntax highlighting for Common Lisp
 (use-package lisp-extra-font-lock
   :ensure t
+  :hook (lisp-mode . lisp-extra-font-lock-mode)
   :config
   (lisp-extra-font-lock-global-mode 1))
 
 ; better syntax highlighting for Racket
 (use-package racket-mode
-  :ensure t)
+  :ensure t
+  :mode "\\.rkt\\'")
 
 ; better syntax highlighting for Emacs Lisp
 (use-package highlight-defined
@@ -236,6 +276,7 @@
 (use-package pdf-view-restore
   :ensure t
   :after pdf-tools
+  :hook (pdf-view-mode . pdf-view-restore-mode)
   :config
   (add-hook 'pdf-view-mode-hook 'pdf-view-restore-mode)
   (setq pdf-view-restore-filename
@@ -246,6 +287,7 @@
 ; org-roam setup
 (use-package org-roam
     :ensure t
+    :defer t
     :custom
     (org-roam-directory org-dir-path)
     (org-roam-completion-everywhere t)
@@ -253,7 +295,7 @@
     (("C-c n l" . org-roam-buffer-toggle)
      ("C-c n f" . org-roam-node-find)
      ("C-c n i" . org-roam-node-insert)
-     :map org-mode-map
+    :map org-mode-map
      ("C-M-i" . completion-at-point))
     :config
     (org-roam-setup)
@@ -363,6 +405,7 @@
 
 (use-package magit
   :ensure t
+  :defer t
   :bind
   (("C-x g"   . magit-status)
    ("C-x M-g" . magit-dispatch))
@@ -450,12 +493,18 @@
 
 ;; ====================| THEMING |====================
 
-; spacemacs theme
+; fix theme warnings for Emacs 29+
+    (setq custom-safe-themes t)
+    (setq warning-minimum-level :error)
+
+; load spacemacs
 (use-package spacemacs-theme
   :ensure t
   :defer t
   :init
-  (load-theme 'spacemacs-dark t))
+  (let ((inhibit-message t)
+        (warning-minimum-level :emergency))
+    (load-theme 'spacemacs-dark t)))
 
 ;; ; doom-themes
 ;; (use-package doom-themes
@@ -550,25 +599,8 @@
        ("" "pgfplots" t)
        ("" "forest" t))))
 
-(use-package autoinsert
-  :hook (find-file-hook . auto-insert)
-  :config
-  (setq auto-insert-query nil)
-  ;; Puliamo eventuali vecchie definizioni per evitare raddoppi
-  (setq auto-insert-alist
-    (delete (assoc "\\.org\\'" auto-insert-alist) auto-insert-alist))
-  
-  (define-auto-insert
-    '("\\.org\\'" . "Org Header")
-    '((let ((file-name
-              (file-name-sans-extension
-                (file-name-nondirectory
-                  (buffer-file-name)))))
-        ;; Verifica se siamo fuori da org-roam
-        (if (not (string-prefix-p
-                   (expand-file-name org-dir-path) (buffer-file-name)))
-          (concat "#+TITLE: " file-name "\n#+AUTHOR: melt\n\n")
-          "")))))
+;; (use-package autoinsert
+;;   :init )
 
 ;; ====================| END ORG MODE |====================
 
@@ -641,19 +673,17 @@
     (execute-kbd-macro (kbd "C-u C-u C-c C-x C-l"))
     (message "[CIRO]: LaTeX scaling set to %.1f" next)))
 
+;; --------------- manual header ---------------
+(defun my/org-insert-header ()
+  "Blindly insert a default Org header based on the current filename."
+  (interactive)
+  (let ((title (file-name-base (or (buffer-file-name) "Untitled"))))
+    (goto-char (point-min))
+    (insert (format "#+TITLE: %s\n#+AUTHOR: melt\n\n" title))
+    (message "[CIRO]: Org header inserted!")))
+;; --------------- end manual header ---------------
+
 ;; ====================| END MY FUNCTIONS |====================
 
 ;;; ====================| END MELT's EMACS CONFIGURATION |===============
 ;;; end dotemacs.el
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages nil))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )

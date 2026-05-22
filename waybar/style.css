@@ -1,4 +1,4 @@
-/* ====================| MELT's NIGHTFOX THEME |====================
+/* ====================| MELT's NIGHTFOX THEME |==================== */
 
 /* Nightfox Palette Definitions */
 @define-color background  #192330;
@@ -50,6 +50,7 @@ window#waybar {
 #custom-updates, #custom-firmware, #mpd, #disk, #cpu, #memory, 
 #temperature, #network, #bluetooth, #pulseaudio, #clock, #tray {
     border-right: 1px solid @selection;
+    border-left: 1px solid @selection;
 }
 
 /* System Mode Indicator */
@@ -100,6 +101,23 @@ window#waybar {
 
 #battery {
     margin-right: 4px;
+}
+
+#battery.critical {
+    color: @red;
+    font-weight: bold;
+    animation-name: blink;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+@keyframes blink {
+    to {
+        background-color: @red;
+        color: @background;
+    }
 }
 
 #tray {

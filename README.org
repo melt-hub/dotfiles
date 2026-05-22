@@ -1,0 +1,12 @@
+#+TITLE: My Fedora Sway system
+#+AUTHOR: melt
+
+* Why Fedora?
+
+
+
+* Why Sway?
+
+
+
+* How my system is organized, software I use

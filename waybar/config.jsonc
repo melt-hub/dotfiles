@@ -7,6 +7,7 @@
     "modules-left": [
         "sway/workspaces",
         "sway/mode",
+        "battery",
         "bluetooth",
         "network",
         "custom/firmware",
@@ -22,9 +23,7 @@
         "memory",
         "temperature",
         "pulseaudio",
-        "battery",
-        "clock",
-        "tray"
+        "clock"
     ],
 
     "sway/mode": {
@@ -157,13 +156,18 @@
     },
 
     "battery": {
+        "bat": "BAT0",
         "states": {
             "good": 95,
             "warning": 30,
             "critical": 15
         },
-        "format": "BAT {capacity}% {icon}",
+        "format": "BAT {capacity}% ({time}) [{power:.1f}W]",
+        "format-charging": "󱐋 BAT {capacity}% (+{power:.1f}W)",
+        "format-plugged": " {capacity}%",
+        "format-full": "󰁹 FULL",
         "format-icons": ["", "", "", "", ""],
+        "interval": 5,
         "tooltip": false
-    }
+    },
 }
