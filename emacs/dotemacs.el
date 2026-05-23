@@ -322,58 +322,6 @@
   ; open the graph in the browser on startup
   (setq org-roam-ui-open-on-start t))
 
-;; --------------- fuzzy finding and completion ---------------
-
-
-
-;; ; ui incremental completion framework
-;; (use-package helm
-;;   :ensure t
-;;   :demand t
-;;   :bind
-;;   (("M-x"     . helm-M-x)
-;;    ("C-x C-f" . helm-find-files)
-;;    ("C-x b"   . helm-mini)
-;;    ("M-y"     . helm-show-kill-ring)
-;;    ("C-x C-r" . helm-recentf))
-;;   :config
-;;   (helm-mode 1)
-;;   (setq helm-split-window-in-side-p t)
-;;   (setq helm-autoresize-mode t)
-;;   (setq helm-M-x-fuzzy-match t)
-;;   (setq helm-buffers-fuzzy-matching t)
-;;   (setq helm-recentf-fuzzy-match t))
-
-;; ; org-roam integration
-;; (use-package helm-org-roam
-;;   :ensure t
-;;   :after (helm org-roam))
-
-;; ; --------------- ivy ---------------
-;; ; lighter ui incremental completion framework
-;; (use-package ivy
-;;   :ensure t
-;;   :config
-;;   (ivy-mode 1)
-;;   (setq ivy-use-virtual-buffers t)
-;;   (setq ivy-count-format "(%d/%d) ")
-;;   (setq ivy-re-builders-alist
-;;         '((t . ivy--regex-fuzzy))))
-;; ;  --------------- end ivy ---------------
-
-;; ; wraps ivy functionalities providing a smoother experience
-;; (use-package counsel
-;;   :after ivy
-;;   :config
-;;   (counsel-mode 1)
-;;   :bind
-;;   (("M-x"     . counsel-M-x)
-;;    ("C-x C-f" . counsel-find-file)
-;;    ("C-h f"   . counsel-describe-function)
-;;    ("C-h v"   . counsel-describe-variable)))
-
-;; --------------- end fuzzy finding and completion ---------------
-
 ;; --------------- password management ---------------
 
 ; wrapper package for Unix standard password manager
@@ -599,9 +547,6 @@
        ("" "pgfplots" t)
        ("" "forest" t))))
 
-;; (use-package autoinsert
-;;   :init )
-
 ;; ====================| END ORG MODE |====================
 
 ;; ====================| MY FUNCTIONS |====================
@@ -647,21 +592,6 @@
 
 (advice-add 'org-latex-preview :after
   (lambda (&rest _) (my/org-center-latex)))
-
-(defun my/loop-invariant ()
-  "Insert a loop invariant proof structure."
-  (interactive)
-  (insert "+ *Initialization*:\n"
-          "+ *Maintenance*:\n"
-          "+ *Termination*:\n"))
-
-(defun my/each-half-hour-between (start end)
-  (interactive "nStart (hour): \nnEnd (hour): ")
-  (let ((steps (* (- end start) 2)))
-  (dotimes (i (+ steps 1))
-  (insert (format "| %02d:%02d | |\n"
-    (+ start (/ i 2))
-    (* 30 (mod i 2)))))))
 
 (defun my/latex-switch-scaling ()
   "Toggle LaTeX preview scaling between 1.1 and 1.8."

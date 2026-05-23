@@ -194,7 +194,7 @@
   #+begin_src emacs-lisp
     ;; ====================| END GENERAL |====================
   #+end_src
-
+  
 * Packages
 
   #+begin_src emacs-lisp
@@ -475,102 +475,6 @@
       (setq org-roam-ui-open-on-start t))
   #+end_src
 
-** Fuzzy Finding and Completion
-
-  The following lines provide configuration for popular fuzzy finding and
-  completion tools:
-
-  #+begin_src emacs-lisp
-    ;; --------------- fuzzy finding and completion ---------------
-  #+end_src
-  
-*** Helm
-
-  Helm is a powerful incremental completion and narrowing framework for Emacs
-  that replaces the standard minibuffer with a rich, persistent panel showing
-  candidates in real time as you type. It is highly versatile and integrates
-  with virtually every Emacs command: from finding files to searching buffers,
-  but is known for being relatively heavyweight:
-
-  #+begin_src emacs-lisp
-
-  #+end_src
-
-  #+begin_src emacs-lisp
-    ;; ; ui incremental completion framework
-    ;; (use-package helm
-    ;;   :ensure t
-    ;;   :demand t
-    ;;   :bind
-    ;;   (("M-x"     . helm-M-x)
-    ;;    ("C-x C-f" . helm-find-files)
-    ;;    ("C-x b"   . helm-mini)
-    ;;    ("M-y"     . helm-show-kill-ring)
-    ;;    ("C-x C-r" . helm-recentf))
-    ;;   :config
-    ;;   (helm-mode 1)
-    ;;   (setq helm-split-window-in-side-p t)
-    ;;   (setq helm-autoresize-mode t)
-    ;;   (setq helm-M-x-fuzzy-match t)
-    ;;   (setq helm-buffers-fuzzy-matching t)
-    ;;   (setq helm-recentf-fuzzy-match t))
-  #+end_src
-
-  org-roam integration:
-
-  #+begin_src emacs-lisp
-    ;; ; org-roam integration
-    ;; (use-package helm-org-roam
-    ;;   :ensure t
-    ;;   :after (helm org-roam))
-  #+end_src
-
-*** Ivy
-  
-  Ivy is a lighter and faster alternative to Helm that provides the same
-  incremental completion experience but with a more minimal footprint and a
-  simpler, less intrusive interface. It is often paired with Counsel, a
-  companion package that wraps common Emacs commands with Ivy-enhanced versions:
-
-  #+begin_src emacs-lisp
-    ;; ; --------------- ivy ---------------
-    ;; ; lighter ui incremental completion framework
-    ;; (use-package ivy
-    ;;   :ensure t
-    ;;   :config
-    ;;   (ivy-mode 1)
-    ;;   (setq ivy-use-virtual-buffers t)
-    ;;   (setq ivy-count-format "(%d/%d) ")
-    ;;   (setq ivy-re-builders-alist
-    ;;         '((t . ivy--regex-fuzzy))))
-    ;; ;  --------------- end ivy ---------------    
-  #+end_src
-
-*** Counsel
-
-  Counsel is the natural companion to Ivy, providing Ivy-enhanced replacements
-  for many built-in Emacs commands such as find-file, M-x, describe-function and
-  grep. Rather than reimplementing functionality from scratch, it simply wraps
-  existing commands to make them go through the Ivy completion interface,
-  resulting in a consistent and polished experience across the board:
-
-  #+begin_src emacs-lisp
-    ;; ; wraps ivy functionalities providing a smoother experience
-    ;; (use-package counsel
-    ;;   :after ivy
-    ;;   :config
-    ;;   (counsel-mode 1)
-    ;;   :bind
-    ;;   (("M-x"     . counsel-M-x)
-    ;;    ("C-x C-f" . counsel-find-file)
-    ;;    ("C-h f"   . counsel-describe-function)
-    ;;    ("C-h v"   . counsel-describe-variable)))
-  #+end_src
-
-  #+begin_src emacs-lisp
-    ;; --------------- end fuzzy finding and completion ---------------
-  #+end_src
-
 ** Password Management
 
   The following line provide configuration for a popular Emacs credentials
@@ -679,7 +583,6 @@
   #+begin_src emacs-lisp
     ;; --------------- end git integration ---------------
   #+end_src
-
 
 ** LaTeX
   
@@ -795,7 +698,7 @@
     ;; ====================| END PACKAGES |====================
   #+end_src
   
-* Theming
+** Theming
 
   Themes configuration and management:
 
@@ -874,7 +777,7 @@
     ;; ====================| END THEMING |====================
   #+end_src
   
-* Org-mode
+** Org-mode
 
   The following lines provide configurations for Emacs Org-mode:
 
@@ -941,21 +844,14 @@
            ("" "pgfplots" t)
            ("" "forest" t))))
   #+end_src
-
-** autoinsert
-
-  Bla bla bla
-
-  #+begin_src emacs-lisp
-    ;; (use-package autoinsert
-    ;;   :init )
-  #+end_src
   
   #+begin_src emacs-lisp
     ;; ====================| END ORG MODE |====================
   #+end_src
   
 * My Functions
+
+** Auto-tangle
 
   The defined function checks for the current buffer to be emacs's org
   configuration file, if so it automatically tangles each code block in the
@@ -978,6 +874,8 @@
 
     (add-hook 'after-save-hook #'my/tangle-dotfiles)
   #+end_src
+
+** LaTeX preview auto-centering
 
   #+begin_src emacs-lisp
     (defun my/org-center-latex ()
@@ -1012,24 +910,7 @@
       (lambda (&rest _) (my/org-center-latex)))
   #+end_src
 
-  #+begin_src emacs-lisp
-    (defun my/loop-invariant ()
-      "Insert a loop invariant proof structure."
-      (interactive)
-      (insert "+ *Initialization*:\n"
-              "+ *Maintenance*:\n"
-              "+ *Termination*:\n"))
-  #+end_src
-
-  #+begin_src emacs-lisp
-    (defun my/each-half-hour-between (start end)
-      (interactive "nStart (hour): \nnEnd (hour): ")
-      (let ((steps (* (- end start) 2)))
-      (dotimes (i (+ steps 1))
-      (insert (format "| %02d:%02d | |\n"
-        (+ start (/ i 2))
-        (* 30 (mod i 2)))))))
-  #+end_src
+** LaTeX preview scaling switch
 
   #+begin_src emacs-lisp
     (defun my/latex-switch-scaling ()
@@ -1043,7 +924,7 @@
         (message "[CIRO]: LaTeX scaling set to %.1f" next)))
   #+end_src
 
-** manual header insertion
+** Manual Org header insertion
 
   The following function provides a quick way to manually insert a standard 
   Org header. It simply takes the current filename as the title and 
