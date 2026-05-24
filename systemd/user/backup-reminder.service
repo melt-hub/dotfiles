@@ -1,0 +1,10 @@
+
+[Unit]
+Description=check if home backup is needed 
+
+[Service]
+Type=oneshot                               
+ExecStart=/home/melt/dotfiles/scripts/backup_reminder.sh 
+
+[Install]
+WantedBy=default.target
