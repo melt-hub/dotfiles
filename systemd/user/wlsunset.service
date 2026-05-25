@@ -5,7 +5,7 @@ After=sway-session.target
 [Service]
 Type=simple
 Environment=WAYLAND_DISPLAY=wayland-1
-ExecStart=/usr/bin/wlsunset -t 3500 -T 6500 -S 07:00 -s 20:30
+ExecStart=/usr/bin/wlsunset -t 4500 -T 6500 -S 07:00 -s 20:30
 Restart=always
 
 [Install]
