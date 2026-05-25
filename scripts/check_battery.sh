@@ -23,7 +23,7 @@ ERROR_LOG=$(mktemp)
     BATTERY=$(cat "$BAT_PATH/capacity")
     STATUS=$(cat "$BAT_PATH/status")
 
-    THRESHOLD=30
+    THRESHOLD=15
 
     # check if the battery is below the threshold and not currently charging
     if [ "$BATTERY" -le "$THRESHOLD" ] && [ "$STATUS" = "Discharging" ]; then

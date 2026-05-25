@@ -10,8 +10,8 @@
         "battery",
         "bluetooth",
         "network",
-        "custom/firmware",
-        "custom/updates",        
+        "custom/firmware-updates",
+        "custom/system-updates",        
         "mpd"
     ],
     "modules-center": [
@@ -88,18 +88,18 @@
         }
     },
 
-    "custom/firmware": {
-        "exec": "~/.local/bin/check_firmware_updates.sh",
-        "interval": 21600,
+    "custom/firmware-updates": {
+        "exec": "cat /tmp/available_firmware_updates 2>/dev/null",
+        "interval": 60,
         "format": "{}",
-        "tooltip": false,
+        "tooltip": false
     },
 
-    "custom/updates": {
-    "exec": "~/.local/bin/check_updates.sh",
-    "interval": 3600,
-    "format": "{}",
-    "tooltip": false
+    "custom/system-updates": {
+        "exec": "cat /tmp/available_system_updates 2>/dev/null",
+        "interval": 60,
+        "format": "{}",
+        "tooltip": false
     },
 
     "disk#home": {

@@ -70,6 +70,20 @@ bt-earbuds() {
     notify-send -i audio-headphones "Bluetooth" "Connected to Earbuds"
 }
 
+bt-switchto() {
+    # disconnect current device first
+    bluetoothctl disconnect
+
+    # use == for string comparison
+    if [ "$1" == "-s" ]; then
+        bt-speakers
+    elif [ "$1" == "-e" ]; then
+        bt-earbuds
+    else
+        echo "usage: bt-switchto [-s (speakers) | -e (earbuds)]"
+    fi
+}
+
 # --- network management ---
 
 nw-hotspot() {

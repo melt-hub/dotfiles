@@ -79,7 +79,7 @@ draw_progress() {
 
 # --- phase 1: home directory backup (home -> storage) ---
 clear
-echo -e "${C_CYAN}===============| HOME DIRECTORY BACKUP |===============${C_NC}\n"
+echo -e "${C_CYAN}=========================| HOME DIRECTORY BACKUP |=========================${C_NC}\n"
 
 # run rsync in background for the dashboard to track it
 rsync -avh --delete --info=progress2 --exclude-from="$EXCLUDE_FILE" "$HOME/" "$DEST_HOME_MAIN/" > "$LOG1" 2>&1 &
@@ -111,7 +111,7 @@ fi
 # --- phase 2: storage mirroring (storage -> storage_backup) ---
 # move cursor to row 7 to leave space for the previous blocks
 tput cup 7 0
-echo -e "\n${C_CYAN}====================| ARCHIVE BACKUP |====================${C_NC}\n\n"
+echo -e "\n${C_CYAN}==============================| ARCHIVE BACKUP |==============================${C_NC}\n"
 
 if [ -d "$MAIN_DRIVE" ] && [ -d "$BACKUP_DRIVE" ]; then
     # sync everything from MAIN to BACKUP (including the fresh home backup)
@@ -121,7 +121,7 @@ if [ -d "$MAIN_DRIVE" ] && [ -d "$BACKUP_DRIVE" ]; then
     PIDM=$!
     
     # dashboard starts drawing from row 9
-    draw_progress 9 "$MAIN_DRIVE -> $BACKUP_DRIVE:" "$LOG_MIRROR" "$PIDM"
+    draw_progress 9 "\n$MAIN_DRIVE -> $BACKUP_DRIVE:" "$LOG_MIRROR" "$PIDM"
     wait $PIDM; ST_M=$?
     
     # final hardware synchronization
