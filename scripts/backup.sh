@@ -3,8 +3,7 @@
 # --- configuration ---
 MAIN_DRIVE="/mnt/storage"
 BACKUP_DRIVE="/mnt/storage_backup"
-DEST1="$MAIN_DRIVE/backups/home"
-DEST2="$BACKUP_DRIVE/backups/home"
+DEST_HOME_MAIN="$MAIN_DRIVE/backups/home"
 EXCLUDE_FILE="$HOME/dotfiles/scripts/backup_exclude.txt"
 LAST_BACKUP_FILE="$HOME/.config/last_backup"
 
@@ -13,18 +12,17 @@ C_CYAN='\033[0;36m'
 C_NC='\033[0m' 
 C_GRAY='\033[0;90m'
 
+# create temporary files for progress tracking
 LOG1=$(mktemp)
-LOG2=$(mktemp)
 LOG_MIRROR=$(mktemp)
 
 # cleanup: restore cursor, remove logs and move to row 13 on exit
-trap "tput cup 13 0; tput cnorm; rm -f $LOG1 $LOG2 $LOG_MIRROR" EXIT
-# hide cursor
-tput civis 
+trap "tput cup 13 0; tput cnorm; rm -f $LOG1 $LOG_MIRROR" EXIT
+tput civis # hide cursor
 
 # --- sanity checks ---
 
-# check if mountpoints are valid
+# ensure mountpoints are valid
 if ! mountpoint -q "$MAIN_DRIVE"; then
     notify-send -t 15000 -u critical "Backup Aborted" "Main drive: $MAIN_DRIVE not mounted"
     exit 1
@@ -46,68 +44,61 @@ if [ ! -w "$BACKUP_DRIVE" ]; then
     exit 1
 fi
 
-# ensure target directories exist
-mkdir -p "$DEST1" "$DEST2"
+# ensure target directory exists
+mkdir -p "$DEST_HOME_MAIN"
 
 # --- dashboard logic function ---
+# args: start_row, label, log, pid
 draw_progress() {
     local start_row=$1
-    local pref1=$2 log1=$3 pid1=$4
-    local pref2=$5 log2=$6 pid2=$7
+    local label=$2 log=$3 pid=$4
 
-    while ps -p "$pid1" > /dev/null || { [ -n "$pid2" ] && ps -p "$pid2" > /dev/null; }; do
+    while ps -p "$pid" > /dev/null; do
+        # process log: transform carriage returns to newlines for parsing
+        local raw=$(tr '\r' '\n' < "$log")
+        # capture last line with percentage
+        local stats=$(echo "$raw" | grep -a '%' | tail -n 1 | xargs)
+        # capture last line starting with filename (no space at start)
+        local file=$(echo "$raw" | grep -aE '^[^[:space:]]' | grep -vaE 'sending|building|---|\./|^$' | tail -n 1)
         
-        # --- disk 1 processing ---
-        local raw1=$(tr '\r' '\n' < "$log1")
-        local stats1=$(echo "$raw1" | grep -a '%' | tail -n 1 | xargs)
-        local file1=$(echo "$raw1" | grep -aE '^[^[:space:]]' | grep -vaE 'sending|building|---|\./|^$' | tail -n 1)
-        
-        local path1="${pref1}/${file1:-...}"
-        [ ${#path1} -gt 65 ] && path1="${pref1}/..${path1: -55}"
+        # smart truncation: keep prefix and end of file if string > 65 chars
+        local disp="${file:-...}"
+        [ ${#disp} -gt 65 ] && disp="..${disp: -62}"
 
+        # drawing to terminal
         tput cup "$start_row" 0
-        echo -ne "${C_CYAN}${pref1}:${C_NC} ${path1}"
+        echo -ne "${C_CYAN}${label}${C_NC} ${disp}"
         tput el 
         tput cup $((start_row + 1)) 0
-        echo -ne "         ${stats1:-waiting...}"
+        echo -ne "         ${stats:-waiting...}"
         tput el
-
-        # --- disk 2 processing (if applicable) ---
-        if [ -n "$pid2" ]; then
-            local raw2=$(tr '\r' '\n' < "$log2")
-            local stats2=$(echo "$raw2" | grep -a '%' | tail -n 1 | xargs)
-            local file2=$(echo "$raw2" | grep -aE '^[^[:space:]]' | grep -vaE 'sending|building|---|\./|^$' | tail -n 1)
-
-            local path2="${pref2}/${file2:-...}"
-            [ ${#path2} -gt 65 ] && path2="${pref2}/..${path2: -55}"
-
-            tput cup $((start_row + 2)) 0
-            echo -ne "${C_CYAN}${pref2}:${C_NC} ${path2}"
-            tput el
-            tput cup $((start_row + 3)) 0
-            echo -ne "         ${stats2:-waiting...}"
-            tput el
-        fi
+        
         sleep 0.2
     done
 }
 
-# --- phase 1: parallel home backup ---
+# --- phase 1: home directory backup (home -> storage) ---
 clear
-echo -e "${C_CYAN}=== home directory backup ===${C_NC}\n"
+echo -e "${C_CYAN}===============| HOME DIRECTORY BACKUP |===============${C_NC}\n"
 
-rsync -avh --delete --info=progress2 --exclude-from="$EXCLUDE_FILE" "$HOME/" "$DEST1/" > "$LOG1" 2>&1 &
+# run rsync in background for the dashboard to track it
+rsync -avh --delete --info=progress2 --exclude-from="$EXCLUDE_FILE" "$HOME/" "$DEST_HOME_MAIN/" > "$LOG1" 2>&1 &
 PID1=$!
-rsync -avh --delete --info=progress2 --exclude-from="$EXCLUDE_FILE" "$HOME/" "$DEST2/" > "$LOG2" 2>&1 &
-PID2=$!
 
-draw_progress 2 "storage" "$LOG1" "$PID1" "storage_backup" "$LOG2" "$PID2"
-
+# dashboard starts drawing from row 2
+draw_progress 2 "$HOME -> $MAIN_DRIVE:" "$LOG1" "$PID1"
 wait $PID1; ST1=$?
-wait $PID2; ST2=$?
+
+# flush RAM to physical drive for phase 1
+if [ $ST1 -eq 0 ]; then
+    tput cup 4 0
+    echo -ne "${C_GRAY}flushing home directory data from RAM to $MAIN_DRIVE..${C_NC}"
+    sync
+    tput el
+fi
 
 # log home backup status
-if [ $ST1 -eq 0 ] && [ $ST2 -eq 0 ]; then
+if [ $ST1 -eq 0 ]; then
     echo "HOME SUCCESS $(date +%s)" > "$LAST_BACKUP_FILE"
     notify-send -t 15000 -i drive-harddisk "Home Backup Success" \
     "Home directory is backed up"            
@@ -117,38 +108,49 @@ else
     "Error while backing up home directory"            
 fi
 
-# --- phase 2: rest of storage backup ---
+# --- phase 2: storage mirroring (storage -> storage_backup) ---
+# move cursor to row 7 to leave space for the previous blocks
 tput cup 7 0
-echo -e "\n${C_CYAN}=== rest of storage backup ===${C_NC}\n"
+echo -e "\n${C_CYAN}====================| ARCHIVE BACKUP |====================${C_NC}\n\n"
 
 if [ -d "$MAIN_DRIVE" ] && [ -d "$BACKUP_DRIVE" ]; then
+    # sync everything from MAIN to BACKUP (including the fresh home backup)
     rsync -avh --delete --info=progress2 \
-        --exclude="backups/home/" --exclude="lost+found/" --exclude=".Trash-1000/" \
+        --exclude="lost+found/" --exclude=".Trash-1000/" \
         "$MAIN_DRIVE/" "$BACKUP_DRIVE/" > "$LOG_MIRROR" 2>&1 &
     PIDM=$!
     
-    draw_progress 9 "mirroring" "$LOG_MIRROR" "$PIDM"
+    # dashboard starts drawing from row 9
+    draw_progress 9 "$MAIN_DRIVE -> $BACKUP_DRIVE:" "$LOG_MIRROR" "$PIDM"
     wait $PIDM; ST_M=$?
+    
+    # final hardware synchronization
+    if [ $ST_M -eq 0 ]; then
+        tput cup 11 0
+        echo -ne "${C_GRAY}flushing $MAIN_DRIVE data from RAM to $BACKUP_DRIVE..${C_NC}"
+        sync
+        tput el
+    fi
 else
     ST_M=1
 fi
 
-# log archive backup status
+# log archive mirroring status
 if [ $ST_M -eq 0 ]; then
     echo "REST SUCCESS $(date +%s)" >> "$LAST_BACKUP_FILE"
-    notify-send -t 15000 -i drive-harddisk "Rest Backup Success" \
-    "Rest of the directories are backed up"
+    notify-send -t 15000 -i drive-harddisk "Archive Backup Success" \
+    "Your whole archive $MAIN_DRIVE is backed up to $BACKUP_DRIVE"
 else
     echo "REST ERROR $(date +%s)" >> "$LAST_BACKUP_FILE"
-    notify-send -t 15000 -u critical -i dialog-error "Rest Backup failed" \
-    "Error while backing up rest of $MAIN_DRIVE 's directories."
+    notify-send -t 15000 -u critical -i dialog-error "Archive Backup Failed" \
+    "Error while backing up archive" 
 fi
 
-# final notification (Fixed syntax [ ... ] and notify-send)
-if [ $ST1 -eq 0 ] && [ $ST2 -eq 0 ] && [ $ST_M -eq 0 ]; then
+# final summary notification
+if [ $ST1 -eq 0 ] && [ $ST_M -eq 0 ]; then
     notify-send -t 15000 -i drive-harddisk "Backup Success" \
-    "Both Home and Archive are now fully redundant."
+    "Both Home directory and the rest of ${MAIN_DRIVE}'s directories are backed up"
 fi
 
-tput cnorm
+tput cnorm # restore cursor visibility
 echo -e "\n${C_GRAY}--- backup finished ---${C_NC}"
