@@ -31,23 +31,23 @@ window#waybar {
 /* Common Module Padding */
 #workspaces, #mpd, #disk, #cpu, #memory, #temperature, 
 #network, #bluetooth, #pulseaudio, #clock, #tray, #battery,
-#custom-updates, #custom-firmware {
+#custom-system-updates, #custom-firmware-updates {
     padding: 0 12px;
 }
 
 /* Specific Colors for Custom Modules */
-#custom-updates {
+#custom-system-updates {
     color: @yellow;
     font-weight: bold;
 }
 
-#custom-firmware {
+#custom-firmware-updates {
     color: @yellow;
     font-weight: bold;
 }
 
 /* Visual Separators (Right Border) */
-#custom-updates, #custom-firmware, #mpd, #disk, #cpu, #memory, 
+#custom-system-updates, #custom-firmware-updates, #mpd, #disk, #cpu, #memory, 
 #temperature, #network, #bluetooth, #pulseaudio, #clock, #tray {
     border-right: 1px solid @selection;
     border-left: 1px solid @selection;
@@ -96,6 +96,10 @@ window#waybar {
 }
 
 #clock {
+    font-weight: bold;
+}
+
+#custom-power-profile {
     font-weight: bold;
 }
 

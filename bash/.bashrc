@@ -84,6 +84,7 @@ bt-switchto() {
     fi
 }
 
+
 # --- network management ---
 
 nw-hotspot() {

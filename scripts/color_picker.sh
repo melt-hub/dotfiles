@@ -35,7 +35,7 @@ PREVIEW_IMG="/tmp/color_preview.png"
 
     # success notification:
     # + the -i flag: uses the freshly generated image as the notification icon
-    notify-send -i "$PREVIEW_IMG" -t 4000 -r $NOTIF_ID "color picker" "copied: $COLOR"
+    notify-send -i "$PREVIEW_IMG" -t 4000 -r $NOTIF_ID "Color Picker" "Copied: $COLOR"
 
 } 2>"$ERROR_LOG"
 exit_code=$?

@@ -1,4 +1,4 @@
- {
+  {
     "layer": "top",
     "position": "top",
     "height": 28,
@@ -7,6 +7,7 @@
     "modules-left": [
         "sway/workspaces",
         "sway/mode",
+        "custom/power-profile",
         "battery",
         "bluetooth",
         "network",
@@ -43,10 +44,10 @@
         }
     },
 
-"sway/window": {
+    "sway/window": {
         "format": "{title}",
         "max-length": 50,
-        "tooltip": false,
+        "tooltip": true,
         "rewrite": {
             "^$": "Let's get to work!",
 
@@ -99,6 +100,7 @@
         "exec": "cat /tmp/available_system_updates 2>/dev/null",
         "interval": 60,
         "format": "{}",
+        "on-click": "kitty sudo dnf upgrade --refresh && echo >  /tmp/available_system_updates 2>/dev/null",
         "tooltip": false
     },
 
@@ -128,8 +130,8 @@
 
     "network": {
         "interval": 2,
-        "format-wifi": "WIFI {essid} 󰇚 {bandwidthDownBytes} 󰕒 {bandwidthUpBytes}",
-        "format-ethernet": "ETH {ipaddr} 󰇚 {bandwidthDownBytes} 󰕒 {bandwidthUpBytes}",
+        "format-wifi": "WIFI {essid}",
+        "format-ethernet": "ETH {ipaddr}",
         "format-disconnected": "status",
         "tooltip": false
     },
@@ -137,7 +139,7 @@
     "bluetooth": {
         "format": "BT {status}",
         "format-connected": "BT {device_alias}",
-        "on-click": "",
+        "on-click": "/home/melt/.local/bin/bluetooth_switch.sh",
         "tooltip": false
     },
 
@@ -153,6 +155,14 @@
 
     "tray": {
         "spacing": 10
+    },
+
+    "custom/power-profile": {
+        "exec": "cat /tmp/power_profile_status 2>/dev/null",
+        "interval": 5,
+        "format": "{}",
+        "tooltip": false,
+        "on-click": "/home/melt/.local/bin/power_profile_switch.sh"
     },
 
     "battery": {
