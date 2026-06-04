@@ -43,9 +43,13 @@ elif [ $EXIT_CODE -eq 0 ]; then
 else
 
     ERR_MSG=$(cat "$ERROR_LOG")
-    [ -z "$ERR_MSG" ] && ERR_MSG="Something went wrong. Check internet connection or DNF repositories"
-     notify-send -t 30000 -u critical -r 9995 -i software-update-urgent "System Update Error" "$ERR_MSG"
-     echo "󰀦 SYS"
+    if [ -z "$ERR_MSG" ]; then
+        ERR_MSG="Something went wrong."
+        ERR_MSG="$ERR_MSG Check internet connection or DNF repositories"
+    fi
+    notify-send -t 30000 -u critical -r 9995 -i software-update-urgent \
+    "System Update Error" "$ERR_MSG"
+    echo "󰀦 SYS"
 fi
 
 # cleanup: delete the temporary log file
