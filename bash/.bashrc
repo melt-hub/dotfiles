@@ -32,10 +32,6 @@ __set_title() {
 }
 PROMPT_COMMAND="__set_title${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
 
-## ---------- ALIASES ----------
-
-# TODO
-
 ## ---------- MY FUNCTIONS ----------
 
 # dotfiles sync shortcut
@@ -71,10 +67,7 @@ bt-earbuds() {
 }
 
 bt-switchto() {
-    # disconnect current device first
     bluetoothctl disconnect
-
-    # use == for string comparison
     if [ "$1" == "-s" ]; then
         bt-speakers
     elif [ "$1" == "-e" ]; then
@@ -148,7 +141,7 @@ ud-system() {
         echo "󰀦 SYSUPD" >  /tmp/available_system_updates
     fi
 
-    rm -f "$error_log"    
+    rm -f "$ERROR_LOG"    
 }
 
 ud-firmware() {
