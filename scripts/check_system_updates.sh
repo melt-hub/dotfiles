@@ -44,12 +44,12 @@ else
 
     ERR_MSG=$(cat "$ERROR_LOG")
     if [ -z "$ERR_MSG" ]; then
-        ERR_MSG="Something went wrong."
+        ERR_MSG="Something went wrong while checking for updates."
         ERR_MSG="$ERR_MSG Check internet connection or DNF repositories"
     fi
     notify-send -t 30000 -u critical -r 9995 -i software-update-urgent \
     "System Update Error" "$ERR_MSG"
-    echo "󰀦 SYS"
+    echo "󰀦 SYSCHK"
 fi
 
 # cleanup: delete the temporary log file
