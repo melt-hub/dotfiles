@@ -2,7 +2,7 @@
 
 ERROR_LOG=$(mktemp)
 
-sudo fwupdmgr refresh && sudo fwuupdmgr update 2>"$ERROR_LOG"
+{ sudo fwupdmgr refresh && sudo fwupdmgr update } 2>"$ERROR_LOG"
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then
