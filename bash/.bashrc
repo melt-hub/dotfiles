@@ -63,15 +63,22 @@ bt-speakers() {
 
 bt-earbuds() {
     bluetoothctl connect 2C:BE:EB:77:51:EB && \
-    notify-send -i audio-headphones "Bluetooth" "Connected to Earbuds"
+    notify-send -i audio-headphones "Bluetooth" "Connected to Nothing Earbuds"
+}
+
+bt-earbudsb() {
+    bluetoothctl connect 84:0F:2A:71:4A:C1 && \
+    notify-send -i audio-headphones "Bluetooth" "Connected to Oppo Earbuds"    
 }
 
 bt-switchto() {
     bluetoothctl disconnect
     if [ "$1" == "-s" ]; then
         bt-speakers
-    elif [ "$1" == "-e" ]; then
+    elif [ "$1" == "-ea" ]; then
         bt-earbuds
+    elif [ "$1" == "-eb" ]; then
+        bt-earbudsb
     else
         echo "usage: bt-switchto [-s (speakers) | -e (earbuds)]"
     fi

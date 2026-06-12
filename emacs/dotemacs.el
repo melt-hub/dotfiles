@@ -195,6 +195,38 @@
 
   (message "[CIRO]: Dashboard is ready."))
 
+;; --------------- rust development ---------------
+(use-package rust-mode
+  :ensure t
+  :mode "\\.rs\\'")
+
+;; Cargo.el: Interfaccia completa per Cargo
+;; Ti permette di compilare e testare a comando (C-c C-k ...)
+(use-package cargo
+  :ensure t
+  :hook (rust-mode . cargo-minor-mode)
+  :config
+  (setq cargo-minor-mode-key-prefix (kbd "C-c C-k"))
+  (setq cargo-process--command-flags '("--color" "always")))
+
+;; Vterm: Terminale per il testing di TUI
+(use-package vterm
+  :ensure t
+  :config
+  (setq vterm-max-scrollback 10000))
+
+;; Integrazione e scorciatoie
+(with-eval-after-load 'rust-mode
+  ;; Scorciatoie manuali per Cargo
+  (define-key rust-mode-map (kbd "C-c C-k b") 'cargo-process-build)
+  (define-key rust-mode-map (kbd "C-c C-k r") 'cargo-process-run)
+  (define-key rust-mode-map (kbd "C-c C-k t") 'cargo-process-test)
+  (define-key rust-mode-map (kbd "C-c C-k c") 'cargo-process-check)
+  ;; Scorciatoia per aprire vterm nel progetto
+  (define-key rust-mode-map (kbd "C-c C-v") 'vterm))
+
+;; --------------- end rust development ---------------
+
 ;; --------------- lisp developement  ---------------
 
 ; SLIME setup
@@ -283,6 +315,25 @@
 	(expand-file-name ".pdf-view-restore" user-emacs-directory)))
 
 ;; --------------- end pdf viewing ---------------
+
+;; --------------- multimedia (emms) ---------------
+(use-package emms
+  :ensure t
+  :config
+  (require 'emms-setup)
+  (emms-all)
+  (emms-default-players)
+  
+  ; Set MPV as the primary player (best for Wayland/Sway)
+  (setq emms-player-list '(emms-player-mpv))
+  
+  ; Directory where you keep your videos/music
+  (setq emms-source-file-default-directory "~/clips/")
+
+  ; Keybindings for the playlist
+  (global-set-key (kbd "C-c e p") 'emms-playlist-mode-go)
+  (global-set-key (kbd "C-c e l") 'emms-play-file))
+;; --------------- end multimedia ------------------
 
 ; org-roam setup
 (use-package org-roam
@@ -407,7 +458,11 @@
   ; enable syntax highlighting in sql buffers
   (add-hook 'sql-mode-hook
     (lambda ()
-      (sql-set-product 'mysql)))
+      (sql-set-product 'mysql)
+      ; DISABILITA il formatter nativo di sql-mode (che allinea a destra)
+      ; e usa l'indentazione relativa (copia l'indentazione della riga sopra)
+      (setq-local indent-line-function 'indent-relative)
+      (electric-indent-local-mode -1)))
 
   ; prevent visual-line-mode from breaking table formatting
   (add-hook 'sql-interactive-mode-hook
@@ -426,11 +481,6 @@
   :config
   ; upcasing blacklist
   (add-to-list 'sqlup-blacklist "name"))
-
-; smart indentation for SQL
-(use-package sql-indent
-  :ensure t
-  :hook (sql-mode . sqlind-minor-mode))
 
 ;; --------------- end sql development ---------------
 

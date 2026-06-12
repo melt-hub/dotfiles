@@ -11,6 +11,7 @@
         "battery",
         "bluetooth",
         "network",
+        "custom/recording",
         "custom/firmware-updates",
         "custom/system-updates",        
         "mpd"
@@ -89,6 +90,13 @@
         }
     },
 
+    "custom/recording": {
+        "exec": "[ -f /tmp/recording_active ] && echo '󰑊 REC' || echo ''",
+        "interval": "once",
+        "signal": 8,
+        "tooltip": false
+    },
+
     "custom/firmware-updates": {
         "exec": "cat /tmp/available_firmware_updates 2>/dev/null",
         "interval": 60,
@@ -126,6 +134,7 @@
     "temperature": {
         "critical-threshold": 80,
         "format": "TEMP {temperatureC}°C",
+        "hwmon-path": "/sys/class/hwmon/hwmon6/temp1_input",
         "tooltip": false
     },
 

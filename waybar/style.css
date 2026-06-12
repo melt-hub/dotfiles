@@ -107,6 +107,14 @@ window#waybar {
     margin-right: 4px;
 }
 
+#custom-recording {
+    color: @red;
+    font-weight: bold;
+    padding: 0 10px;
+    border-right: 1px solid @selection;
+    border-left: 1px solid @selection;
+}
+
 #battery.critical {
     color: @red;
     font-weight: bold;

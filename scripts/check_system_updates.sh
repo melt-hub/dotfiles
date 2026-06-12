@@ -35,7 +35,7 @@ EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 100 ]; then
 
-    updates=$(echo "$OUTPUT" | grep -c '^\S')
+    UPDATES=$(echo "$OUTPUT" | grep -c '^\S')
     echo "󰏗 $UPDATES"
 
 elif [ $EXIT_CODE -eq 0 ]; then
