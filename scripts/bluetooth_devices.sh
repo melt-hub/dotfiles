@@ -9,6 +9,9 @@ MAC_OPPO="84:0F:2A:71:4A:C1"
 # unique notification id to prevent spam in dunst
 NOTIF_ID=9992
 
+# time limit in seconds for each connection attempt
+T_OUT=10
+
 # create a temporary log file to isolate bluetoothctl errors
 ERROR_LOG=$(mktemp)
 
@@ -21,25 +24,28 @@ ERROR_LOG=$(mktemp)
     fi
 
     # identify the currently connected device mac address
-    # we take the first one detected if multiple devices are active
     CONNECTED=$(bluetoothctl devices Connected | awk '{print $2}' | head -n 1)
 
-    # implement the rotation logic based on the requirements
-    # case 1: no device is connected -> connect the logi speakers
+    # implement the rotation logic with timeout and fallback functionality
+    # case 1: no device is connected -> try to connect logi speakers
     if [ -z "$CONNECTED" ]; then
-        bluetoothctl connect "$MAC_LOGI"
+        timeout $T_OUT bluetoothctl connect "$MAC_LOGI"
 
-    # case 2: speakers are connected -> switch to nothing ear
+    # case 2: speakers are connected -> try nothing ear, fallback to speakers
     elif [ "$CONNECTED" = "$MAC_LOGI" ]; then
         bluetoothctl disconnect "$MAC_LOGI"
-        bluetoothctl connect "$MAC_NOTHING"
+        if ! timeout $T_OUT bluetoothctl connect "$MAC_NOTHING"; then
+            bluetoothctl connect "$MAC_LOGI"
+        fi
 
-    # case 3: nothing ear is connected -> switch to oppo buds
+    # case 3: nothing ear connected -> try oppo buds, fallback to nothing
     elif [ "$CONNECTED" = "$MAC_NOTHING" ]; then
         bluetoothctl disconnect "$MAC_NOTHING"
-        bluetoothctl connect "$MAC_OPPO"
+        if ! timeout $T_OUT bluetoothctl connect "$MAC_OPPO"; then
+            bluetoothctl connect "$MAC_NOTHING"
+        fi
 
-    # case 4: oppo buds are connected -> disconnect everything
+    # case 4: oppo buds are connected -> disconnect and return to idle
     elif [ "$CONNECTED" = "$MAC_OPPO" ]; then
         bluetoothctl disconnect "$MAC_OPPO"
 
@@ -52,7 +58,8 @@ ERROR_LOG=$(mktemp)
 EXIT_CODE=$?
 
 # handle execution failures and notify the user via dunst
-if [ $EXIT_CODE -ne 0 ]; then
+# exit code 124 indicates the timeout command triggered
+if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 124 ]; then
     ERR_MSG=$(cat "$ERROR_LOG")
     if [ -z "$ERR_MSG" ]; then
         ERR_MSG="An unknown error occurred during the bluetooth cycle"

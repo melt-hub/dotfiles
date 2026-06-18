@@ -149,10 +149,12 @@
     "bluetooth": {
         "format": "BT {status}",
         "format-connected": "BT {device_alias}",
+        "format-connected-battery": "BT {device_alias} {device_battery_percentage}%",
         "on-click": "/home/melt/.local/bin/bluetooth_switch.sh",
+        "on-click-right": "/home/melt/.local/bin/bluetooth_devices.sh",
         "tooltip": false
     },
-
+   
     "pulseaudio": {
         "format": "VOL {volume}%",
         "tooltip": false
