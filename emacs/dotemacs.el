@@ -5,96 +5,67 @@
 
 (message "[CIRO]: Yo melt!")
 
-; temporally extend garbage collector's threshold
-(setq gc-cons-threshold 100000000)
-(message "[CIRO]: Increasing garbage collecting threshold...")
-
-; Save original file-name-handler-alist and disable it during init
-(defvar my/file-name-handler-alist-original file-name-handler-alist)
-(setq file-name-handler-alist nil)
-
-(message "[CIRO]: Tuning startup performance...")
-
-; Restore everything after init
-(add-hook 'after-init-hook
-  (lambda ()
-    (setq gc-cons-threshold 800000)
-    (setq file-name-handler-alist my/file-name-handler-alist-original)
-    (message "[CIRO]: Startup completed in %s" (emacs-init-time))))
-
-; set path variables
+;; Set directory paths
 (defvar os-packages-path "~/dotfiles/emacs/packages/")
 (defvar org-dir-path "~/zk/")
 
-; automatically follow symlinks
+;; Automatically follow file symlinks
 (setq vc-follow-symlinks t)
 
-; set character encoding system
+;; Set default character encoding system
 (prefer-coding-system 'utf-8-unix)
 
-; display pinentry prompts in minibuffer
+;; Direct pinentry prompts to the minibuffer
 (setq epa-pinentry-mode 'loopback)
 
-; do not shoew startup screen
+;; Suppress startup screen display
 (setq inhibit-startup-screen t)
 
-; always display inline images
+;; Always display inline images by default
 (setq org-startup-with-inline-images t)
 
-; load use-package
+;; Load use-package path
 (add-to-list 'load-path (concat os-packages-path "use-package/"))
 
-; --------------- automodes for specific languages ---------------
-; ----- Lisp Dialects -----
-; racket
+;; --------------- automodes for specific languages ---------------
+;; Lisp Dialects
 (add-to-list 'auto-mode-alist '("\\.rkt\\'"  . racket-mode))
-; scheme
 (add-to-list 'auto-mode-alist '("\\.ss\\'"   . scheme-mode))
-; common lisp
 (add-to-list 'auto-mode-alist '("\\.cl\\'"   . common-lisp-mode))
 
-; ----- Prolog ----- 
-(add-to-list 'auto-mode-alist
-	'("\\.pl\\'" . prolog-mode))
-; NOTE: temporally disabling per-mode because i never use it
+;; Prolog
+(add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
+
+;; Temporarily disable default perl-mode association for .pl files
 (setq auto-mode-alist
   (rassq-delete-all 'perl-mode auto-mode-alist))
-; --------------- end automodes for specific languages ---------------
+;; --------------- end automodes for specific languages ---------------
 
 ;; ====================| END STARTUP |====================
 
 ;; ====================| GENERAL |====================
 
 ;; --------------- modeline ----------
-; display line number
+;; Display line numbers in status bar
 (setq line-number-mode t)
 
-; display column number
+;; Display column numbers in status bar
 (column-number-mode t)
 
-; display time
+;; Enable system time display
 (display-time)
 
-; disable bell
-(setq ring-bell-function (quote ignore))
+;; Disable audible bell notifications
+(setq ring-bell-function 'ignore)
 
-; disable scroll bar
-(scroll-bar-mode -1)
-
-; disable menu bar
-(menu-bar-mode -1)
-
-; disable tool bar
-(tool-bar-mode 0)
 ;; --------------- end modeline ----------
 
 ;; --------------- spacing/indentation ---------------
-; prevent Emacs from automatically adding a newline at the end of the file
+;; Control newline insertions at end of files
 (setq require-final-newline nil)
 (setq mode-require-final-newline nil)
 
-; remove all trailing whitespace and newlines 
-; from the end of the file before saving
+;; Remove trailing whitespaces and empty lines on save
 (add-hook 'before-save-hook
           (lambda ()
             (save-excursion
@@ -102,65 +73,106 @@
               (skip-chars-backward " \t\n\r")
               (delete-region (point) (point-max)))))
 
-; visual newline for very long lines
+;; Enable visual line wrap globally
 (global-visual-line-mode t)
 
-; auto newline after 80 columns
+;; Set default column limit for text filling
 (setq-default fill-column 80)
 
-; use auto fill in text-mode and prog-mode
+;; Enable automatic wrapping in text and programming buffers
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 (add-hook 'prog-mode-hook 'turn-on-auto-fill)
 
-; tab is set to two spaces
+;; Use two spaces instead of hard tabs
 (setq-default tab-width 2)
-
-; disable real tabs for spaces
 (setq-default indent-tabs-mode nil)
 
-; indentation is two spaces for the following languages:
+;; Set relative offsets for C and Lisp dialects
 (setq-default c-basic-offset 2)
 (setq-default lisp-indent-offset 2)
 
-; autoindent after '\n', '\b' and '}'
+;; Specify characters triggering automatic indentation
 (setq-default electric-indent-chars '(?\n ?\^? ?\}))
 
-; set zoom at +1
+;; Increase default text size on file opening
 (add-hook 'find-file-hook
   (lambda ()
     (text-scale-set 1)))
 
-;; ; enables line number visualization in source files
-;; (global-display-line-numbers-mode t)
-;; (dolist (mode '(org-mode-hook
-;; 		term-mode-hook
-;; 		shell-mode-hook
-;; 		eshell-mode-hook
-;; 		eshell-mode-hook))
-;;   (add-hook mode (lambda () (display-line-numbers-mode 0))))
-; --------------- end spacing/indentation ---------------
+;; Prevent native graphical dialogs and file selection windows
+    (setq use-dialog-box nil)
+    (setq use-file-dialog nil)
+
+    ;; Disable context menus triggered by mouse clicks
+    (setq context-menu-mode nil)
+
+    ;; Disable popup menus triggered by clicking major or minor modes in the modeline
+    (setq mode-line-major-mode-keymap nil)
+    (setq mode-line-minor-mode-keymap nil)
+
+;; --------------- end spacing/indentation ---------------
 
 ;; ====================| END GENERAL |====================
 
 ;; ====================| PACKAGES |====================
 
-; built-in Emacs's package manager configuration and remote archives setting
+;; Remote ELPA and MELPA archives configuration
 (use-package package
   :config
   (setq package-archive-priorities
-	'(("melpa-stable" . 2)
- 	  ("MELPA" . 1)
- 	  ("gnu" . 0)))
-   (setq package-archives
- 	'(("melpa-stable" . "https://stable.melpa.org/packages/")
- 	  ("MELPA" . "https://melpa.org/packages/")
- 	  ("gnu" . "https://elpa.gnu.org/packages/"))))
+        '(("melpa-stable" . 2)
+          ("MELPA" . 1)
+          ("gnu" . 0)))
+  (setq package-archives
+        '(("melpa-stable" . "https://stable.melpa.org/packages/")
+          ("MELPA" . "https://melpa.org/packages/")
+          ("gnu" . "https://elpa.gnu.org/packages/"))))
 
+;; Setup statistics tracking and load use-package engine
 (setq use-package-compute-statistics t)
-
-; using 'package' to initialize 'use-package'
 (package-initialize)
 (require 'use-package)
+
+;; Gestione automatica e ottimizzata del Garbage Collector
+(use-package gcmh
+  :ensure t
+  :init
+  ;; Imposta la soglia a 16MB durante l'uso attivo (valore equilibrato)
+  (setq gcmh-high-cons-threshold (* 16 1024 1024)
+        ;; Avvia la pulizia della memoria dopo 15 secondi di inattività
+        gcmh-idle-delay 15)
+  :config
+  (gcmh-mode 1))
+
+;; Fix safe theme validation issues for Emacs 29+
+(setq custom-safe-themes t)
+(setq warning-minimum-level :error)
+
+;; Initialize dark theme
+(use-package spacemacs-theme
+  :ensure t
+  :defer t
+  :init
+  (let ((inhibit-message t)
+        (warning-minimum-level :emergency))
+    (load-theme 'spacemacs-dark t)))
+
+(use-package beacon
+  :ensure t
+  :config
+  (beacon-mode 1))
+
+(use-package nerd-icons
+  :ensure t)
+
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1))
+
+(use-package nyan-mode
+  :ensure t
+  :config
+  (nyan-mode))
 
 (use-package dashboard
   :ensure t
@@ -168,26 +180,24 @@
   :config
   (dashboard-setup-startup-hook)
 
-  ; path to your custom banner image
+  ;; Specify custom branding banner
   (setq dashboard-startup-banner "~/pics/other/emacs-e-logo.png")
   (setq dashboard-banner-logo-title "[CIRO]: Welcome back melt!")
 
-  ; standard items: recents and agenda
-  (setq dashboard-items '((recents  . 10)
-                         (agenda   . 5)))
+  ;; Display standard sections
+  (setq dashboard-items '((recents  . 10)))
 
-  ; appearance settings
-  ; IMPORTANT: we disable heading icons to prevent the 'nil icon' error
+  ;; Fine-tune visual options
   (setq dashboard-set-heading-icons nil)
   (setq dashboard-set-file-icons t)
   (setq dashboard-icon-type 'nerd-icons)
-  
-  ; spacing and layout
-  (setq dashboard-center-content t)
-  (setq dashboard-section-gap 2) ; adds vertical space between sections
-  (setq dashboard-set-footer nil) ; cleaner look
 
-  ; dashboard keybindings and behavior
+  ;; Center content alignment
+  (setq dashboard-center-content t)
+  (setq dashboard-section-gap 2)
+  (setq dashboard-set-footer t)
+
+  ;; Custom buffer interactions
   (add-hook 'dashboard-mode-hook
             (lambda ()
               (local-set-key (kbd "q") 'quit-window)
@@ -195,13 +205,26 @@
 
   (message "[CIRO]: Dashboard is ready."))
 
+;; --------------- git integration ---------------
+(use-package magit
+  :ensure t
+  :defer t
+  :bind
+  (("C-x g"   . magit-status)
+   ("C-x M-g" . magit-dispatch))
+  :config
+  ;; Retrieve credentials using auth-source
+  (setq magit-process-find-password-functions
+        '(magit-process-password-auth-source)))
+;; --------------- end git integration ---------------
+
 ;; --------------- rust development ---------------
+;; Major mode for editing Rust source code
 (use-package rust-mode
   :ensure t
   :mode "\\.rs\\'")
 
-;; Cargo.el: Interfaccia completa per Cargo
-;; Ti permette di compilare e testare a comando (C-c C-k ...)
+;; Compiler and dependency manager interaction
 (use-package cargo
   :ensure t
   :hook (rust-mode . cargo-minor-mode)
@@ -209,27 +232,24 @@
   (setq cargo-minor-mode-key-prefix (kbd "C-c C-k"))
   (setq cargo-process--command-flags '("--color" "always")))
 
-;; Vterm: Terminale per il testing di TUI
+;; High-performance terminal emulator inside Emacs
 (use-package vterm
   :ensure t
   :config
   (setq vterm-max-scrollback 10000))
 
-;; Integrazione e scorciatoie
+;; Manual shortcut bindings for compilation and terminal tasks
 (with-eval-after-load 'rust-mode
-  ;; Scorciatoie manuali per Cargo
   (define-key rust-mode-map (kbd "C-c C-k b") 'cargo-process-build)
   (define-key rust-mode-map (kbd "C-c C-k r") 'cargo-process-run)
   (define-key rust-mode-map (kbd "C-c C-k t") 'cargo-process-test)
   (define-key rust-mode-map (kbd "C-c C-k c") 'cargo-process-check)
-  ;; Scorciatoia per aprire vterm nel progetto
   (define-key rust-mode-map (kbd "C-c C-v") 'vterm))
-
 ;; --------------- end rust development ---------------
 
 ;; --------------- lisp developement  ---------------
 
-; SLIME setup
+;; Core environment setup
 (use-package slime
   :ensure t
   :commands (slime slime-mode)
@@ -237,50 +257,111 @@
   (setq inferior-lisp-program "sbcl")
   (slime-setup '(slime-fancy)))
 
-; provides file-contextual autocompletion
+;; Complete-at-point suggestions via Company
 (use-package slime-company
   :ensure t
   :after (slime company)
   :config
   (setq slime-company-completion 'fuzzy))
 
-; better syntax highlighting for Common Lisp
 (use-package lisp-extra-font-lock
   :ensure t
   :hook (lisp-mode . lisp-extra-font-lock-mode)
   :config
   (lisp-extra-font-lock-global-mode 1))
 
-; better syntax highlighting for Racket
 (use-package racket-mode
   :ensure t
   :mode "\\.rkt\\'")
 
-; better syntax highlighting for Emacs Lisp
 (use-package highlight-defined
   :ensure t
   :hook (emacs-lisp-mode . highlight-defined-mode))
 
 ;; --------------- end lisp developement  ---------------
 
+;; --------------- sql developement ---------------
+(use-package sql
+  :config
+  ;; Assign primary engine dialect
+  (setq sql-product 'mysql)
+
+  ;; Declare active profiles mapping credentials to auth-source
+  (setq sql-connection-alist
+    '((mysql-melt
+       (sql-product  'mysql)
+       (sql-server   "127.0.0.1")
+       (sql-port     3306)
+       (sql-user     "melt")
+       (sql-password
+        (auth-source-pass-get 'secret "mysql/melt"))
+       (sql-database ""))
+      (mysql-root
+       (sql-product  'mysql)
+       (sql-server   "127.0.0.1")
+       (sql-port     3306)
+       (sql-user     "root")
+       (sql-password
+        (auth-source-pass-get 'secret "mysql/root"))
+       (sql-database ""))))
+
+  ;; Set buffer options
+  (add-hook 'sql-mode-hook
+    (lambda ()
+      (sql-set-product 'mysql)
+      ;; Use simple indentation copying previous line spacing
+      (setq-local indent-line-function 'indent-relative)
+      (electric-indent-local-mode -1)))
+
+  ;; Truncate layout inside interactive shells to preserve ASCII table width
+  (add-hook 'sql-interactive-mode-hook
+    (lambda ()
+      (toggle-truncate-lines t)))
+
+  ;; Force standard ASCII formatting
+  (setq sql-mysql-options '("--table" "--unbuffered")))
+
+;; Automatic capitalization utility for SQL keywords
+(use-package sqlup-mode
+  :defer t
+  :hook
+  ((sql-mode . sqlup-mode)
+   (sql-interactive-mode . sqlup-mode))
+  :config
+  ;; Specify exclusion blacklist
+  (add-to-list 'sqlup-blacklist "name"))
+;; --------------- end sql development ---------------
+
+;; --------------- latex ---------------
+
+;; (use-package tex
+;;  :ensure auctex
+;;  :config
+;;  (setq-default TeX-master nil)
+;;  (setq TeX-parse-self t)
+;;  (setq TeX-auto-save t))
+
+(use-package org-fragtog
+  :ensure t
+  :hook (org-mode . org-fragtog-mode))
+
+;; --------------- end latex ---------------
+
 ;; --------------- pdf viewing ---------------
 
-; advanced PDF viewer
 (use-package pdf-tools
  :ensure t
  :magic ("%PDF" . pdf-view-mode)
  :config
- ; compile and install automatically
+ ;; Trigger backend installation
  (pdf-tools-install)
 
- ; use scaling
+ ;; Scale to window width
  (setq pdf-view-use-scaling t)
- ; fit window width
  (setq-default pdf-view-display-size 'fit-width)
- ; dark mode colors
  (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
 
- ; automaticclly enable nightmode and annotations
+ ;; Enable night mode and annotator hook automatically
  (add-hook 'pdf-view-mode-hook
            (lambda ()
              (pdf-annot-minor-mode)
@@ -288,23 +369,22 @@
              (pdf-links-minor-mode)
              (pdf-outline-minor-mode)))
 
- ; hotkeys
- (define-key
-  pdf-view-mode-map (kbd "H") 'pdf-annot-add-highlight-markup-annotation)
- (define-key
-  pdf-view-mode-map (kbd "U") 'pdf-annot-add-underline-markup-annotation)
- (define-key
-  pdf-view-mode-map (kbd "D") 'pdf-annot-add-strikeout-markup-annotation)
- (define-key
-  pdf-view-mode-map (kbd "C-=") 'pdf-view-enlarge)
- (define-key
-  pdf-view-mode-map (kbd "C--") 'pdf-view-shrink)
- (define-key
-  pdf-view-mode-map (kbd "0") 'pdf-view-scale-reset)
- (define-key
-  pdf-view-mode-map (kbd "M") 'pdf-view-midnight-minor-mode))
+ ;; Bind operational shortcut keys
+ (define-key pdf-view-mode-map (kbd "H")
+   'pdf-annot-add-highlight-markup-annotation)
+ (define-key pdf-view-mode-map (kbd "U")
+   'pdf-annot-add-underline-markup-annotation)
+ (define-key pdf-view-mode-map (kbd "D")
+   'pdf-annot-add-strikeout-markup-annotation)
+ (define-key pdf-view-mode-map (kbd "C-=")
+   'pdf-view-enlarge)
+ (define-key pdf-view-mode-map (kbd "C--")
+   'pdf-view-shrink)
+ (define-key pdf-view-mode-map (kbd "0")
+   'pdf-view-scale-reset)
+ (define-key pdf-view-mode-map (kbd "M")
+   'pdf-view-midnight-minor-mode))
 
-; keeps track of the last page visited in a PDF
 (use-package pdf-view-restore
   :ensure t
   :after pdf-tools
@@ -312,82 +392,102 @@
   :config
   (add-hook 'pdf-view-mode-hook 'pdf-view-restore-mode)
   (setq pdf-view-restore-filename
-	(expand-file-name ".pdf-view-restore" user-emacs-directory)))
+        (expand-file-name ".pdf-view-restore"
+                          user-emacs-directory)))
 
 ;; --------------- end pdf viewing ---------------
 
-;; --------------- multimedia (emms) ---------------
-(use-package emms
-  :ensure t
+(use-package org
+  :defer t
+  :bind
+  (("C-c a" . org-agenda))
   :config
-  (require 'emms-setup)
-  (emms-all)
-  (emms-default-players)
-  
-  ; Set MPV as the primary player (best for Wayland/Sway)
-  (setq emms-player-list '(emms-player-mpv))
-  
-  ; Directory where you keep your videos/music
-  (setq emms-source-file-default-directory "~/clips/")
+  ;; Point to active task agendas
+  (setq org-agenda-files
+        (list (expand-file-name "agenda.org" org-dir-path)))
 
-  ; Keybindings for the playlist
-  (global-set-key (kbd "C-c e p") 'emms-playlist-mode-go)
-  (global-set-key (kbd "C-c e l") 'emms-play-file))
-;; --------------- end multimedia ------------------
+  ;; Prevent blank lines on section creation
+  (setq org-blank-before-new-entry
+        '((heading . nil) (plain-list-item . nil)))
 
-; org-roam setup
+  ;; Define global access key
+  (global-set-key (kbd "C-c a") 'org-agenda)
+
+  ;; Hide markdown character symbols
+  (setq org-hide-emphasis-markers t)
+
+  ;; Set mathematical equations presentation
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :scale 1.1))
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :justify 'center))
+  (setq org-preview-latex-default-process 'dvisvgm)
+
+  ;; Set standard packages for document exports
+  (setq org-format-latex-header
+        (concat org-format-latex-header
+                "\n\\usepackage{clrscode3e}"
+                "\n\\usepackage{tikz}"
+                "\n\\usepackage{pgfplots}"
+                "\n\\usepackage{forest}"
+                "\n\\usetikzlibrary{positioning, calc, arrows.meta,"
+                "shapes.multipart, automata, matrix, intersections}"
+                "\n\\usepgfplotslibrary{fillbetween, statistics}"
+                "\n\\pgfplotsset{compat=newest}"))
+
+  (setq org-latex-packages-alist
+        '(("" "clrscode3e" t)
+          ("" "tikz" t)
+          ("" "pgfplots" t)
+          ("" "forest" t))))
+
 (use-package org-roam
-    :ensure t
-    :defer t
-    :custom
-    (org-roam-directory org-dir-path)
-    (org-roam-completion-everywhere t)
-    :bind
-    (("C-c n l" . org-roam-buffer-toggle)
-     ("C-c n f" . org-roam-node-find)
-     ("C-c n i" . org-roam-node-insert)
-    :map org-mode-map
-     ("C-M-i" . completion-at-point))
-    :config
-    (org-roam-setup)
-    (setq org-roam-capture-templates
-      '(("d" "default" plain "%?"
-         :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-                            "#+title: ${title}\n")
-         :unnarrowed t)
-        ("r" "dream" plain "%?"
-         :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
-                            "#+title: ${title}\n#+filetags: :dream:\n\n:PROPERTIES:\n:created: %<%Y-%m-%d %H:%M>\n:END:\n")
-         :unnarrowed t))))
+  :ensure t
+  :defer t
+  :custom
+  (org-roam-directory org-dir-path)
+  (org-roam-completion-everywhere t)
+  :bind
+  (("C-c n l" . org-roam-buffer-toggle)
+   ("C-c n f" . org-roam-node-find)
+   ("C-c n i" . org-roam-node-insert)
+   :map org-mode-map
+   ("C-M-i" . completion-at-point))
+  :config
+  (org-roam-setup)
+  (setq org-roam-capture-templates
+        '(("d" "default" plain "%?"
+           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                              "#+title: ${title}\n")
+           :unnarrowed t)
+          ("r" "dream" plain "%?"
+           :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
+                              "#+title: ${title}\n#+filetags: :dream:\n\n:PROPERTIES:\n:created: %<%Y-%m-%d %H:%M>\n:END:\n")
+           :unnarrowed t))))
 
 (use-package org-roam-ui
   :ensure t
   :after org-roam
   :config
-  ; sync emacs theme with the graph
   (setq org-roam-ui-sync-theme t)
-  ; keep the graph focused on the current buffer
   (setq org-roam-ui-follow t)
-  ; update the graph on save
   (setq org-roam-ui-update-on-save t)
-  ; open the graph in the browser on startup
   (setq org-roam-ui-open-on-start t))
 
 ;; --------------- password management ---------------
-
-; wrapper package for Unix standard password manager
 (use-package pass
   :ensure t
+  :defer t
+  :commands (pass)
   :after password-store)
 
-; clear clipboard after 15s
+;; Clear clipboard history automatically after 15 seconds
 (setq password-store-time-before-clipboard-restore 15)
 
-; official emacs's pass binding
 (use-package password-store
-  :ensure t)
+  :ensure t
+  :defer t)
 
-; emacs's built-in system for credential management
 (use-package auth-source-pass
   :config
   (auth-source-pass-enable))
@@ -397,248 +497,71 @@
   :config
   (setenv "EMACS" "t")
   (pinentry-start))
-
 ;; --------------- end password management ---------------
 
-;; --------------- git integration ---------------
-
-(use-package magit
+;; --------------- multimedia (emms) ---------------
+(use-package emms
   :ensure t
   :defer t
   :bind
-  (("C-x g"   . magit-status)
-   ("C-x M-g" . magit-dispatch))
+  (("C-c e p" . emms-playlist-mode-go)
+   ("C-c e l" . emms-play-file))  
   :config
-  ; uses auth-source-pass for authentication
-  (setq magit-process-find-password-functions
-        '(magit-process-password-auth-source)))
+  (require 'emms-setup)
+  (emms-all)
+  (emms-default-players)
 
-;; --------------- end git integration ---------------
+  ;; Use MPV as standard backend
+  (setq emms-player-list '(emms-player-mpv))
 
-;; --------------- latex ---------------
+  ;; Declare standard source path
+  (setq emms-source-file-default-directory "~/clips/")
 
-; the best emacs latex environment
-; (use-package tex
-;  :ensure auctex
-;  :config
-;  (setq-default TeX-master nil)
-;  (setq TeX-parse-self t)
-;  (setq TeX-auto-save t))
-
-; auto latex rendering (like obsidian)
-(use-package org-fragtog
-  :ensure t
-  :hook (org-mode . org-fragtog-mode))
-
-;; --------------- end latex ---------------
-
-;; --------------- sql developement ---------------
-(use-package sql
-  :config
-  ; default dbms
-  (setq sql-product 'mysql)
-
-  ; connection profiles
-  (setq sql-connection-alist
-    '((mysql-melt
-       (sql-product  'mysql)
-       (sql-server   "127.0.0.1")
-       (sql-port     3306)
-       (sql-user     "melt")
-       (sql-password (auth-source-pass-get 'secret "mysql/melt"))
-       (sql-database ""))
-      (mysql-root
-       (sql-product  'mysql)
-       (sql-server   "127.0.0.1")
-       (sql-port     3306)
-       (sql-user     "root")
-       (sql-password (auth-source-pass-get 'secret "mysql/root"))
-       (sql-database ""))))
-
-  ; enable syntax highlighting in sql buffers
-  (add-hook 'sql-mode-hook
-    (lambda ()
-      (sql-set-product 'mysql)
-      ; DISABILITA il formatter nativo di sql-mode (che allinea a destra)
-      ; e usa l'indentazione relativa (copia l'indentazione della riga sopra)
-      (setq-local indent-line-function 'indent-relative)
-      (electric-indent-local-mode -1)))
-
-  ; prevent visual-line-mode from breaking table formatting
-  (add-hook 'sql-interactive-mode-hook
-    (lambda ()
-      (toggle-truncate-lines t)))
-
-  ; force table printing in ascii, disable buffering
-  (setq sql-mysql-options '("--table" "--unbuffered")))
-
-; auto uppercasing keywords
-(use-package sqlup-mode
-  :ensure t
-  :hook
-  ((sql-mode . sqlup-mode)
-    (sql-interactive-mode . sqlup-mode))
-  :config
-  ; upcasing blacklist
-  (add-to-list 'sqlup-blacklist "name"))
-
-;; --------------- end sql development ---------------
-
-(use-package ada-mode
-  :ensure t)
+  ;; Assign active media keys
+  (global-set-key (kbd "C-c e p") 'emms-playlist-mode-go)
+  (global-set-key (kbd "C-c e l") 'emms-play-file))
+;; --------------- end multimedia ------------------
 
 ;; ====================| END PACKAGES |====================
 
-;; ====================| THEMING |====================
-
-; fix theme warnings for Emacs 29+
-    (setq custom-safe-themes t)
-    (setq warning-minimum-level :error)
-
-; load spacemacs
-(use-package spacemacs-theme
-  :ensure t
-  :defer t
-  :init
-  (let ((inhibit-message t)
-        (warning-minimum-level :emergency))
-    (load-theme 'spacemacs-dark t)))
-
-;; ; doom-themes
-;; (use-package doom-themes
-;;   :ensure t
-;;   :config
-;;   (load-theme 'doom-gruvbox t))
-
-;; ; ef themes
-;; (use-package ef-themes
-;;   :ensure t)
-
-; cool beacon animation when switching through buffers
-(use-package beacon
-  :ensure t
-  :config
-  (beacon-mode 1))
-
-; nerd-icons
-(use-package nerd-icons
-  :ensure t)
-
-; cool modeline
-(use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode 1))
-
-; nyan cat animated buffer position indicator
-(use-package nyan-mode
-  :ensure t
-  :config
-  (nyan-mode))
-
-;; ====================| END THEMING |====================
-
-;; ====================| ORG MODE |====================
-
-; org mode configuration
-(use-package org
-  :config
-
-  ; agenda files pointers
-  (setq org-agenda-files
-    (list (expand-file-name "agenda.org" org-dir-path)))
-	
-  ; prevent emacs from inserting a newline '\n' when using 'M-RET' to generate
-  ; a new list item.
-  (setq org-blank-before-new-entry
-    '((heading . nil) (plain-list-item . nil)))
-  
-  ; agenda keybind
-  (global-set-key (kbd "C-c a") 'org-agenda)
-  
-  ; hides markup characters
-  (setq org-hide-emphasis-markers t)
-
-  ; latex rendering scaling  
-  (setq org-format-latex-options
-    (plist-put org-format-latex-options :scale 1.1))
-
-  ; fixed dpi
-  ; (setq org-format-latex-options
-  ;  (plist-put org-format-latex-options :dpi 120))
-
-  ; latex aligning
-  (setq org-format-latex-options
-    (plist-put org-format-latex-options :justify 'center))
-
-  ; compile latex code into SVG files
-  (setq org-preview-latex-default-process 'dvisvgm)
-
-  ; auto preview latex in whole buffer
-  ;; (add-hook 'org-mode-hook
-  ;;   (lambda ()
-  ;;     (org-latex-preview '(16))))
-
-  ; support for TikZ and advanced TikZ graphs in latex preview
-  (setq org-format-latex-header
-    (concat org-format-latex-header
-      "\n\\usepackage{clrscode3e}"      
-      "\n\\usepackage{tikz}"
-      "\n\\usepackage{pgfplots}"
-      "\n\\usepackage{forest}"
-      "\n\\usetikzlibrary{positioning, calc, arrows.meta,"
-      "shapes.multipart, automata, matrix, intersections}"          
-      "\n\\usepgfplotslibrary{fillbetween, statistics}"
-      "\n\\pgfplotsset{compat=newest}"))
-  
-  ; support for TikZ and advanced TikZ graphs in latex export
-  (setq org-latex-packages-alist
-    '(("" "clrscode3e" t)
-       ("" "tikz" t)
-       ("" "pgfplots" t)
-       ("" "forest" t))))
-
-;; ====================| END ORG MODE |====================
-
 ;; ====================| MY FUNCTIONS |====================
 
-; my/tangle dotfiles
-;
-; this function autotangles the org config file
 (defun my/tangle-dotfiles ()
+  "Compile Org dotfiles automatically on save."
   (when (equal (buffer-file-name)
-	       (expand-file-name "~/dotfiles/emacs/dotemacs.org"))
+               (expand-file-name "~/dotfiles/emacs/dotemacs.org"))
     (org-babel-tangle)
     (message "[CIRO]: Org Configuration file tangled!")))
 
 (add-hook 'after-save-hook #'my/tangle-dotfiles)
 
 (defun my/org-center-latex ()
+  "Position and center inline LaTeX preview overlays in current buffer."
   (dolist (ov (overlays-in (point-min) (point-max)))
     (when (and (eq (overlay-get ov 'org-overlay-type) 'org-latex-overlay)
-      (my/org-latex-block-p ov))
+               (my/org-latex-block-p ov))
       (overlay-put ov
-        'before-string
-        (propertize " " 'display (my/build-space ov))))))
+                   'before-string
+                   (propertize " " 'display (my/build-space ov))))))
 
 (defun my/build-space (overlay)
+  "Construct empty margin space width mapping coordinates."
   `(space :align-to (- center ,(/ (my/get-image-width-px overlay)
                                    2
                                    (frame-char-width)))))
 
 (defun my/get-image-width-px (overlay)
+  "Retrieve pixel width of the target overlay."
   (car (image-size (overlay-get overlay 'display) t)))
 
 (defun my/org-latex-block-p (overlay)
+  "Verify if target overlay represents a LaTeX equation block."
   (let ((text (buffer-substring-no-properties
                 (overlay-start overlay)
                 (overlay-end overlay))))
     (or (string-match-p "\\`\\s-*\\$\\$" text)
         (string-match-p "\\`\\s-*\\\\\\[" text)
         (string-match-p "\\`\\s-*\\\\begin{" text))))
-
-;; (add-hook 'org-mode-hook
-;;   (lambda ()
-;;     (add-hook 'after-save-hook #'my/org-center-latex nil t)))
 
 (advice-add 'org-latex-preview :after
   (lambda (&rest _) (my/org-center-latex)))
@@ -647,9 +570,9 @@
   "Toggle LaTeX preview scaling between 1.1 and 1.8."
   (interactive)
   (let* ((current (plist-get org-format-latex-options :scale))
-          (next (if (< current 1.5) 1.8 1.1)))
+         (next (if (< current 1.5) 1.8 1.1)))
     (setq org-format-latex-options
-      (plist-put org-format-latex-options :scale next))
+          (plist-put org-format-latex-options :scale next))
     (execute-kbd-macro (kbd "C-u C-u C-c C-x C-l"))
     (message "[CIRO]: LaTeX scaling set to %.1f" next)))
 

@@ -1,29 +1,25 @@
 #!/bin/bash
 
-ERROR_LOG=$(mktemp)
-
-sudo dnf upgrade --refresh 2>"$ERROR_LOG"
+# Execute dnf upgrade directly.
+# This preserves native terminal colors and prevents the "staircase effect" (staggered output)
+# that occurs when redirecting standard error through a pipe under sudo.
+sudo dnf reinstall curl
+#sudo dnf upgrade --refresh
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then
     echo "" > /tmp/available_system_updates
 
-    if [ -f /var/run/reboot-required ] || \
-        rpm -q kernel --queryformat '%{VERSION}-%{RELEASE}\n' | \
-        tail -n 1 | grep -qv "$(uname -r)"; then
-
+    # Check if a reboot is required using Fedora's native needs-restarting tool
+    sudo dnf needs-restarting -r >/dev/null 2>&1
+    if [ $? -eq 1 ]; then
         notify-send -t 30000 -u critical -r 9995 -i software-update-urgent \
         "Reboot Required" "A new kernel or core library was installed"
     fi
 else
-    ERR_MSG=$(cat "$ERROR_LOG")
-    if [ -z "$ERR_MSG" ]; then
-        ERR_MSG="Something went wrong while updating system."
-        ERR_MSG="$ERR_MSG Check internet connection or DNF repositories"
-    fi
+    ERR_MSG="Something went wrong while updating system. Please check the terminal output, your internet connection, or DNF repositories."
+    
     notify-send -t 30000 -u critical -r 9995 -i software-update-urgent \
     "System Update Error" "$ERR_MSG"
     echo "󰀦 SYSUPD" >  /tmp/available_system_updates
 fi
-
-rm -f "$ERROR_LOG"

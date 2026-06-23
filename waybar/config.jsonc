@@ -188,7 +188,6 @@
         "format-charging": "󱐋 BAT {capacity}% (+{power:.1f}W)",
         "format-plugged": " {capacity}%",
         "format-full": "󰁹 FULL",
-        "format-icons": ["", "", "", "", ""],
         "interval": 5,
         "tooltip": false
     },

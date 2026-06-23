@@ -4,110 +4,79 @@
 
 * Startup
 
-  The following lines provide efficiency driven functions and environmental
-  variables setting for Emacs's startup phase:
+  This section contains performance-oriented settings, path registrations, and
+  core variables initialized during the Emacs startup phase.
 
   #+begin_src emacs-lisp
     ;;; dotemacs.el
     ;;; ====================| MELT's EMACS CONFIGURATION |===============
   #+end_src
-  
+
   #+begin_src emacs-lisp
     ;; ====================| STARTUP |====================
   #+end_src
-
-  A little greeting message to confirm the configuration file
-  is starting to be loaded.
 
   #+begin_src emacs-lisp
     (message "[CIRO]: Yo melt!")
   #+end_src
 
-  The constant gc-cons-threshold defines the amount of bytes  allowed by
-  the garbage collector to be left "hanging". This lines slightly expand
-  said threshold during Emacs starup for a reason: starting up the editor,
-  loading archives, packages and dependencies res lots of memory,
-  thus aggressively garbage collecting during such a phase introduces an
-  important i/o overhead.
+  Core paths, encoding schemes, and primary system behaviors.
 
   #+begin_src emacs-lisp
-    ; temporally extend garbage collector's threshold
-    (setq gc-cons-threshold 100000000)
-    (message "[CIRO]: Increasing garbage collecting threshold...")
-
-    ; Save original file-name-handler-alist and disable it during init
-    (defvar my/file-name-handler-alist-original file-name-handler-alist)
-    (setq file-name-handler-alist nil)
-
-    (message "[CIRO]: Tuning startup performance...")
-
-    ; Restore everything after init
-    (add-hook 'after-init-hook
-      (lambda ()
-        (setq gc-cons-threshold 800000)
-        (setq file-name-handler-alist my/file-name-handler-alist-original)
-        (message "[CIRO]: Startup completed in %s" (emacs-init-time))))
-  #+end_src
-
-  Useful variables:
-  
-  #+begin_src emacs-lisp
-    ; set path variables
+    ;; Set directory paths
     (defvar os-packages-path "~/dotfiles/emacs/packages/")
     (defvar org-dir-path "~/zk/")
 
-    ; automatically follow symlinks
+    ;; Automatically follow file symlinks
     (setq vc-follow-symlinks t)
 
-    ; set character encoding system
+    ;; Set default character encoding system
     (prefer-coding-system 'utf-8-unix)
 
-    ; display pinentry prompts in minibuffer
+    ;; Direct pinentry prompts to the minibuffer
     (setq epa-pinentry-mode 'loopback)
 
-    ; do not shoew startup screen
+    ;; Suppress startup screen display
     (setq inhibit-startup-screen t)
 
-    ; always display inline images
+    ;; Always display inline images by default
     (setq org-startup-with-inline-images t)
   #+end_src
 
-  In order to download, intall and load packages using use-package, its path
-  must be loaded first:
+  The path for the declarative package manager =use-package= must be
+  registered prior to loading external packages.
 
   #+begin_src emacs-lisp
-    ; load use-package
+    ;; Load use-package path
     (add-to-list 'load-path (concat os-packages-path "use-package/"))
   #+end_src
 
-  automodes for specific languages:
+  Automatic major mode associations for specific programming language files.
 
   #+begin_src emacs-lisp
-    ; --------------- automodes for specific languages ---------------
-    ; ----- Lisp Dialects -----
-    ; racket
+    ;; --------------- automodes for specific languages ---------------
+    ;; Lisp Dialects
     (add-to-list 'auto-mode-alist '("\\.rkt\\'"  . racket-mode))
-    ; scheme
     (add-to-list 'auto-mode-alist '("\\.ss\\'"   . scheme-mode))
-    ; common lisp
     (add-to-list 'auto-mode-alist '("\\.cl\\'"   . common-lisp-mode))
 
-    ; ----- Prolog ----- 
-    (add-to-list 'auto-mode-alist
-    	'("\\.pl\\'" . prolog-mode))
-    ; NOTE: temporally disabling per-mode because i never use it
+    ;; Prolog
+    (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
+
+    ;; Temporarily disable default perl-mode association for .pl files
     (setq auto-mode-alist
       (rassq-delete-all 'perl-mode auto-mode-alist))
-    ; --------------- end automodes for specific languages ---------------
+    ;; --------------- end automodes for specific languages ---------------
   #+end_src
 
   #+begin_src emacs-lisp
     ;; ====================| END STARTUP |====================
   #+end_src
-  
+
 * General
 
-  General settings:
+  This section configures global editor behavior, spacing parameters, status
+  modelines, and standard formatting hooks.
 
   #+begin_src emacs-lisp
     ;; ====================| GENERAL |====================
@@ -115,35 +84,26 @@
 
   #+begin_src emacs-lisp
     ;; --------------- modeline ----------
-    ; display line number
+    ;; Display line numbers in status bar
     (setq line-number-mode t)
 
-    ; display column number
+    ;; Display column numbers in status bar
     (column-number-mode t)
 
-    ; display time
+    ;; Enable system time display
     (display-time)
 
-    ; disable bell
-    (setq ring-bell-function (quote ignore))
+    ;; Disable audible bell notifications
+    (setq ring-bell-function 'ignore)
 
-    ; disable scroll bar
-    (scroll-bar-mode -1)
-
-    ; disable menu bar
-    (menu-bar-mode -1)
-
-    ; disable tool bar
-    (tool-bar-mode 0)
     ;; --------------- end modeline ----------
 
     ;; --------------- spacing/indentation ---------------
-    ; prevent Emacs from automatically adding a newline at the end of the file
+    ;; Control newline insertions at end of files
     (setq require-final-newline nil)
     (setq mode-require-final-newline nil)
 
-    ; remove all trailing whitespace and newlines 
-    ; from the end of the file before saving
+    ;; Remove trailing whitespaces and empty lines on save
     (add-hook 'before-save-hook
               (lambda ()
                 (save-excursion
@@ -151,630 +111,112 @@
                   (skip-chars-backward " \t\n\r")
                   (delete-region (point) (point-max)))))
 
-    ; visual newline for very long lines
+    ;; Enable visual line wrap globally
     (global-visual-line-mode t)
 
-    ; auto newline after 80 columns
+    ;; Set default column limit for text filling
     (setq-default fill-column 80)
 
-    ; use auto fill in text-mode and prog-mode
+    ;; Enable automatic wrapping in text and programming buffers
     (add-hook 'text-mode-hook 'turn-on-auto-fill)
     (add-hook 'prog-mode-hook 'turn-on-auto-fill)
 
-    ; tab is set to two spaces
+    ;; Use two spaces instead of hard tabs
     (setq-default tab-width 2)
-
-    ; disable real tabs for spaces
     (setq-default indent-tabs-mode nil)
 
-    ; indentation is two spaces for the following languages:
+    ;; Set relative offsets for C and Lisp dialects
     (setq-default c-basic-offset 2)
     (setq-default lisp-indent-offset 2)
 
-    ; autoindent after '\n', '\b' and '}'
+    ;; Specify characters triggering automatic indentation
     (setq-default electric-indent-chars '(?\n ?\^? ?\}))
 
-    ; set zoom at +1
+    ;; Increase default text size on file opening
     (add-hook 'find-file-hook
       (lambda ()
         (text-scale-set 1)))
 
-    ;; ; enables line number visualization in source files
-    ;; (global-display-line-numbers-mode t)
-    ;; (dolist (mode '(org-mode-hook
-    ;; 		term-mode-hook
-    ;; 		shell-mode-hook
-    ;; 		eshell-mode-hook
-    ;; 		eshell-mode-hook))
-    ;;   (add-hook mode (lambda () (display-line-numbers-mode 0))))
-    ; --------------- end spacing/indentation ---------------
+    ;; Prevent native graphical dialogs and file selection windows
+        (setq use-dialog-box nil)
+        (setq use-file-dialog nil)
+
+        ;; Disable context menus triggered by mouse clicks
+        (setq context-menu-mode nil)
+
+        ;; Disable popup menus triggered by clicking major or minor modes in the modeline
+        (setq mode-line-major-mode-keymap nil)
+        (setq mode-line-minor-mode-keymap nil)
+
+    ;; --------------- end spacing/indentation ---------------
   #+end_src
 
-   
   #+begin_src emacs-lisp
     ;; ====================| END GENERAL |====================
   #+end_src
-  
+
 * Packages
+
+  This section manages repository registration, initialization, and configuration
+  of third-party libraries grouped by category.
 
   #+begin_src emacs-lisp
     ;; ====================| PACKAGES |====================
   #+end_src
 
-  These lines configure the archives or repositories from where packages
-  and dependencies will be downloaded. First we set the loading priority
-  for each one, then the URL(s):
+** Initialization
+
+  Configurations for package managers, archive priorities, and load paths.
 
   #+begin_src emacs-lisp
-    ; built-in Emacs's package manager configuration and remote archives setting
+    ;; Remote ELPA and MELPA archives configuration
     (use-package package
       :config
       (setq package-archive-priorities
-    	'(("melpa-stable" . 2)
-     	  ("MELPA" . 1)
-     	  ("gnu" . 0)))
-       (setq package-archives
-     	'(("melpa-stable" . "https://stable.melpa.org/packages/")
-     	  ("MELPA" . "https://melpa.org/packages/")
-     	  ("gnu" . "https://elpa.gnu.org/packages/"))))
-  #+end_src
+            '(("melpa-stable" . 2)
+              ("MELPA" . 1)
+              ("gnu" . 0)))
+      (setq package-archives
+            '(("melpa-stable" . "https://stable.melpa.org/packages/")
+              ("MELPA" . "https://melpa.org/packages/")
+              ("gnu" . "https://elpa.gnu.org/packages/"))))
 
-  Using default Emacs package manager 'package' to initialize
-  'use-package'
-
-  #+begin_src emacs-lisp
+    ;; Setup statistics tracking and load use-package engine
     (setq use-package-compute-statistics t)
-
-    ; using 'package' to initialize 'use-package'
     (package-initialize)
     (require 'use-package)
   #+end_src
 
-** dashboard
-
-  The following lines configure the startup dashboard. It features a clean 
-  layout with recent files and agenda, using native padding for spacing 
-  to avoid icon errors. Press 'q' to close:
+*** Gcmh
 
   #+begin_src emacs-lisp
-    (use-package dashboard
+    ;; Gestione automatica e ottimizzata del Garbage Collector
+    (use-package gcmh
       :ensure t
-      :init (recentf-mode 1)
+      :init
+      ;; Imposta la soglia a 16MB durante l'uso attivo (valore equilibrato)
+      (setq gcmh-high-cons-threshold (* 16 1024 1024)
+            ;; Avvia la pulizia della memoria dopo 15 secondi di inattività
+            gcmh-idle-delay 15)
       :config
-      (dashboard-setup-startup-hook)
-
-      ; path to your custom banner image
-      (setq dashboard-startup-banner "~/pics/other/emacs-e-logo.png")
-      (setq dashboard-banner-logo-title "[CIRO]: Welcome back melt!")
-
-      ; standard items: recents and agenda
-      (setq dashboard-items '((recents  . 10)
-                             (agenda   . 5)))
-
-      ; appearance settings
-      ; IMPORTANT: we disable heading icons to prevent the 'nil icon' error
-      (setq dashboard-set-heading-icons nil)
-      (setq dashboard-set-file-icons t)
-      (setq dashboard-icon-type 'nerd-icons)
-      
-      ; spacing and layout
-      (setq dashboard-center-content t)
-      (setq dashboard-section-gap 2) ; adds vertical space between sections
-      (setq dashboard-set-footer nil) ; cleaner look
-
-      ; dashboard keybindings and behavior
-      (add-hook 'dashboard-mode-hook
-                (lambda ()
-                  (local-set-key (kbd "q") 'quit-window)
-                  (setq buffer-read-only t)))
-
-      (message "[CIRO]: Dashboard is ready."))
-  #+end_src
-
-** Rust Development
-
-   Configuration for Rust syntax highlighting and Cargo integration:
-
-   #+begin_src emacs-lisp
-     ;; --------------- rust development ---------------
-     (use-package rust-mode
-       :ensure t
-       :mode "\\.rs\\'")
-
-     ;; Cargo.el: Interfaccia completa per Cargo
-     ;; Ti permette di compilare e testare a comando (C-c C-k ...)
-     (use-package cargo
-       :ensure t
-       :hook (rust-mode . cargo-minor-mode)
-       :config
-       (setq cargo-minor-mode-key-prefix (kbd "C-c C-k"))
-       (setq cargo-process--command-flags '("--color" "always")))
-
-     ;; Vterm: Terminale per il testing di TUI
-     (use-package vterm
-       :ensure t
-       :config
-       (setq vterm-max-scrollback 10000))
-
-     ;; Integrazione e scorciatoie
-     (with-eval-after-load 'rust-mode
-       ;; Scorciatoie manuali per Cargo
-       (define-key rust-mode-map (kbd "C-c C-k b") 'cargo-process-build)
-       (define-key rust-mode-map (kbd "C-c C-k r") 'cargo-process-run)
-       (define-key rust-mode-map (kbd "C-c C-k t") 'cargo-process-test)
-       (define-key rust-mode-map (kbd "C-c C-k c") 'cargo-process-check)
-       ;; Scorciatoia per aprire vterm nel progetto
-       (define-key rust-mode-map (kbd "C-c C-v") 'vterm))
-
-     ;; --------------- end rust development ---------------
-   #+end_src
-
-** Lisp Developement
-
-  The following lines install a few packages in order to make Lisp developing
-  smoother.
-
-    #+begin_src emacs-lisp
-    ;; --------------- lisp developement  ---------------
-   #+end_src
-
-*** slime
-
-  SLIME (Superior Lisp Interaction Mode for Emacs) is a powerful Emacs extension
-  that turns the editor into a full-featured Common Lisp developement
-  environment. It achieves that by connecting Emacs to a running Lisp process
-  through a component called Swank, enabling interactive developement where the
-  programmer can evaluate expressions, inspect objects, compile and run a
-  program, without ever leaving the editor, through and integrated REPL:
-
-  #+begin_src emacs-lisp
-    ; SLIME setup
-    (use-package slime
-      :ensure t
-      :commands (slime slime-mode)
-      :config
-      (setq inferior-lisp-program "sbcl")
-      (slime-setup '(slime-fancy)))
-
-    ; provides file-contextual autocompletion
-    (use-package slime-company
-      :ensure t
-      :after (slime company)
-      :config
-      (setq slime-company-completion 'fuzzy))
-  #+end_src
-
-*** lisp-extra-font-lock
-
-  Better syntax highlighting for Common Lisp:
-
-  #+begin_src emacs-lisp
-    ; better syntax highlighting for Common Lisp
-    (use-package lisp-extra-font-lock
-      :ensure t
-      :hook (lisp-mode . lisp-extra-font-lock-mode)
-      :config
-      (lisp-extra-font-lock-global-mode 1))
-  #+end_src
-
-*** racket-mode
-
-  Better syntax highlighting for Scheme:
-
-  #+begin_src emacs-lisp
-    ; better syntax highlighting for Racket
-    (use-package racket-mode
-      :ensure t
-      :mode "\\.rkt\\'")
-  #+end_src
-
-*** highlight-defined
-
-  Better syntax highlighting for Emacs Lisp:
-
-  #+begin_src emacs-lisp
-    ; better syntax highlighting for Emacs Lisp
-    (use-package highlight-defined
-      :ensure t
-      :hook (emacs-lisp-mode . highlight-defined-mode))
-  #+end_src
-
-  
-    #+begin_src emacs-lisp
-    ;; --------------- end lisp developement  ---------------
-   #+end_src
-
-** PDF Viewing
-
-  The following lines provide configuration for a popular PDF Viewer featuring
-  advanced feautures like theming, scaling, highlighting and annotations:
-
-  #+begin_src emacs-lisp
-    ;; --------------- pdf viewing ---------------
-  #+end_src
-
-*** pdf-tools
-
-  #+begin_src emacs-lisp
-    ; advanced PDF viewer
-    (use-package pdf-tools
-     :ensure t
-     :magic ("%PDF" . pdf-view-mode)
-     :config
-     ; compile and install automatically
-     (pdf-tools-install)
-
-     ; use scaling
-     (setq pdf-view-use-scaling t)
-     ; fit window width
-     (setq-default pdf-view-display-size 'fit-width)
-     ; dark mode colors
-     (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
-
-     ; automaticclly enable nightmode and annotations
-     (add-hook 'pdf-view-mode-hook
-               (lambda ()
-                 (pdf-annot-minor-mode)
-                 (pdf-view-midnight-minor-mode)
-                 (pdf-links-minor-mode)
-                 (pdf-outline-minor-mode)))
-
-     ; hotkeys
-     (define-key
-      pdf-view-mode-map (kbd "H") 'pdf-annot-add-highlight-markup-annotation)
-     (define-key
-      pdf-view-mode-map (kbd "U") 'pdf-annot-add-underline-markup-annotation)
-     (define-key
-      pdf-view-mode-map (kbd "D") 'pdf-annot-add-strikeout-markup-annotation)
-     (define-key
-      pdf-view-mode-map (kbd "C-=") 'pdf-view-enlarge)
-     (define-key
-      pdf-view-mode-map (kbd "C--") 'pdf-view-shrink)
-     (define-key
-      pdf-view-mode-map (kbd "0") 'pdf-view-scale-reset)
-     (define-key
-      pdf-view-mode-map (kbd "M") 'pdf-view-midnight-minor-mode))
-  #+end_src
-
-*** pdf-restore
-
-  This package keeps track of the last page visited in a PDF file by storing its
-  position in a file named .pdf-view-restore:
-
-  #+begin_src emacs-lisp
-    ; keeps track of the last page visited in a PDF
-    (use-package pdf-view-restore
-      :ensure t
-      :after pdf-tools
-      :hook (pdf-view-mode . pdf-view-restore-mode)
-      :config
-      (add-hook 'pdf-view-mode-hook 'pdf-view-restore-mode)
-      (setq pdf-view-restore-filename
-    	(expand-file-name ".pdf-view-restore" user-emacs-directory)))
+      (gcmh-mode 1))
   #+end_src
   
-  #+begin_src emacs-lisp
-    ;; --------------- end pdf viewing ---------------
-  #+end_src
-  
-** Multimedia (EMMS)
+** UI and Theming
 
-   EMMS is the Emacs Multimedia System. It lets you control MPV from Emacs
-   and integrate your playlist with your workflow.
+  Packages related to interface styling, themes, icons, and status indicators.
 
-   #+begin_src emacs-lisp
-     ;; --------------- multimedia (emms) ---------------
-     (use-package emms
-       :ensure t
-       :config
-       (require 'emms-setup)
-       (emms-all)
-       (emms-default-players)
-       
-       ; Set MPV as the primary player (best for Wayland/Sway)
-       (setq emms-player-list '(emms-player-mpv))
-       
-       ; Directory where you keep your videos/music
-       (setq emms-source-file-default-directory "~/clips/")
+*** Spacemacs Theme
 
-       ; Keybindings for the playlist
-       (global-set-key (kbd "C-c e p") 'emms-playlist-mode-go)
-       (global-set-key (kbd "C-c e l") 'emms-play-file))
-     ;; --------------- end multimedia ------------------
-   #+end_src
-
-** org-roam
-
-  Org-Roam is a note-taking package built on top of Org Mode that implements the
-  Zettelkasten methodology inside Emacs. It treats each note as a node in a
-  network of interconnected files, tracking backlinks and relationships between
-  them, and optionally visualizing the whole knowledge graph. It is heavily
-  inspired by the Roam Research app and is widely used for building personal
-  knowledge bases. Further documentation can be found on the [[https://www.orgroam.com/manual.html][official website]]:
+  A high-contrast dark color scheme optimized for readability and extended
+  development.
 
   #+begin_src emacs-lisp
-    ; org-roam setup
-    (use-package org-roam
-        :ensure t
-        :defer t
-        :custom
-        (org-roam-directory org-dir-path)
-        (org-roam-completion-everywhere t)
-        :bind
-        (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n i" . org-roam-node-insert)
-        :map org-mode-map
-         ("C-M-i" . completion-at-point))
-        :config
-        (org-roam-setup)
-        (setq org-roam-capture-templates
-          '(("d" "default" plain "%?"
-             :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-                                "#+title: ${title}\n")
-             :unnarrowed t)
-            ("r" "dream" plain "%?"
-             :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
-                                "#+title: ${title}\n#+filetags: :dream:\n\n:PROPERTIES:\n:created: %<%Y-%m-%d %H:%M>\n:END:\n")
-             :unnarrowed t))))
-  #+end_src
+    ;; Fix safe theme validation issues for Emacs 29+
+    (setq custom-safe-themes t)
+    (setq warning-minimum-level :error)
 
-*** org-roam-ui
-
-  Provides an high quality interactive graph visualization mode in the browser
-  for org-roam's graph:
-
-  #+begin_src emacs-lisp
-    (use-package org-roam-ui
-      :ensure t
-      :after org-roam
-      :config
-      ; sync emacs theme with the graph
-      (setq org-roam-ui-sync-theme t)
-      ; keep the graph focused on the current buffer
-      (setq org-roam-ui-follow t)
-      ; update the graph on save
-      (setq org-roam-ui-update-on-save t)
-      ; open the graph in the browser on startup
-      (setq org-roam-ui-open-on-start t))
-  #+end_src
-
-** Password Management
-
-  The following line provide configuration for a popular Emacs credentials
-  management system:
-
-  #+begin_src emacs-lisp
-    ;; --------------- password management ---------------
-  #+end_src
-
-*** pass
-
-  The standard Unix password manager.
-  Pass manages a directory (usually ~/.password-store/) where each password is
-  stored as a GPG encrypted text file. In this system file names are the actual
-  entries (e.g. ~/.password-store/email/gmail.gpg), while files content is plain
-  , encrypted, text where, usually, the actual password is stored in the first
-  line and further line can store any other information (e.g. username:, url:).
-  The root directory of said system (i.e. ~/password-store/) is generated as a
-  Git repository:
-
-  #+begin_src emacs-lisp
-    ; wrapper package for Unix standard password manager
-    (use-package pass
-      :ensure t
-      :after password-store)
-
-    ; clear clipboard after 15s
-    (setq password-store-time-before-clipboard-restore 15)
-  #+end_src
-
-*** password-store
-
-  The official Emacs's pass binding. This package implements an interface that
-  allows the user to use 100% of pass functionalities while never quitting Emacs
-  , thus increasing productivity. This is achieved by launching directly pass
-  queries and functions through shell-command:
-
-  #+begin_src emacs-lisp
-    ; official emacs's pass binding
-    (use-package password-store
-      :ensure t)
-  #+end_src
-
-*** auth-source-pass
-
-  Emacs's built-in system for credential management. It provides an integration
-  (or middleware) between Emacs and any other credential management system
-  (e.g. Magit uses it for Git credentials, TRAMP uses it for SSH/FTP, mu4e uses
-  it for IMAP/SMTP). While the default package (i.e. auth-source) looks for
-  credentials in files lile ~/.authinfo.gpg, auth-source-pass wraps this limited
-  functionality and resolves credentials queries also using the pass package:
-
-  #+begin_src emacs-lisp
-    ; emacs's built-in system for credential management
-    (use-package auth-source-pass
-      :config
-      (auth-source-pass-enable))
-  #+end_src
-
-*** pinentry
-
-  Allows the system to prompt the user asking for the GPG passphrase in the
-  minibuffer:
-
-  #+begin_src emacs-lisp
-    (use-package pinentry
-      :ensure t
-      :config
-      (setenv "EMACS" "t")
-      (pinentry-start))
-  #+end_src
-
-  #+begin_src emacs-lisp
-    ;; --------------- end password management ---------------
-  #+end_src
-
-** Magit
-
-  Magit is a full-featured Git interface for Emacs, built as a major mode that
-  provides an intuitive and efficient alternative to the standard command-line
-  Git workflow. It exposes all of Git's core functionality — staging,
-  committing, branching, rebasing, stashing and more — through a clean,
-  keyboard-driven interface that lets the user perform complex version control
-  operations without ever leaving the editor. Because it is deeply integrated
-  with Emacs, it naturally benefits from the editor's existing infrastructure,
-  including auth-source for credential management and any custom keybindings or
-  workflows the user has already set up:
-
-  #+begin_src emacs-lisp
-    ;; --------------- git integration ---------------
-  #+end_src
-
-  #+begin_src emacs-lisp
-    (use-package magit
-      :ensure t
-      :defer t
-      :bind
-      (("C-x g"   . magit-status)
-       ("C-x M-g" . magit-dispatch))
-      :config
-      ; uses auth-source-pass for authentication
-      (setq magit-process-find-password-functions
-            '(magit-process-password-auth-source)))
-  #+end_src
-
-  #+begin_src emacs-lisp
-    ;; --------------- end git integration ---------------
-  #+end_src
-
-** LaTeX
-  
-  The following lines install a few packages in order to make writing LaTeX
-  smoother:
-
-  #+begin_src emacs-lisp
-    ;; --------------- latex ---------------
-  #+end_src
-
-*** TeX - AUCTeX
-
-  The best Emacs LaTeX environment:
-
-  #+begin_src emacs-lisp
-    ; the best emacs latex environment
-    ; (use-package tex
-    ;  :ensure auctex
-    ;  :config
-    ;  (setq-default TeX-master nil)
-    ;  (setq TeX-parse-self t)
-    ;  (setq TeX-auto-save t))
-  #+end_src
-
-*** org-fragtog
-  
-  Org-fragtog automatically compiles in an SVG image a block of LaTeX code when
-  editing an org note. Emphasis markers are shown when the cursor enters the
-  block:
-
-  #+begin_src emacs-lisp
-    ; auto latex rendering (like obsidian)
-    (use-package org-fragtog
-      :ensure t
-      :hook (org-mode . org-fragtog-mode))
-  #+end_src
-
-  #+begin_src emacs-lisp
-    ;; --------------- end latex ---------------
-  #+end_src
-  
-** SQL Developement
- 
-  The following lines bla bla bla:
-
-  #+begin_src emacs-lisp
-    ;; --------------- sql developement ---------------
-    (use-package sql
-      :config
-      ; default dbms
-      (setq sql-product 'mysql)
-
-      ; connection profiles
-      (setq sql-connection-alist
-        '((mysql-melt
-           (sql-product  'mysql)
-           (sql-server   "127.0.0.1")
-           (sql-port     3306)
-           (sql-user     "melt")
-           (sql-password (auth-source-pass-get 'secret "mysql/melt"))
-           (sql-database ""))
-          (mysql-root
-           (sql-product  'mysql)
-           (sql-server   "127.0.0.1")
-           (sql-port     3306)
-           (sql-user     "root")
-           (sql-password (auth-source-pass-get 'secret "mysql/root"))
-           (sql-database ""))))
-
-      ; enable syntax highlighting in sql buffers
-      (add-hook 'sql-mode-hook
-        (lambda ()
-          (sql-set-product 'mysql)
-          ; DISABILITA il formatter nativo di sql-mode (che allinea a destra)
-          ; e usa l'indentazione relativa (copia l'indentazione della riga sopra)
-          (setq-local indent-line-function 'indent-relative)
-          (electric-indent-local-mode -1)))
-
-      ; prevent visual-line-mode from breaking table formatting
-      (add-hook 'sql-interactive-mode-hook
-        (lambda ()
-          (toggle-truncate-lines t)))
-
-      ; force table printing in ascii, disable buffering
-      (setq sql-mysql-options '("--table" "--unbuffered")))
-
-    ; auto uppercasing keywords
-    (use-package sqlup-mode
-      :ensure t
-      :hook
-      ((sql-mode . sqlup-mode)
-        (sql-interactive-mode . sqlup-mode))
-      :config
-      ; upcasing blacklist
-      (add-to-list 'sqlup-blacklist "name"))
-  #+end_src
-
-  #+begin_src emacs-lisp
-    ;; --------------- end sql development ---------------
-  #+end_src
-
-** Ada Developement
-
-  bla bla
-
-  #+begin_src emacs-lisp
-    (use-package ada-mode
-      :ensure t)
-  #+end_src
-
-  #+begin_src emacs-lisp
-    ;; ====================| END PACKAGES |====================
-  #+end_src
-  
-** Theming
-
-  Themes configuration and management:
-
-  #+begin_src emacs-lisp
-    ;; ====================| THEMING |====================
-  #+end_src
-
-  #+begin_src emacs-lisp
-    ; fix theme warnings for Emacs 29+
-        (setq custom-safe-themes t)
-        (setq warning-minimum-level :error)
-
-    ; load spacemacs
+    ;; Initialize dark theme
     (use-package spacemacs-theme
       :ensure t
       :defer t
@@ -784,180 +226,633 @@
         (load-theme 'spacemacs-dark t)))
   #+end_src
 
-  #+begin_src emacs-lisp
-    ;; ; doom-themes
-    ;; (use-package doom-themes
-    ;;   :ensure t
-    ;;   :config
-    ;;   (load-theme 'doom-gruvbox t))
-  #+end_src
-  
-  #+begin_src emacs-lisp
-    ;; ; ef themes
-    ;; (use-package ef-themes
-    ;;   :ensure t)
-  #+end_src
+*** Beacon
 
-  Cool beacon when switching through buffers:
+  Provides a visual flash animation at the cursor when shifting focus
+  between windows or buffers.
 
   #+begin_src emacs-lisp
-    ; cool beacon animation when switching through buffers
     (use-package beacon
       :ensure t
       :config
       (beacon-mode 1))
   #+end_src
 
-  Fonts and icons:
+*** Nerd Icons
+
+  A vector icon set integration utilized across multiple modelines and
+  dashboard modules.
 
   #+begin_src emacs-lisp
-    ; nerd-icons
     (use-package nerd-icons
       :ensure t)
   #+end_src
-  
-  Cool modeline:
+
+*** Doom Modeline
+
+  A streamlined, highly informative modeline interface.
 
   #+begin_src emacs-lisp
-    ; cool modeline
     (use-package doom-modeline
       :ensure t
       :init (doom-modeline-mode 1))
   #+end_src
 
-  Nyan mode:
+*** Nyan Mode
+
+  An animated buffer position indicator using the classic Nyan Cat sprite.
 
   #+begin_src emacs-lisp
-
-    ; nyan cat animated buffer position indicator
     (use-package nyan-mode
       :ensure t
       :config
       (nyan-mode))
   #+end_src
 
-  #+begin_src emacs-lisp
-    ;; ====================| END THEMING |====================
-  #+end_src
-  
-** Org-mode
+*** Dashboard
 
-  The following lines provide configurations for Emacs Org-mode:
+  A clean and responsive startup splash screen featuring list views of
+  recent documents and active agenda items.
 
   #+begin_src emacs-lisp
-    ;; ====================| ORG MODE |====================
-  #+end_src
-
-  #+begin_src emacs-lisp
-    ; org mode configuration
-    (use-package org
+    (use-package dashboard
+      :ensure t
+      :init (recentf-mode 1)
       :config
+      (dashboard-setup-startup-hook)
 
-      ; agenda files pointers
+      ;; Specify custom branding banner
+      (setq dashboard-startup-banner "~/pics/other/emacs-e-logo.png")
+      (setq dashboard-banner-logo-title "[CIRO]: Welcome back melt!")
+
+      ;; Display standard sections
+      (setq dashboard-items '((recents  . 10)))
+
+      ;; Fine-tune visual options
+      (setq dashboard-set-heading-icons nil)
+      (setq dashboard-set-file-icons t)
+      (setq dashboard-icon-type 'nerd-icons)
+
+      ;; Center content alignment
+      (setq dashboard-center-content t)
+      (setq dashboard-section-gap 2)
+      (setq dashboard-set-footer t)
+
+      ;; Custom buffer interactions
+      (add-hook 'dashboard-mode-hook
+                (lambda ()
+                  (local-set-key (kbd "q") 'quit-window)
+                  (setq buffer-read-only t)))
+
+      (message "[CIRO]: Dashboard is ready."))
+  #+end_src
+
+** Software Development
+
+  Development systems, compiler interfaces, and languages integrations.
+
+*** Git
+
+  Magit is a comprehensive, keyboard-driven interface for Git, enabling
+  efficient version control management directly from editing buffers.
+
+  #+begin_src emacs-lisp
+    ;; --------------- git integration ---------------
+    (use-package magit
+      :ensure t
+      :defer t
+      :bind
+      (("C-x g"   . magit-status)
+       ("C-x M-g" . magit-dispatch))
+      :config
+      ;; Retrieve credentials using auth-source
+      (setq magit-process-find-password-functions
+            '(magit-process-password-auth-source)))
+    ;; --------------- end git integration ---------------
+  #+end_src
+
+*** Rust
+
+  Configurations for Rust language support, containing syntax coloring,
+  Cargo integration, and fast terminal emulation.
+
+  #+begin_src emacs-lisp
+    ;; --------------- rust development ---------------
+    ;; Major mode for editing Rust source code
+    (use-package rust-mode
+      :ensure t
+      :mode "\\.rs\\'")
+
+    ;; Compiler and dependency manager interaction
+    (use-package cargo
+      :ensure t
+      :hook (rust-mode . cargo-minor-mode)
+      :config
+      (setq cargo-minor-mode-key-prefix (kbd "C-c C-k"))
+      (setq cargo-process--command-flags '("--color" "always")))
+
+    ;; High-performance terminal emulator inside Emacs
+    (use-package vterm
+      :ensure t
+      :config
+      (setq vterm-max-scrollback 10000))
+
+    ;; Manual shortcut bindings for compilation and terminal tasks
+    (with-eval-after-load 'rust-mode
+      (define-key rust-mode-map (kbd "C-c C-k b") 'cargo-process-build)
+      (define-key rust-mode-map (kbd "C-c C-k r") 'cargo-process-run)
+      (define-key rust-mode-map (kbd "C-c C-k t") 'cargo-process-test)
+      (define-key rust-mode-map (kbd "C-c C-k c") 'cargo-process-check)
+      (define-key rust-mode-map (kbd "C-c C-v") 'vterm))
+    ;; --------------- end rust development ---------------
+  #+end_src
+
+*** Lisp Dialects
+
+  Interactive REPL systems, custom formatting, and completions for Common
+  Lisp, Scheme, and Emacs Lisp.
+
+  #+begin_src emacs-lisp
+    ;; --------------- lisp developement  ---------------
+  #+end_src
+
+**** SLIME
+
+  Superior Lisp Interaction Mode for Emacs. Evaluates forms, inspects
+  environments, and handles debugging by interfacing with an external
+  Common Lisp compiler thread.
+
+  #+begin_src emacs-lisp
+    ;; Core environment setup
+    (use-package slime
+      :ensure t
+      :commands (slime slime-mode)
+      :config
+      (setq inferior-lisp-program "sbcl")
+      (slime-setup '(slime-fancy)))
+
+    ;; Complete-at-point suggestions via Company
+    (use-package slime-company
+      :ensure t
+      :after (slime company)
+      :config
+      (setq slime-company-completion 'fuzzy))
+  #+end_src
+
+**** Lisp Extra Font Lock
+
+  Extends visual syntax color rules targeting custom macros and standard
+  special operators.
+
+  #+begin_src emacs-lisp
+    (use-package lisp-extra-font-lock
+      :ensure t
+      :hook (lisp-mode . lisp-extra-font-lock-mode)
+      :config
+      (lisp-extra-font-lock-global-mode 1))
+  #+end_src
+
+**** Racket Mode
+
+  Interactive syntax structures and execution tools for the Racket
+  language ecosystem.
+
+  #+begin_src emacs-lisp
+    (use-package racket-mode
+      :ensure t
+      :mode "\\.rkt\\'")
+  #+end_src
+
+**** Highlight Defined
+
+  Locates and colorizes defined functions, variables, and macros in
+  Emacs Lisp buffers.
+
+  #+begin_src emacs-lisp
+    (use-package highlight-defined
+      :ensure t
+      :hook (emacs-lisp-mode . highlight-defined-mode))
+  #+end_src
+
+  #+begin_src emacs-lisp
+  ;; --------------- end lisp developement  ---------------
+  #+end_src
+
+*** SQL
+
+  SQL interactions including connection profiling, formatting, and keyword
+  capitalization.
+
+  #+begin_src emacs-lisp
+    ;; --------------- sql developement ---------------
+    (use-package sql
+      :config
+      ;; Assign primary engine dialect
+      (setq sql-product 'mysql)
+
+      ;; Declare active profiles mapping credentials to auth-source
+      (setq sql-connection-alist
+        '((mysql-melt
+           (sql-product  'mysql)
+           (sql-server   "127.0.0.1")
+           (sql-port     3306)
+           (sql-user     "melt")
+           (sql-password
+            (auth-source-pass-get 'secret "mysql/melt"))
+           (sql-database ""))
+          (mysql-root
+           (sql-product  'mysql)
+           (sql-server   "127.0.0.1")
+           (sql-port     3306)
+           (sql-user     "root")
+           (sql-password
+            (auth-source-pass-get 'secret "mysql/root"))
+           (sql-database ""))))
+
+      ;; Set buffer options
+      (add-hook 'sql-mode-hook
+        (lambda ()
+          (sql-set-product 'mysql)
+          ;; Use simple indentation copying previous line spacing
+          (setq-local indent-line-function 'indent-relative)
+          (electric-indent-local-mode -1)))
+
+      ;; Truncate layout inside interactive shells to preserve ASCII table width
+      (add-hook 'sql-interactive-mode-hook
+        (lambda ()
+          (toggle-truncate-lines t)))
+
+      ;; Force standard ASCII formatting
+      (setq sql-mysql-options '("--table" "--unbuffered")))
+
+    ;; Automatic capitalization utility for SQL keywords
+    (use-package sqlup-mode
+      :defer t
+      :hook
+      ((sql-mode . sqlup-mode)
+       (sql-interactive-mode . sqlup-mode))
+      :config
+      ;; Specify exclusion blacklist
+      (add-to-list 'sqlup-blacklist "name"))
+    ;; --------------- end sql development ---------------
+  #+end_src
+
+** Text Editing
+
+  Writing, editing tools, and layout systems.
+
+*** LaTeX
+
+  Support suites facilitating document compilation and real-time equation
+  previews.
+
+  #+begin_src emacs-lisp
+    ;; --------------- latex ---------------
+  #+end_src
+
+**** AUCTeX
+
+  A comprehensive environment offering document compilation and macro
+  expansions.
+
+  #+begin_src emacs-lisp
+    ;; (use-package tex
+    ;;  :ensure auctex
+    ;;  :config
+    ;;  (setq-default TeX-master nil)
+    ;;  (setq TeX-parse-self t)
+    ;;  (setq TeX-auto-save t))
+  #+end_src
+
+**** Org Fragtog
+
+  Automatically renders inline LaTeX snippets as graphic images when the
+  cursor exits the markup block.
+
+  #+begin_src emacs-lisp
+    (use-package org-fragtog
+      :ensure t
+      :hook (org-mode . org-fragtog-mode))
+  #+end_src
+
+  #+begin_src emacs-lisp
+  ;; --------------- end latex ---------------
+  #+end_src
+
+*** PDF Viewing
+
+  Navigating, reading, scaling, and processing PDF documents within Emacs.
+
+  #+begin_src emacs-lisp
+  ;; --------------- pdf viewing ---------------
+  #+end_src
+
+**** PDF Tools
+
+  A fast vector-based rendering viewer supporting night-mode conversion
+  and markup annotation.
+
+  #+begin_src emacs-lisp
+    (use-package pdf-tools
+     :ensure t
+     :magic ("%PDF" . pdf-view-mode)
+     :config
+     ;; Trigger backend installation
+     (pdf-tools-install)
+
+     ;; Scale to window width
+     (setq pdf-view-use-scaling t)
+     (setq-default pdf-view-display-size 'fit-width)
+     (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
+
+     ;; Enable night mode and annotator hook automatically
+     (add-hook 'pdf-view-mode-hook
+               (lambda ()
+                 (pdf-annot-minor-mode)
+                 (pdf-view-midnight-minor-mode)
+                 (pdf-links-minor-mode)
+                 (pdf-outline-minor-mode)))
+
+     ;; Bind operational shortcut keys
+     (define-key pdf-view-mode-map (kbd "H")
+       'pdf-annot-add-highlight-markup-annotation)
+     (define-key pdf-view-mode-map (kbd "U")
+       'pdf-annot-add-underline-markup-annotation)
+     (define-key pdf-view-mode-map (kbd "D")
+       'pdf-annot-add-strikeout-markup-annotation)
+     (define-key pdf-view-mode-map (kbd "C-=")
+       'pdf-view-enlarge)
+     (define-key pdf-view-mode-map (kbd "C--")
+       'pdf-view-shrink)
+     (define-key pdf-view-mode-map (kbd "0")
+       'pdf-view-scale-reset)
+     (define-key pdf-view-mode-map (kbd "M")
+       'pdf-view-midnight-minor-mode))
+  #+end_src
+
+**** PDF Restore
+
+  Remembers and jumps to the last visited page coordinates when reopening a
+  PDF document.
+
+  #+begin_src emacs-lisp
+    (use-package pdf-view-restore
+      :ensure t
+      :after pdf-tools
+      :hook (pdf-view-mode . pdf-view-restore-mode)
+      :config
+      (add-hook 'pdf-view-mode-hook 'pdf-view-restore-mode)
+      (setq pdf-view-restore-filename
+            (expand-file-name ".pdf-view-restore"
+                              user-emacs-directory)))
+  #+end_src
+
+  #+begin_src emacs-lisp
+  ;; --------------- end pdf viewing ---------------
+  #+end_src
+
+** Text editing 
+
+  Packages focused on text editing task management, knowledge graphs, and
+  outlining.
+
+*** Org Mode
+
+  A versatile note-taking, planning, and document-exporting system.
+
+  #+begin_src emacs-lisp
+    (use-package org
+      :defer t
+      :bind
+      (("C-c a" . org-agenda))
+      :config
+      ;; Point to active task agendas
       (setq org-agenda-files
-        (list (expand-file-name "agenda.org" org-dir-path)))
-    	
-      ; prevent emacs from inserting a newline '\n' when using 'M-RET' to generate
-      ; a new list item.
+            (list (expand-file-name "agenda.org" org-dir-path)))
+
+      ;; Prevent blank lines on section creation
       (setq org-blank-before-new-entry
-        '((heading . nil) (plain-list-item . nil)))
-      
-      ; agenda keybind
+            '((heading . nil) (plain-list-item . nil)))
+
+      ;; Define global access key
       (global-set-key (kbd "C-c a") 'org-agenda)
-      
-      ; hides markup characters
+
+      ;; Hide markdown character symbols
       (setq org-hide-emphasis-markers t)
 
-      ; latex rendering scaling  
+      ;; Set mathematical equations presentation
       (setq org-format-latex-options
-        (plist-put org-format-latex-options :scale 1.1))
-
-      ; fixed dpi
-      ; (setq org-format-latex-options
-      ;  (plist-put org-format-latex-options :dpi 120))
-
-      ; latex aligning
+            (plist-put org-format-latex-options :scale 1.1))
       (setq org-format-latex-options
-        (plist-put org-format-latex-options :justify 'center))
-
-      ; compile latex code into SVG files
+            (plist-put org-format-latex-options :justify 'center))
       (setq org-preview-latex-default-process 'dvisvgm)
 
-      ; auto preview latex in whole buffer
-      ;; (add-hook 'org-mode-hook
-      ;;   (lambda ()
-      ;;     (org-latex-preview '(16))))
-
-      ; support for TikZ and advanced TikZ graphs in latex preview
+      ;; Set standard packages for document exports
       (setq org-format-latex-header
-        (concat org-format-latex-header
-          "\n\\usepackage{clrscode3e}"      
-          "\n\\usepackage{tikz}"
-          "\n\\usepackage{pgfplots}"
-          "\n\\usepackage{forest}"
-          "\n\\usetikzlibrary{positioning, calc, arrows.meta,"
-          "shapes.multipart, automata, matrix, intersections}"          
-          "\n\\usepgfplotslibrary{fillbetween, statistics}"
-          "\n\\pgfplotsset{compat=newest}"))
-      
-      ; support for TikZ and advanced TikZ graphs in latex export
+            (concat org-format-latex-header
+                    "\n\\usepackage{clrscode3e}"
+                    "\n\\usepackage{tikz}"
+                    "\n\\usepackage{pgfplots}"
+                    "\n\\usepackage{forest}"
+                    "\n\\usetikzlibrary{positioning, calc, arrows.meta,"
+                    "shapes.multipart, automata, matrix, intersections}"
+                    "\n\\usepgfplotslibrary{fillbetween, statistics}"
+                    "\n\\pgfplotsset{compat=newest}"))
+
       (setq org-latex-packages-alist
-        '(("" "clrscode3e" t)
-           ("" "tikz" t)
-           ("" "pgfplots" t)
-           ("" "forest" t))))
+            '(("" "clrscode3e" t)
+              ("" "tikz" t)
+              ("" "pgfplots" t)
+              ("" "forest" t))))
   #+end_src
-  
+
+*** Org Roam
+
+  Provides non-linear personal wiki structures following the Zettelkasten note
+  organization method.
+
   #+begin_src emacs-lisp
-    ;; ====================| END ORG MODE |====================
+    (use-package org-roam
+      :ensure t
+      :defer t
+      :custom
+      (org-roam-directory org-dir-path)
+      (org-roam-completion-everywhere t)
+      :bind
+      (("C-c n l" . org-roam-buffer-toggle)
+       ("C-c n f" . org-roam-node-find)
+       ("C-c n i" . org-roam-node-insert)
+       :map org-mode-map
+       ("C-M-i" . completion-at-point))
+      :config
+      (org-roam-setup)
+      (setq org-roam-capture-templates
+            '(("d" "default" plain "%?"
+               :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                                  "#+title: ${title}\n")
+               :unnarrowed t)
+              ("r" "dream" plain "%?"
+               :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
+                                  "#+title: ${title}\n#+filetags: :dream:\n\n:PROPERTIES:\n:created: %<%Y-%m-%d %H:%M>\n:END:\n")
+               :unnarrowed t))))
   #+end_src
-  
+
+*** Org Roam UI
+
+  Displays dynamic web browser representations of the personal note graph.
+
+  #+begin_src emacs-lisp
+    (use-package org-roam-ui
+      :ensure t
+      :after org-roam
+      :config
+      (setq org-roam-ui-sync-theme t)
+      (setq org-roam-ui-follow t)
+      (setq org-roam-ui-update-on-save t)
+      (setq org-roam-ui-open-on-start t))
+  #+end_src
+
+** System and Password Management
+
+  Bridges securing sensitive files, directory sync setups, and keychain requests.
+
+*** Pass
+
+  A GPG-oriented layout managing secure keys using git synchronization.
+
+  #+begin_src emacs-lisp
+    ;; --------------- password management ---------------
+    (use-package pass
+      :ensure t
+      :defer t
+      :commands (pass)
+      :after password-store)
+
+    ;; Clear clipboard history automatically after 15 seconds
+    (setq password-store-time-before-clipboard-restore 15)
+  #+end_src
+
+*** Password Store
+
+  Executes operating system password commands directly from active buffers.
+
+  #+begin_src emacs-lisp
+    (use-package password-store
+      :ensure t
+      :defer t)
+  #+end_src
+
+*** Auth Source Pass
+
+  Standardizing password lookup across mu4e, magit, and Tramp.
+
+  #+begin_src emacs-lisp
+    (use-package auth-source-pass
+      :config
+      (auth-source-pass-enable))
+  #+end_src
+
+*** Pinentry
+
+  Directing GPG security queries directly inside the minibuffer prompt.
+
+  #+begin_src emacs-lisp
+    (use-package pinentry
+      :ensure t
+      :config
+      (setenv "EMACS" "t")
+      (pinentry-start))
+    ;; --------------- end password management ---------------
+  #+end_src
+
+** Multimedia
+
+  Interactive controls managing audio streams and playback queues.
+
+*** EMMS
+
+  The Emacs Multimedia System, linking background MPV processes to native playlists.
+
+  #+begin_src emacs-lisp
+    ;; --------------- multimedia (emms) ---------------
+    (use-package emms
+      :ensure t
+      :defer t
+      :bind
+      (("C-c e p" . emms-playlist-mode-go)
+       ("C-c e l" . emms-play-file))  
+      :config
+      (require 'emms-setup)
+      (emms-all)
+      (emms-default-players)
+
+      ;; Use MPV as standard backend
+      (setq emms-player-list '(emms-player-mpv))
+
+      ;; Declare standard source path
+      (setq emms-source-file-default-directory "~/clips/")
+
+      ;; Assign active media keys
+      (global-set-key (kbd "C-c e p") 'emms-playlist-mode-go)
+      (global-set-key (kbd "C-c e l") 'emms-play-file))
+    ;; --------------- end multimedia ------------------
+  #+end_src
+
+  #+begin_src emacs-lisp
+    ;; ====================| END PACKAGES |====================
+  #+end_src
+
 * My Functions
 
-** Auto-tangle
+  This section registers custom, user-defined functions and automated hooks.
 
-  The defined function checks for the current buffer to be emacs's org
-  configuration file, if so it automatically tangles each code block in the
-  emacs-lisp emacs's configuration file. Adding an after-save hook allows to
-  check for any saved buffer to be checked automatically:
+#+begin_src emacs-lisp
+;; ====================| MY FUNCTIONS |====================
+#+end_src
+
+** Automatic Tangle
+
+  Monitors file modifications on the core config file and tangles code
+  blocks to =dotemacs.el= automatically upon saving.
 
   #+begin_src emacs-lisp
-    ;; ====================| MY FUNCTIONS |====================
-  #+end_src
-
-  #+begin_src emacs-lisp
-    ; my/tangle dotfiles
-    ;
-    ; this function autotangles the org config file
     (defun my/tangle-dotfiles ()
+      "Compile Org dotfiles automatically on save."
       (when (equal (buffer-file-name)
-    	       (expand-file-name "~/dotfiles/emacs/dotemacs.org"))
+                   (expand-file-name "~/dotfiles/emacs/dotemacs.org"))
         (org-babel-tangle)
         (message "[CIRO]: Org Configuration file tangled!")))
 
     (add-hook 'after-save-hook #'my/tangle-dotfiles)
   #+end_src
 
-** LaTeX preview auto-centering
+** LaTeX Preview Alignment and Rendering
+
+  This collection of procedures parses mathematical symbols within active Org
+  modes and computes spaces to center equation previews inside the buffer.
 
   #+begin_src emacs-lisp
     (defun my/org-center-latex ()
+      "Position and center inline LaTeX preview overlays in current buffer."
       (dolist (ov (overlays-in (point-min) (point-max)))
         (when (and (eq (overlay-get ov 'org-overlay-type) 'org-latex-overlay)
-          (my/org-latex-block-p ov))
+                   (my/org-latex-block-p ov))
           (overlay-put ov
-            'before-string
-            (propertize " " 'display (my/build-space ov))))))
+                       'before-string
+                       (propertize " " 'display (my/build-space ov))))))
 
     (defun my/build-space (overlay)
+      "Construct empty margin space width mapping coordinates."
       `(space :align-to (- center ,(/ (my/get-image-width-px overlay)
                                        2
                                        (frame-char-width)))))
 
     (defun my/get-image-width-px (overlay)
+      "Retrieve pixel width of the target overlay."
       (car (image-size (overlay-get overlay 'display) t)))
 
     (defun my/org-latex-block-p (overlay)
+      "Verify if target overlay represents a LaTeX equation block."
       (let ((text (buffer-substring-no-properties
                     (overlay-start overlay)
                     (overlay-end overlay))))
@@ -965,33 +860,31 @@
             (string-match-p "\\`\\s-*\\\\\\[" text)
             (string-match-p "\\`\\s-*\\\\begin{" text))))
 
-    ;; (add-hook 'org-mode-hook
-    ;;   (lambda ()
-    ;;     (add-hook 'after-save-hook #'my/org-center-latex nil t)))
-
     (advice-add 'org-latex-preview :after
       (lambda (&rest _) (my/org-center-latex)))
   #+end_src
 
-** LaTeX preview scaling switch
+** LaTeX Preview Scale Switcher
+
+  Quickly increases or decreases rendering sizes of mathematical previews
+  between standard scales (1.1 and 1.8).
 
   #+begin_src emacs-lisp
     (defun my/latex-switch-scaling ()
       "Toggle LaTeX preview scaling between 1.1 and 1.8."
       (interactive)
       (let* ((current (plist-get org-format-latex-options :scale))
-              (next (if (< current 1.5) 1.8 1.1)))
+             (next (if (< current 1.5) 1.8 1.1)))
         (setq org-format-latex-options
-          (plist-put org-format-latex-options :scale next))
+              (plist-put org-format-latex-options :scale next))
         (execute-kbd-macro (kbd "C-u C-u C-c C-x C-l"))
         (message "[CIRO]: LaTeX scaling set to %.1f" next)))
   #+end_src
 
-** Manual Org header insertion
+** Automatic Org Header Generator
 
-  The following function provides a quick way to manually insert a standard 
-  Org header. It simply takes the current filename as the title and 
-  sets melt as the author:
+  Automates prepending structured meta title markers and global author headers
+  to the top of empty Org files.
 
   #+begin_src emacs-lisp
     ;; --------------- manual header ---------------
