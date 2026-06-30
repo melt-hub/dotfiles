@@ -3,8 +3,7 @@
 # Execute dnf upgrade directly.
 # This preserves native terminal colors and prevents the "staircase effect" (staggered output)
 # that occurs when redirecting standard error through a pipe under sudo.
-sudo dnf reinstall curl
-#sudo dnf upgrade --refresh
+sudo dnf upgrade --refresh
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then
