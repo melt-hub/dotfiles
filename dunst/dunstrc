@@ -1,9 +1,8 @@
-; ====================| MELT's DUNST CONFIG |====================
+; ====================| MELT's DUNST CONFIG  |====================
 
-; (modus-vivendi, cyan accent) 
+; (spacemacs-dark)
 
 [global]
-; display and positioning
 monitor = 0
 follow = mouse
 width = 300
@@ -13,29 +12,26 @@ offset = (10, 50)
 scale = 0
 notification_limit = 20
 
-; progress bar
 progress_bar = true
 progress_bar_height = 10
 progress_bar_frame_width = 1
-highlight = "#04A9E4"
+highlight = "#4f97d7"
 progress_bar_min_width = 150
 progress_bar_max_width = 300
 progress_bar_corner_radius = 0
 
-; general styling
 transparency = 10
 separator_height = 1
 padding = 12
 horizontal_padding = 14
 text_icon_padding = 10
 frame_width = 1
-frame_color = "#04A9E4"
+frame_color = "#4f97d7"
 gap_size = 5
-separator_color = "#04A9E4"
+separator_color = "#4f97d7"
 font = Monospace 10
 line_height = 0
 
-; text formatting
 markup = full
 format = "[ %s ]\n%b"
 alignment = center
@@ -46,7 +42,6 @@ ignore_newline = no
 stack_duplicates = true
 hide_duplicate_count = false
 
-; icons
 icon_position = left
 min_icon_size = 32
 max_icon_size = 64
@@ -54,7 +49,6 @@ icon_theme = "Papirus-Dark"
 enable_recursive_icon_lookup = true
 icon_path = /usr/share/icons/Papirus-Dark/32x32/status/:/usr/share/icons/Papirus-Dark/32x32/devices/:/usr/share/icons/Papirus-Dark/32x32/apps/
 
-; history and interaction
 sticky_history = yes
 history_length = 20
 browser = /usr/bin/xdg-open
@@ -66,21 +60,18 @@ mouse_left_click = close_current
 mouse_middle_click = do_action, close_current
 mouse_right_click = close_all
 
-[experimental]
-per_monitor_dpi = false
-
 [urgency_low]
-background = "#000000"
-foreground = "#989898"
+background = "#212026"
+foreground = "#5e5079"
 timeout = 3
 
 [urgency_normal]
-background = "#000000"
-foreground = "#ffffff"
+background = "#292b2e"
+foreground = "#b2b2b2"
 timeout = 5
 
 [urgency_critical]
-background = "#000000"
+background = "#212026"
 foreground = "#ffffff"
-frame_color = "#ff8059"
+frame_color = "#f2241f"
 timeout = 0

@@ -211,7 +211,7 @@
 
   Packages related to interface styling, themes, icons, and status indicators.
 
-*** Spacemacs Theme
+*** Emacs themes
 
   A high-contrast dark color scheme optimized for readability and extended
   development.
@@ -671,6 +671,8 @@
       (setq org-format-latex-options
             (plist-put org-format-latex-options :justify 'center))
       (setq org-preview-latex-default-process 'dvisvgm)
+      (setq org-format-latex-options
+          (plist-put org-format-latex-options :background "Transparent"))
 
       ;; Set standard packages for document exports
       (setq org-format-latex-header

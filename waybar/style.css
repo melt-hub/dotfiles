@@ -1,18 +1,15 @@
-/* ====================| MELT's WAYBAR CONFIG |==================== */
+/* ====================| MELT's WAYBAR CONFIG (spacemacs-dark) |==================== */
 
-/* (modus-vivendi, electric cyan accent) */
+@define-color background #292b2e;
+@define-color bg-dark     #212026;
+@define-color foreground  #b2b2b2;
+@define-color selection   #444155;
+@define-color comment     #5e5079;
+@define-color border      #444155;
+@define-color accent      #4f97d7;
+@define-color green       #67b11d;
+@define-color red         #f2241f;
 
-@define-color background #535353;
-@define-color bg-dark     #000000;
-@define-color foreground  #ffffff;
-@define-color selection   #646464;
-@define-color comment     #989898;
-@define-color border      #646464;
-@define-color cyan        #04A9E4;
-@define-color green       #44bc44;
-@define-color red         #ff8059;
-
-/* global reset */
 * {
     border: none;
     border-radius: 0;
@@ -23,47 +20,23 @@
     margin: 0;
 }
 
-/* main bar window */
 window#waybar {
     background-color: @background;
     color: @foreground;
     border-bottom: 1px solid @border;
 }
 
-/* common module padding */
 #workspaces, #mpd, #disk, #cpu, #memory, #temperature, 
 #network, #bluetooth, #pulseaudio, #clock, #tray, #battery,
 #custom-system-updates, #custom-firmware-updates {
     padding: 0 12px;
 }
 
-/* custom module colors */
-#custom-system-updates {
-    color: @cyan;
+#custom-system-updates, #custom-firmware-updates, #window {
+    color: @accent;
     font-weight: bold;
 }
 
-#custom-firmware-updates {
-    color: @cyan;
-    font-weight: bold;
-}
-
-/* module separators */
-#custom-system-updates, #custom-firmware-updates, #mpd, #disk, #cpu, #memory, 
-#temperature, #network, #bluetooth, #pulseaudio, #clock, #tray {
-    border-right: 1px solid @border;
-    border-left: 1px solid @border;
-}
-
-/* mode indicator */
-#mode {
-    background-color: @red;
-    color: @background;
-    font-weight: bold;
-    padding: 0 10px;
-}
-
-/* workspaces */
 #workspaces button {
     color: @foreground;
     padding: 0 6px;
@@ -74,42 +47,22 @@ window#waybar {
 }
 
 #workspaces button.focused {
-    color: @cyan;
+    color: @accent;
 }
 
 #workspaces button.urgent {
     color: @red;
 }
 
-/* window and module styling */
-#window {
-    color: @cyan;
+#mode {
+    background-color: @red;
+    color: @background;
     font-weight: bold;
-}
-
-#mpd {
-    color: @comment;
-    font-style: italic;
+    padding: 0 10px;
 }
 
 #clock {
     font-weight: bold;
-}
-
-#custom-power-profile {
-    font-weight: bold;
-}
-
-#battery {
-    margin-right: 4px;
-}
-
-#custom-recording {
-    color: @red;
-    font-weight: bold;
-    padding: 0 10px;
-    border-right: 1px solid @border;
-    border-left: 1px solid @border;
 }
 
 #battery.critical {
@@ -127,8 +80,4 @@ window#waybar {
         background-color: @red;
         color: @background;
     }
-}
-
-#tray {
-    margin-left: 4px;
 }

@@ -1,9 +1,7 @@
-### ====================| MELT's SWAYLOCK CONFIG |====================
-
-# (modus-vivendi, cyan accent)
+### ====================| MELT's SWAYLOCK CONFIG (spacemacs-dark) |====================
 
 # wallpaper
-image=/home/melt/pics/wallpapers/earth-blurred.jpg
+image=/home/melt/pics/wallpapers/city-blurred.png
 
 # indicator dimensions
 indicator-radius=80
@@ -13,37 +11,35 @@ ignore-empty-password
 ## ---------- ring ----------
 
 # waiting
-ring-color=ffffff
-inside-color=000000
-text-color=ffffff
+ring-color=b2b2b2
+inside-color=292b2e
+text-color=b2b2b2
 
 # typing
-key-hl-color=04A9E4
-bs-hl-color=ff8059
+key-hl-color=4f97d7
+bs-hl-color=f2241f
 
 # verifying (success)
-ring-ver-color=04A9E4
-inside-ver-color=1e1e1e
+ring-ver-color=67b11d
+inside-ver-color=212026
 text-ver-color=ffffff
 
 # wrong (error)
-ring-wrong-color=ff8059
-inside-wrong-color=000000
+ring-wrong-color=f2241f
+inside-wrong-color=212026
 text-wrong-color=ffffff
 
 # cleared (reset)
-ring-clear-color=04A9E4
-inside-clear-color=1e1e1e
-text-clear-color=04A9E4
+ring-clear-color=4f97d7
+inside-clear-color=292b2e
+text-clear-color=4f97d7
 
 ## ---------- layout & separators ----------
 
-# hide keyboard layout (transparency trick)
 layout-text-color=00000000
 layout-bg-color=00000000
 layout-border-color=00000000
 
-# separator
 line-color=00000000
 separator-color=00000000
 line-ver-color=00000000

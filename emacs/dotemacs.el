@@ -445,6 +445,8 @@
   (setq org-format-latex-options
         (plist-put org-format-latex-options :justify 'center))
   (setq org-preview-latex-default-process 'dvisvgm)
+  (setq org-format-latex-options
+      (plist-put org-format-latex-options :background "Transparent"))
 
   ;; Set standard packages for document exports
   (setq org-format-latex-header

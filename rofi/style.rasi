@@ -1,25 +1,24 @@
-/* ===============| MODUS-VIVENDI PALETTE |================= */
+/* ====================| MELT's ROFI CONFIG (spacemacs-dark) |==================== */
 
 * {
-    background: #000000;
-    foreground: #ffffff;
-    selection:  #535353;
-    comment:    #989898;
-    red:        #ff8059;
-    green:      #44bc44;
-    yellow:     #00a6c0;
-    cyan:       #04A9E4;
+    background: #292b2e;
+    foreground: #b2b2b2;
+    selection:  #444155;
+    comment:    #5e5079;
+    red:        #f2241f;
+    green:      #67b11d;
+    yellow:     #b1951d;
+    cyan:       #4f97d7;
+    accent:     #4f97d7;
 
-    /* shortcut for rofi */
     background-color: @background;
     text-color: @foreground;
 }
 
-/* window */
 #window {
     background-color: @background;
     border: 1px;
-    border-color: #646464;
+    border-color: @selection;
     border-radius: 0px;
     width: 600px;
 }
@@ -28,17 +27,16 @@
     padding: 12px;
 }
 
-/* input */
 #inputbar {
     background-color: @selection;
     text-color: @foreground;
     padding: 8px 12px;
     border: 1px;
-    border-color: @cyan;
+    border-color: @accent;
 }
 
 #prompt {
-    text-color: @cyan;
+    text-color: @accent;
     font-weight: bold;
 }
 
@@ -47,7 +45,6 @@
     text-color: @foreground;
 }
 
-/* listview */
 #listview {
     background-color: transparent;
     margin: 8px 0 0 0;
@@ -55,15 +52,19 @@
     columns: 1;
 }
 
-/* elements */
 #element {
     padding: 6px 10px;
     text-color: @foreground;
 }
 
-#element.selected {
+#element.selected.normal {
     background-color: @selection;
-    text-color: @cyan;
+    text-color: @accent;
+}
+
+#element.selected.active {
+    background-color: @selection;
+    text-color: @accent;
 }
 
 #element.urgent {
@@ -71,5 +72,5 @@
 }
 
 #element.active {
-    text-color: @cyan;
+    text-color: @accent;
 }
