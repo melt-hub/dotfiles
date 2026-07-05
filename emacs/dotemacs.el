@@ -28,17 +28,22 @@
 (add-to-list 'load-path (concat os-packages-path "use-package/"))
 
 ;; --------------- automodes for specific languages ---------------
-;; Lisp Dialects
-(add-to-list 'auto-mode-alist '("\\.rkt\\'"  . racket-mode))
-(add-to-list 'auto-mode-alist '("\\.ss\\'"   . scheme-mode))
-(add-to-list 'auto-mode-alist '("\\.cl\\'"   . common-lisp-mode))
+    ;; Lisp Dialects
+    (add-to-list 'auto-mode-alist '("\\.rkt\\'"  . racket-mode))
+    (add-to-list 'auto-mode-alist '("\\.ss\\'"   . scheme-mode))
+    (add-to-list 'auto-mode-alist '("\\.cl\\'"   . common-lisp-mode))
 
-;; Prolog
-(add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
+    ;; Prolog
+    (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
 
-;; Temporarily disable default perl-mode association for .pl files
-(setq auto-mode-alist
-  (rassq-delete-all 'perl-mode auto-mode-alist))
+    ;; Rofi, Sway/Swaylock e file RC generici
+    (add-to-list 'auto-mode-alist '("\\.rasi\\'" . css-mode))
+    (add-to-list 'auto-mode-alist '("config\\'" . conf-mode))
+    (add-to-list 'auto-mode-alist '("\\.*rc\\'" . conf-mode))
+
+    ;; Temporarily disable default perl-mode association for .pl files
+    (setq auto-mode-alist
+      (rassq-delete-all 'perl-mode auto-mode-alist))
 ;; --------------- end automodes for specific languages ---------------
 
 ;; ====================| END STARTUP |====================
@@ -148,14 +153,32 @@
 (setq custom-safe-themes t)
 (setq warning-minimum-level :error)
 
-;; Initialize dark theme
-(use-package spacemacs-theme
-  :ensure t
-  :defer t
+;; change 'load-theme' value to change theme
+
+;; emacs built in themes
+(use-package emacs
   :init
   (let ((inhibit-message t)
         (warning-minimum-level :emergency))
-    (load-theme 'spacemacs-dark t)))
+    (load-theme 'modus-vivendi t)))
+
+;; spacemacs dark
+;; (use-package spacemacs-theme
+;;   :ensure t
+;;   :defer t
+;;   :init
+;;   (let ((inhibit-message t)
+;;         (warning-minimum-level :emergency))
+;;     (load-theme 'spacemacs-dark t)))
+
+;; ef themes
+;; (use-package ef-themes
+;;   :ensure t
+;;   :defer t
+;;   :init
+;;   (let ((inhibit-message t)
+;;         (warning-minimum-level :emergency))
+;;     (load-theme 'ef-trio-dark t)))
 
 (use-package beacon
   :ensure t
@@ -169,10 +192,10 @@
   :ensure t
   :init (doom-modeline-mode 1))
 
-(use-package nyan-mode
-  :ensure t
-  :config
-  (nyan-mode))
+;; (use-package nyan-mode
+;;   :ensure t
+;;   :config
+;;   (nyan-mode))
 
 (use-package dashboard
   :ensure t

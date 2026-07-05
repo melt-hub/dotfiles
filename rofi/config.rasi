@@ -16,7 +16,7 @@ configuration {
     combi-hide-mode-prefix: true;
 }
 
-@import "nightfox.rasi"
+@import "style.rasi"
 
 /* Window configuration */
 window {

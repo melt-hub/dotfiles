@@ -1,16 +1,18 @@
-/* ====================| MELT's NIGHTFOX THEME |==================== */
+/* ====================| MELT's WAYBAR CONFIG |==================== */
 
-/* Nightfox Palette Definitions */
-@define-color background  #192330;
-@define-color foreground  #cdcecf;
-@define-color selection   #2d3848;
-@define-color comment     #6b7a8c;
-@define-color cyan        #50a5a4;
-@define-color red         #c94f6d;
-@define-color yellow      #e9c46a;
-@define-color orange      #f4a261;
+/* (modus-vivendi, electric cyan accent) */
 
-/* Global Reset */
+@define-color background #535353;
+@define-color bg-dark     #000000;
+@define-color foreground  #ffffff;
+@define-color selection   #646464;
+@define-color comment     #989898;
+@define-color border      #646464;
+@define-color cyan        #04A9E4;
+@define-color green       #44bc44;
+@define-color red         #ff8059;
+
+/* global reset */
 * {
     border: none;
     border-radius: 0;
@@ -21,39 +23,39 @@
     margin: 0;
 }
 
-/* Main Bar Window */
+/* main bar window */
 window#waybar {
     background-color: @background;
     color: @foreground;
-    border-bottom: 1px solid @selection;
+    border-bottom: 1px solid @border;
 }
 
-/* Common Module Padding */
+/* common module padding */
 #workspaces, #mpd, #disk, #cpu, #memory, #temperature, 
 #network, #bluetooth, #pulseaudio, #clock, #tray, #battery,
 #custom-system-updates, #custom-firmware-updates {
     padding: 0 12px;
 }
 
-/* Specific Colors for Custom Modules */
+/* custom module colors */
 #custom-system-updates {
-    color: @yellow;
+    color: @cyan;
     font-weight: bold;
 }
 
 #custom-firmware-updates {
-    color: @yellow;
+    color: @cyan;
     font-weight: bold;
 }
 
-/* Visual Separators (Right Border) */
+/* module separators */
 #custom-system-updates, #custom-firmware-updates, #mpd, #disk, #cpu, #memory, 
 #temperature, #network, #bluetooth, #pulseaudio, #clock, #tray {
-    border-right: 1px solid @selection;
-    border-left: 1px solid @selection;
+    border-right: 1px solid @border;
+    border-left: 1px solid @border;
 }
 
-/* System Mode Indicator */
+/* mode indicator */
 #mode {
     background-color: @red;
     color: @background;
@@ -61,30 +63,25 @@ window#waybar {
     padding: 0 10px;
 }
 
-/* Workspaces Logic */
-
-/* Inactive on current monitor */
+/* workspaces */
 #workspaces button {
     color: @foreground;
     padding: 0 6px;
 }
 
-/* Active on other monitor */
 #workspaces button.visible {
     color: @comment;
 }
 
-/* Active on current monitor */
 #workspaces button.focused {
     color: @cyan;
 }
 
-/* Urgent state */
 #workspaces button.urgent {
     color: @red;
 }
 
-/* Window & Module Styling */
+/* window and module styling */
 #window {
     color: @cyan;
     font-weight: bold;
@@ -111,8 +108,8 @@ window#waybar {
     color: @red;
     font-weight: bold;
     padding: 0 10px;
-    border-right: 1px solid @selection;
-    border-left: 1px solid @selection;
+    border-right: 1px solid @border;
+    border-left: 1px solid @border;
 }
 
 #battery.critical {

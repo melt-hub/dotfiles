@@ -1,33 +1,47 @@
-### ====================| MELT's SWAYLOCK CONFIG FILE |====================
+### ====================| MELT's SWAYLOCK CONFIG |====================
+
+# (modus-vivendi, cyan accent)
 
 # wallpaper
-image=/home/melt/pics/wallpapers/moon-blurred.png
+image=/home/melt/pics/wallpapers/earth-blurred.jpg
+
+# indicator dimensions
+indicator-radius=80
+indicator-thickness=7
+ignore-empty-password
 
 ## ---------- ring ----------
 
 # waiting
-ring-color=50a5a4
-inside-color=192330
-text-color=cdcecf
+ring-color=ffffff
+inside-color=000000
+text-color=ffffff
 
 # typing
-key-hl-color=8c6c9a
-bs-hl-color=f4a261
+key-hl-color=04A9E4
+bs-hl-color=ff8059
 
-# verifying
-ring-ver-color=50a5a4
-inside-ver-color=192330
-text-ver-color=cdcecf
+# verifying (success)
+ring-ver-color=04A9E4
+inside-ver-color=1e1e1e
+text-ver-color=ffffff
 
-# wrong
-ring-wrong-color=c94f6d
-inside-wrong-color=c94f6d
-text-wrong-color=192330
+# wrong (error)
+ring-wrong-color=ff8059
+inside-wrong-color=000000
+text-wrong-color=ffffff
 
-# cleared
-ring-clear-color=e9c46a
-inside-clear-color=192330
-text-clear-color=e9c46a
+# cleared (reset)
+ring-clear-color=04A9E4
+inside-clear-color=1e1e1e
+text-clear-color=04A9E4
+
+## ---------- layout & separators ----------
+
+# hide keyboard layout (transparency trick)
+layout-text-color=00000000
+layout-bg-color=00000000
+layout-border-color=00000000
 
 # separator
 line-color=00000000

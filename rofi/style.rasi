@@ -1,0 +1,75 @@
+/* ===============| MODUS-VIVENDI PALETTE |================= */
+
+* {
+    background: #000000;
+    foreground: #ffffff;
+    selection:  #535353;
+    comment:    #989898;
+    red:        #ff8059;
+    green:      #44bc44;
+    yellow:     #00a6c0;
+    cyan:       #04A9E4;
+
+    /* shortcut for rofi */
+    background-color: @background;
+    text-color: @foreground;
+}
+
+/* window */
+#window {
+    background-color: @background;
+    border: 1px;
+    border-color: #646464;
+    border-radius: 0px;
+    width: 600px;
+}
+
+#mainbox {
+    padding: 12px;
+}
+
+/* input */
+#inputbar {
+    background-color: @selection;
+    text-color: @foreground;
+    padding: 8px 12px;
+    border: 1px;
+    border-color: @cyan;
+}
+
+#prompt {
+    text-color: @cyan;
+    font-weight: bold;
+}
+
+#entry {
+    background-color: transparent;
+    text-color: @foreground;
+}
+
+/* listview */
+#listview {
+    background-color: transparent;
+    margin: 8px 0 0 0;
+    lines: 8;
+    columns: 1;
+}
+
+/* elements */
+#element {
+    padding: 6px 10px;
+    text-color: @foreground;
+}
+
+#element.selected {
+    background-color: @selection;
+    text-color: @cyan;
+}
+
+#element.urgent {
+    text-color: @red;
+}
+
+#element.active {
+    text-color: @cyan;
+}
