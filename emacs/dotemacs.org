@@ -224,20 +224,20 @@
     ;; change 'load-theme' value to change theme
 
     ;; emacs built in themes
-    (use-package emacs
-      :init
-      (let ((inhibit-message t)
-            (warning-minimum-level :emergency))
-        (load-theme 'modus-vivendi t)))
-
-    ;; spacemacs dark
-    ;; (use-package spacemacs-theme
-    ;;   :ensure t
-    ;;   :defer t
+    ;; (use-package emacs
     ;;   :init
     ;;   (let ((inhibit-message t)
     ;;         (warning-minimum-level :emergency))
-    ;;     (load-theme 'spacemacs-dark t)))
+    ;;     (load-theme 'modus-vivendi t)))
+
+    ;; spacemacs dark
+    (use-package spacemacs-theme
+      :ensure t
+      :defer t
+      :init
+      (let ((inhibit-message t)
+            (warning-minimum-level :emergency))
+        (load-theme 'spacemacs-dark t)))
 
     ;; ef themes
     ;; (use-package ef-themes
@@ -288,10 +288,10 @@
   An animated buffer position indicator using the classic Nyan Cat sprite.
 
   #+begin_src emacs-lisp
-    ;; (use-package nyan-mode
-    ;;   :ensure t
-    ;;   :config
-    ;;   (nyan-mode))
+    (use-package nyan-mode
+      :ensure t
+      :config
+      (nyan-mode))
   #+end_src
 
 *** Dashboard
@@ -307,7 +307,7 @@
       (dashboard-setup-startup-hook)
 
       ;; Specify custom branding banner
-      (setq dashboard-startup-banner "~/pics/other/emacs-e-logo.png")
+      (setq dashboard-startup-banner "~/pics/other/spacemacs-logo-padded.png")
       (setq dashboard-banner-logo-title "[CIRO]: Welcome back melt!")
 
       ;; Display standard sections
@@ -588,7 +588,8 @@
      ;; Scale to window width
      (setq pdf-view-use-scaling t)
      (setq-default pdf-view-display-size 'fit-width)
-     (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
+     ; (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
+     (setq pdf-view-midnight-colors '("#ffffff" . "#121212"))
 
      ;; Enable night mode and annotator hook automatically
      (add-hook 'pdf-view-mode-hook
