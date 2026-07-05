@@ -382,8 +382,8 @@
  ;; Scale to window width
  (setq pdf-view-use-scaling t)
  (setq-default pdf-view-display-size 'fit-width)
- ; (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
- (setq pdf-view-midnight-colors '("#ffffff" . "#121212"))
+ (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
+ ;; (setq pdf-view-midnight-colors '("#ffffff" . "#121212"))
 
  ;; Enable night mode and annotator hook automatically
  (add-hook 'pdf-view-mode-hook
@@ -423,73 +423,146 @@
 
 (use-package org
   :defer t
-  :bind
-  (("C-c a" . org-agenda))
+  :bind (("C-c a" . org-agenda)
+         ("C-c c" . org-capture))
   :config
-  ;; Point to active task agendas
-  (setq org-agenda-files
-        (list (expand-file-name "agenda.org" org-dir-path)))
+  (let ((agenda-path "/home/melt/zk/agenda/agenda.org"))
+    (setq org-agenda-files (list agenda-path))
+    (setq org-log-done 'time)
+    (setq org-log-into-drawer t)
 
-  ;; Prevent blank lines on section creation
-  (setq org-blank-before-new-entry
-        '((heading . nil) (plain-list-item . nil)))
+    ;; Added 'proj' tag for project tracking
+    (setq org-tag-alist
+          '((:startgroup)
+            ("call" . ?c) ("appo" . ?a) ("bday" . ?b) ("proj" . ?p)
+            (:endgroup)))
 
-  ;; Define global access key
-  (global-set-key (kbd "C-c a") 'org-agenda)
+    (setq org-capture-templates
+          `(("t" "Todo [Inbox]" entry (file+headline ,agenda-path "Inbox")
+             "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:" 
+             :empty-lines 1)
+            ("a" "Appointment" entry 
+             (file+headline ,agenda-path "Tasks & Appointments")
+             ,(concat "* %^{Description} :appo:\n%^t\n:PROPERTIES:\n"
+                      ":CONTACT: %^{Who}\n:LOCATION: %^{Where}\n"
+                      ":CREATED: %U\n:END:") :empty-lines 1)
+            ("c" "Call" entry 
+             (file+headline ,agenda-path "Tasks & Appointments")
+             ,(concat "* TODO %^{Name} :call:\nSCHEDULED: %^t\n"
+                      ":PROPERTIES:\n:CONTACT: %\\1\n:CREATED: %U\n:END:")
+             :empty-lines 1)
+            ("b" "Birthday" entry 
+             (file+headline ,agenda-path "Birthdays & Recurrences")
+             ,(concat "* Compleanno %^{Who} :bday:\n"
+                      "%(concat \"<\" (org-read-date) \" +1y>\")")
+             :empty-lines 1)
+            ;; New Project template with percentage cookie
+            ("p" "Project" entry (file+headline ,agenda-path "Tasks & Appointments")
+             "* TODO %^{Project Name} [%] :proj:\n:PROPERTIES:\n:CREATED: %U\n:END:\n- [ ] %?"
+             :empty-lines 1)))
 
-  ;; Hide markdown character symbols
+    (setq org-refile-targets `((,agenda-path :maxlevel . 1)))
+    (setq org-outline-path-complete-in-steps nil)
+    (setq org-refile-use-outline-path 'file))
+
+  (setq org-blank-before-new-entry '((heading . t) (plain-list-item . nil)))
+  (setq org-use-property-inheritance t)
   (setq org-hide-emphasis-markers t)
+  (setq org-tags-column 0)
+  (setq org-agenda-tags-column 0)
 
-  ;; Set mathematical equations presentation
+  (global-set-key (kbd "C-c a") 'org-agenda)
+  (global-set-key (kbd "C-c c") 'org-capture)
+
+  ;; Latex math and packages settings...
   (setq org-format-latex-options
         (plist-put org-format-latex-options :scale 1.1))
   (setq org-format-latex-options
         (plist-put org-format-latex-options :justify 'center))
   (setq org-preview-latex-default-process 'dvisvgm)
   (setq org-format-latex-options
-      (plist-put org-format-latex-options :background "Transparent"))
+        (plist-put org-format-latex-options :background "Transparent"))
 
-  ;; Set standard packages for document exports
   (setq org-format-latex-header
         (concat org-format-latex-header
-                "\n\\usepackage{clrscode3e}"
-                "\n\\usepackage{tikz}"
-                "\n\\usepackage{pgfplots}"
-                "\n\\usepackage{forest}"
+                "\n\\usepackage{clrscode3e}\n\\usepackage{tikz}"
+                "\n\\usepackage{pgfplots}\n\\usepackage{forest}"
                 "\n\\usetikzlibrary{positioning, calc, arrows.meta,"
                 "shapes.multipart, automata, matrix, intersections}"
                 "\n\\usepgfplotslibrary{fillbetween, statistics}"
                 "\n\\pgfplotsset{compat=newest}"))
 
   (setq org-latex-packages-alist
-        '(("" "clrscode3e" t)
-          ("" "tikz" t)
-          ("" "pgfplots" t)
-          ("" "forest" t))))
+        '(("" "clrscode3e" t) ("" "tikz" t)
+          ("" "pgfplots" t) ("" "forest" t))))
 
-(use-package org-roam
-  :ensure t
+(use-package org
   :defer t
-  :custom
-  (org-roam-directory org-dir-path)
-  (org-roam-completion-everywhere t)
-  :bind
-  (("C-c n l" . org-roam-buffer-toggle)
-   ("C-c n f" . org-roam-node-find)
-   ("C-c n i" . org-roam-node-insert)
-   :map org-mode-map
-   ("C-M-i" . completion-at-point))
+  :bind (("C-c a" . org-agenda)
+         ("C-c c" . org-capture))
   :config
-  (org-roam-setup)
-  (setq org-roam-capture-templates
-        '(("d" "default" plain "%?"
-           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-                              "#+title: ${title}\n")
-           :unnarrowed t)
-          ("r" "dream" plain "%?"
-           :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
-                              "#+title: ${title}\n#+filetags: :dream:\n\n:PROPERTIES:\n:created: %<%Y-%m-%d %H:%M>\n:END:\n")
-           :unnarrowed t))))
+  (let ((agenda-path "/home/melt/zk/agenda/agenda.org"))
+    (setq org-agenda-files (list agenda-path))
+    ;; Logging settings: creates the :LOGBOOK: drawer with CLOSED timestamp
+    (setq org-log-done 'time)
+    (setq org-log-into-drawer t)
+
+    (setq org-tag-alist
+          '((:startgroup)
+            ("call" . ?c) ("appo" . ?a) ("bday" . ?b)
+            (:endgroup)))
+
+    (setq org-capture-templates
+          `(("t" "Todo [Inbox]" entry (file+headline ,agenda-path "Inbox")
+             "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:")
+            ("a" "Appointment" entry 
+             (file+headline ,agenda-path "Tasks & Appointments")
+             ,(concat "* %^{Description} :appo:\n%^t\n:PROPERTIES:\n"
+                      ":CONTACT: %^{Who}\n:LOCATION: %^{Where}\n"
+                      ":CREATED: %U\n:END:"))
+            ("c" "Call" entry 
+             (file+headline ,agenda-path "Tasks & Appointments")
+             ,(concat "* TODO %^{Name} :call:\nSCHEDULED: %^t\n"
+                      ":PROPERTIES:\n:CONTACT: %\\1\n:CREATED: %U\n:END:"))
+            ("b" "Birthday" entry 
+             (file+headline ,agenda-path "Birthdays & Recurrences")
+             ,(concat "* Compleanno %^{Who} :bday:\n"
+                      "%(concat \"<\" (org-read-date) \" +1y>\")"))))
+
+    (setq org-refile-targets `((,agenda-path :maxlevel . 1)))
+    (setq org-outline-path-complete-in-steps nil)
+    (setq org-refile-use-outline-path 'file))
+
+  ;; Let Org-mode handle blank lines natively
+  (setq org-blank-before-new-entry '((heading . auto) (plain-list-item . auto)))
+  (setq org-use-property-inheritance t)
+  (setq org-hide-emphasis-markers t)
+
+  (global-set-key (kbd "C-c a") 'org-agenda)
+  (global-set-key (kbd "C-c c") 'org-capture)
+
+  ;; Latex math display
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :scale 1.1))
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :justify 'center))
+  (setq org-preview-latex-default-process 'dvisvgm)
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :background "Transparent"))
+
+  ;; Latex headers
+  (setq org-format-latex-header
+        (concat org-format-latex-header
+                "\n\\usepackage{clrscode3e}\n\\usepackage{tikz}"
+                "\n\\usepackage{pgfplots}\n\\usepackage{forest}"
+                "\n\\usetikzlibrary{positioning, calc, arrows.meta,"
+                "shapes.multipart, automata, matrix, intersections}"
+                "\n\\usepgfplotslibrary{fillbetween, statistics}"
+                "\n\\pgfplotsset{compat=newest}"))
+
+  (setq org-latex-packages-alist
+        '(("" "clrscode3e" t) ("" "tikz" t)
+          ("" "pgfplots" t) ("" "forest" t))))
 
 (use-package org-roam-ui
   :ensure t
@@ -601,16 +674,6 @@
           (plist-put org-format-latex-options :scale next))
     (execute-kbd-macro (kbd "C-u C-u C-c C-x C-l"))
     (message "[CIRO]: LaTeX scaling set to %.1f" next)))
-
-;; --------------- manual header ---------------
-(defun my/org-insert-header ()
-  "Blindly insert a default Org header based on the current filename."
-  (interactive)
-  (let ((title (file-name-base (or (buffer-file-name) "Untitled"))))
-    (goto-char (point-min))
-    (insert (format "#+TITLE: %s\n#+AUTHOR: melt\n\n" title))
-    (message "[CIRO]: Org header inserted!")))
-;; --------------- end manual header ---------------
 
 ;; ====================| END MY FUNCTIONS |====================
 
