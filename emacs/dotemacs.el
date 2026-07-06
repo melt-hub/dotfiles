@@ -9,6 +9,12 @@
 (defvar os-packages-path "~/dotfiles/emacs/packages/")
 (defvar org-dir-path "~/zk/")
 
+(defvar my/org-university "Università di Milano Bicocca"
+  "Default university for scientific papers.")
+
+(defvar my/org-email "melt@campus.unimib.it"
+  "Default email address for academic exports.")
+
 ;; Automatically follow file symlinks
 (setq vc-follow-symlinks t)
 
@@ -156,20 +162,20 @@
 ;; change 'load-theme' value to change theme
 
 ;; emacs built in themes
-;; (use-package emacs
-;;   :init
-;;   (let ((inhibit-message t)
-;;         (warning-minimum-level :emergency))
-;;     (load-theme 'modus-vivendi t)))
-
-;; spacemacs dark
-(use-package spacemacs-theme
-  :ensure t
-  :defer t
+(use-package emacs
   :init
   (let ((inhibit-message t)
         (warning-minimum-level :emergency))
-    (load-theme 'spacemacs-dark t)))
+    (load-theme 'modus-vivendi t)))
+
+;; spacemacs dark
+;; (use-package spacemacs-theme
+;;   :ensure t
+;;   :defer t
+;;   :init
+;;   (let ((inhibit-message t)
+;;         (warning-minimum-level :emergency))
+;;     (load-theme 'spacemacs-dark t)))
 
 ;; ef themes
 ;; (use-package ef-themes
@@ -382,8 +388,8 @@
  ;; Scale to window width
  (setq pdf-view-use-scaling t)
  (setq-default pdf-view-display-size 'fit-width)
- (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
- ;; (setq pdf-view-midnight-colors '("#ffffff" . "#121212"))
+ ;; (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
+ (setq pdf-view-midnight-colors '("#ffffff" . "#121212"))
 
  ;; Enable night mode and annotator hook automatically
  (add-hook 'pdf-view-mode-hook
@@ -427,25 +433,37 @@
          ("C-c c" . org-capture))
   :config
   (let ((agenda-path "/home/melt/zk/agenda/agenda.org"))
+    ;; Define active agenda files
     (setq org-agenda-files (list agenda-path))
     (setq org-log-done 'time)
     (setq org-log-into-drawer t)
 
-    ;; Added 'proj' tag for project tracking
+    ;; Tag shortcuts including the new 'task' tag
     (setq org-tag-alist
           '((:startgroup)
-            ("call" . ?c) ("appo" . ?a) ("bday" . ?b) ("proj" . ?p)
+            ("call" . ?c) ("appo" . ?a) ("bday" . ?b) 
+            ("proj" . ?p) ("task" . ?k)
             (:endgroup)))
 
+    ;; Custom Agenda View for projects
+    (setq org-agenda-custom-commands
+          '(("p" "Project Overview" tags-todo "+proj")))
+
+    ;; Capture templates with the new scheduled 'task'
     (setq org-capture-templates
           `(("t" "Todo [Inbox]" entry (file+headline ,agenda-path "Inbox")
-             "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:" 
-             :empty-lines 1)
+             "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:" :empty-lines 1)
             ("a" "Appointment" entry 
              (file+headline ,agenda-path "Tasks & Appointments")
              ,(concat "* %^{Description} :appo:\n%^t\n:PROPERTIES:\n"
                       ":CONTACT: %^{Who}\n:LOCATION: %^{Where}\n"
                       ":CREATED: %U\n:END:") :empty-lines 1)
+            ("k" "Task" entry
+             (file+headline ,agenda-path "Tasks & Appointments")
+             ,(concat "* TODO %^{Description} :task:\nSCHEDULED: %^t\n"
+                      ":PROPERTIES:\n:CONTACT: %^{Who}\n"
+                      ":LOCATION: %^{Where}\n:CREATED: %U\n:END:")
+             :empty-lines 1)
             ("c" "Call" entry 
              (file+headline ,agenda-path "Tasks & Appointments")
              ,(concat "* TODO %^{Name} :call:\nSCHEDULED: %^t\n"
@@ -456,33 +474,34 @@
              ,(concat "* Compleanno %^{Who} :bday:\n"
                       "%(concat \"<\" (org-read-date) \" +1y>\")")
              :empty-lines 1)
-            ;; New Project template with percentage cookie
-            ("p" "Project" entry (file+headline ,agenda-path "Tasks & Appointments")
-             "* TODO %^{Project Name} [%] :proj:\n:PROPERTIES:\n:CREATED: %U\n:END:\n- [ ] %?"
+            ("p" "Project" entry (file+headline ,agenda-path "Projects")
+             ,(concat "* TODO %^{Project Name} [%] :proj:\nDEADLINE: %^t\n"
+                      ":PROPERTIES:\n:CREATED: %U\n:END:\n- [ ] %?")
              :empty-lines 1)))
 
+    ;; Refile targets and logic
     (setq org-refile-targets `((,agenda-path :maxlevel . 1)))
     (setq org-outline-path-complete-in-steps nil)
     (setq org-refile-use-outline-path 'file))
 
+  ;; UI and formatting settings
   (setq org-blank-before-new-entry '((heading . t) (plain-list-item . nil)))
   (setq org-use-property-inheritance t)
   (setq org-hide-emphasis-markers t)
   (setq org-tags-column 0)
   (setq org-agenda-tags-column 0)
 
+  ;; Global keys
   (global-set-key (kbd "C-c a") 'org-agenda)
   (global-set-key (kbd "C-c c") 'org-capture)
 
-  ;; Latex math and packages settings...
-  (setq org-format-latex-options
-        (plist-put org-format-latex-options :scale 1.1))
-  (setq org-format-latex-options
-        (plist-put org-format-latex-options :justify 'center))
+  ;; Latex math display settings
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.1))
+  (setq org-format-latex-options (plist-put org-format-latex-options :justify 'center))
   (setq org-preview-latex-default-process 'dvisvgm)
-  (setq org-format-latex-options
-        (plist-put org-format-latex-options :background "Transparent"))
+  (setq org-format-latex-options (plist-put org-format-latex-options :background "Transparent"))
 
+  ;; Latex packages for export and preview
   (setq org-format-latex-header
         (concat org-format-latex-header
                 "\n\\usepackage{clrscode3e}\n\\usepackage{tikz}"
@@ -491,78 +510,57 @@
                 "shapes.multipart, automata, matrix, intersections}"
                 "\n\\usepgfplotslibrary{fillbetween, statistics}"
                 "\n\\pgfplotsset{compat=newest}"))
-
   (setq org-latex-packages-alist
-        '(("" "clrscode3e" t) ("" "tikz" t)
+        '(("" "clrscode3e" t) ("" "tikz" t) 
           ("" "pgfplots" t) ("" "forest" t))))
 
-(use-package org
-  :defer t
-  :bind (("C-c a" . org-agenda)
-         ("C-c c" . org-capture))
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory (expand-file-name "~/zk"))
+  (org-roam-completion-everywhere t)
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert))
   :config
-  (let ((agenda-path "/home/melt/zk/agenda/agenda.org"))
-    (setq org-agenda-files (list agenda-path))
-    ;; Logging settings: creates the :LOGBOOK: drawer with CLOSED timestamp
-    (setq org-log-done 'time)
-    (setq org-log-into-drawer t)
-
-    (setq org-tag-alist
-          '((:startgroup)
-            ("call" . ?c) ("appo" . ?a) ("bday" . ?b)
-            (:endgroup)))
-
-    (setq org-capture-templates
-          `(("t" "Todo [Inbox]" entry (file+headline ,agenda-path "Inbox")
-             "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:")
-            ("a" "Appointment" entry 
-             (file+headline ,agenda-path "Tasks & Appointments")
-             ,(concat "* %^{Description} :appo:\n%^t\n:PROPERTIES:\n"
-                      ":CONTACT: %^{Who}\n:LOCATION: %^{Where}\n"
-                      ":CREATED: %U\n:END:"))
-            ("c" "Call" entry 
-             (file+headline ,agenda-path "Tasks & Appointments")
-             ,(concat "* TODO %^{Name} :call:\nSCHEDULED: %^t\n"
-                      ":PROPERTIES:\n:CONTACT: %\\1\n:CREATED: %U\n:END:"))
-            ("b" "Birthday" entry 
-             (file+headline ,agenda-path "Birthdays & Recurrences")
-             ,(concat "* Compleanno %^{Who} :bday:\n"
-                      "%(concat \"<\" (org-read-date) \" +1y>\")"))))
-
-    (setq org-refile-targets `((,agenda-path :maxlevel . 1)))
-    (setq org-outline-path-complete-in-steps nil)
-    (setq org-refile-use-outline-path 'file))
-
-  ;; Let Org-mode handle blank lines natively
-  (setq org-blank-before-new-entry '((heading . auto) (plain-list-item . auto)))
-  (setq org-use-property-inheritance t)
-  (setq org-hide-emphasis-markers t)
-
-  (global-set-key (kbd "C-c a") 'org-agenda)
-  (global-set-key (kbd "C-c c") 'org-capture)
-
-  ;; Latex math display
-  (setq org-format-latex-options
-        (plist-put org-format-latex-options :scale 1.1))
-  (setq org-format-latex-options
-        (plist-put org-format-latex-options :justify 'center))
-  (setq org-preview-latex-default-process 'dvisvgm)
-  (setq org-format-latex-options
-        (plist-put org-format-latex-options :background "Transparent"))
-
-  ;; Latex headers
-  (setq org-format-latex-header
-        (concat org-format-latex-header
-                "\n\\usepackage{clrscode3e}\n\\usepackage{tikz}"
-                "\n\\usepackage{pgfplots}\n\\usepackage{forest}"
-                "\n\\usetikzlibrary{positioning, calc, arrows.meta,"
-                "shapes.multipart, automata, matrix, intersections}"
-                "\n\\usepgfplotslibrary{fillbetween, statistics}"
-                "\n\\pgfplotsset{compat=newest}"))
-
-  (setq org-latex-packages-alist
-        '(("" "clrscode3e" t) ("" "tikz" t)
-          ("" "pgfplots" t) ("" "forest" t))))
+  ;; Capture templates with subdirectory targets and metadata
+  (setq org-roam-capture-templates
+        `(("d" "default (uni)" plain "%?"
+           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                       ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                       "#+title: ${title}\n#+author: melt\n"
+                                       "#+filetags: :uni:"))
+           :unnarrowed t)
+          ("s" "scrap" plain "%?"
+           :target (file+head "scraps/%<%Y%m%d%H%M%S>-${slug}.org"
+                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                       ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                       "#+title: ${title}\n#+author: melt\n"
+                                       "#+filetags: :scrap:"))
+           :unnarrowed t)
+          ("r" "dream" plain "%?"
+           :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
+                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                       ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                       "#+title: ${title}\n#+author: melt\n"
+                                       "#+filetags: :dream:"))
+           :unnarrowed t)
+          ("p" "paper" plain "%?"
+           :target (file+head "papers/%<%Y%m%d%H%M%S>-${slug}.org"
+                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                       ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                       "#+title: ${title}\n#+author: melt\n"
+                                       "#+email: " my/org-email "\n"
+                                       "#+affiliation: " my/org-university "\n"
+                                       "#+filetags: :paper:\n"
+                                       "#+latex_class: scientific-paper\n\n"
+                                       "* Abstract\n%?\n"
+                                       "* Introduction\n\n"
+                                       "* Bibliography\n"
+                                       "\\bibliographystyle{plain}\n"))
+           :unnarrowed t)))
+  (org-roam-setup))
 
 (use-package org-roam-ui
   :ensure t
