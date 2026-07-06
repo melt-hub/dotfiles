@@ -481,25 +481,48 @@
   (setq org-agenda-tags-column 0)
 
   ;; Latex math display
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.1))
-  (setq org-format-latex-options (plist-put org-format-latex-options :justify 'center))
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :scale 1.1))
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :justify 'center))
   (setq org-preview-latex-default-process 'dvisvgm)
-  (setq org-format-latex-options (plist-put org-format-latex-options :background "Transparent"))
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :background "Transparent"))
 
-  ;; Standard Latex packages
+  ;; Custom Latex package for equation previews (renders buffers correctly)
   (setq org-format-latex-header
-        (concat org-format-latex-header
-                "\n\\usepackage{clrscode3e}\n\\usepackage{tikz}"
-                "\n\\usepackage{pgfplots}\n\\usepackage{forest}"
-                "\n\\usepackage{authblk}"
-                "\n\\usetikzlibrary{positioning, calc, arrows.meta,"
-                "shapes.multipart, automata, matrix, intersections}"
-                "\n\\usepgfplotslibrary{fillbetween, statistics}"
-                "\n\\pgfplotsset{compat=newest}"))
+        (concat org-format-latex-header "\n\\usepackage{melt-setup}"))
 
+  ;; Remove default geometry to avoid conflicts with custom margins
+  (setq org-latex-default-packages-alist
+        (assoc-delete-all "geometry" org-latex-default-packages-alist))
+
+  ;; Custom default Latex packages
   (setq org-latex-packages-alist
-        '(("" "clrscode3e" t) ("" "tikz" t) ("" "pgfplots" t) 
-          ("" "forest" t) ("" "authblk" t))))
+        '(("margin=1in" "geometry" t)
+          ("" "parskip" t)
+          ("" "melt-setup" t)))
+
+  ;; Set global author variables to resolve "immediate" metadata issue
+  (setq user-full-name "melt")
+  (setq user-login-name "melt")
+
+  ;; Ensure images are centered by default
+  (setq org-latex-images-centered t)
+
+  ;; Custom minimal class for CS papers (uses external cs-paper-style.sty)
+  (with-eval-after-load 'ox-latex
+    (add-to-list 'org-latex-classes
+                 '("cs-paper"
+                   "\\documentclass[11pt]{article}
+[DEFAULT-PACKAGES]
+[PACKAGES]
+[EXTRA]
+\\usepackage{cs-paper-style}"
+                   ("\\section{%s}" . "\\section*{%s}")
+                   ("\\subsection{%s}" . "\\subsection*{%s}")
+                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                   ("\\paragraph{%s}" . "\\paragraph*{%s}")))))
 
 (use-package org-roam
   :ensure t
@@ -539,10 +562,15 @@
                                        "#+title: ${title}\n"
                                        "#+author: melt\n"
                                        "#+email: " my/org-email "\n"
-                                       "#+latex_header: \\affil{" 
-                                       my/org-university "}\n"
+                                       "#+latex_class: cs-paper\n"
+                                       "#+latex_header: \\author{melt}\n"
+                                       "#+latex_header: \\affil{"
+                                       my/org-university
+                                       " \\\\ \\texttt{" my/org-email "}}\n"
                                        "#+filetags: :paper:\n\n"
-                                       "* Abstract\n%?\n"
+                                       "#+begin_abstract\n"
+                                       "%?\n"
+                                       "#+end_abstract\n\n"
                                        "* Introduction\n\n"
                                        "* Bibliography\n"))
            :unnarrowed t)))
