@@ -655,27 +655,22 @@
   #+begin_src emacs-lisp
     (use-package org
       :defer t
-      :bind (("C-c a" . org-agenda)
-             ("C-c c" . org-capture))
+      :bind (("C-c a" . org-agenda) ("C-c c" . org-capture))
       :config
       (let ((agenda-path "/home/melt/zk/agenda/agenda.org"))
-        ;; Define active agenda files
         (setq org-agenda-files (list agenda-path))
         (setq org-log-done 'time)
         (setq org-log-into-drawer t)
 
-        ;; Tag shortcuts including the new 'task' tag
         (setq org-tag-alist
               '((:startgroup)
                 ("call" . ?c) ("appo" . ?a) ("bday" . ?b) 
                 ("proj" . ?p) ("task" . ?k)
                 (:endgroup)))
 
-        ;; Custom Agenda View for projects
         (setq org-agenda-custom-commands
               '(("p" "Project Overview" tags-todo "+proj")))
 
-        ;; Capture templates with the new scheduled 'task'
         (setq org-capture-templates
               `(("t" "Todo [Inbox]" entry (file+headline ,agenda-path "Inbox")
                  "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:" :empty-lines 1)
@@ -703,42 +698,34 @@
                 ("p" "Project" entry (file+headline ,agenda-path "Projects")
                  ,(concat "* TODO %^{Project Name} [%] :proj:\nDEADLINE: %^t\n"
                           ":PROPERTIES:\n:CREATED: %U\n:END:\n- [ ] %?")
-                 :empty-lines 1)))
+                 :empty-lines 1))))
 
-        ;; Refile targets and logic
-        (setq org-refile-targets `((,agenda-path :maxlevel . 1)))
-        (setq org-outline-path-complete-in-steps nil)
-        (setq org-refile-use-outline-path 'file))
-
-      ;; UI and formatting settings
       (setq org-blank-before-new-entry '((heading . t) (plain-list-item . nil)))
       (setq org-use-property-inheritance t)
       (setq org-hide-emphasis-markers t)
       (setq org-tags-column 0)
       (setq org-agenda-tags-column 0)
 
-      ;; Global keys
-      (global-set-key (kbd "C-c a") 'org-agenda)
-      (global-set-key (kbd "C-c c") 'org-capture)
-
-      ;; Latex math display settings
+      ;; Latex math display
       (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.1))
       (setq org-format-latex-options (plist-put org-format-latex-options :justify 'center))
       (setq org-preview-latex-default-process 'dvisvgm)
       (setq org-format-latex-options (plist-put org-format-latex-options :background "Transparent"))
 
-      ;; Latex packages for export and preview
+      ;; Standard Latex packages
       (setq org-format-latex-header
             (concat org-format-latex-header
                     "\n\\usepackage{clrscode3e}\n\\usepackage{tikz}"
                     "\n\\usepackage{pgfplots}\n\\usepackage{forest}"
+                    "\n\\usepackage{authblk}"
                     "\n\\usetikzlibrary{positioning, calc, arrows.meta,"
                     "shapes.multipart, automata, matrix, intersections}"
                     "\n\\usepgfplotslibrary{fillbetween, statistics}"
                     "\n\\pgfplotsset{compat=newest}"))
+
       (setq org-latex-packages-alist
-            '(("" "clrscode3e" t) ("" "tikz" t) 
-              ("" "pgfplots" t) ("" "forest" t))))
+            '(("" "clrscode3e" t) ("" "tikz" t) ("" "pgfplots" t) 
+              ("" "forest" t) ("" "authblk" t))))
   #+end_src
 
 *** Org Roam
@@ -756,7 +743,6 @@
              ("C-c n f" . org-roam-node-find)
              ("C-c n i" . org-roam-node-insert))
       :config
-      ;; Capture templates with subdirectory targets and metadata
       (setq org-roam-capture-templates
             `(("d" "default (uni)" plain "%?"
                :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
@@ -783,15 +769,15 @@
                :target (file+head "papers/%<%Y%m%d%H%M%S>-${slug}.org"
                                   ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
                                            ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
-                                           "#+title: ${title}\n#+author: melt\n"
+                                           "#+title: ${title}\n"
+                                           "#+author: melt\n"
                                            "#+email: " my/org-email "\n"
-                                           "#+affiliation: " my/org-university "\n"
-                                           "#+filetags: :paper:\n"
-                                           "#+latex_class: scientific-paper\n\n"
+                                           "#+latex_header: \\affil{" 
+                                           my/org-university "}\n"
+                                           "#+filetags: :paper:\n\n"
                                            "* Abstract\n%?\n"
                                            "* Introduction\n\n"
-                                           "* Bibliography\n"
-                                           "\\bibliographystyle{plain}\n"))
+                                           "* Bibliography\n"))
                :unnarrowed t)))
       (org-roam-setup))
   #+end_src
