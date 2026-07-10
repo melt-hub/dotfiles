@@ -198,10 +198,10 @@
   :ensure t
   :init (doom-modeline-mode 1))
 
-(use-package nyan-mode
-  :ensure t
-  :config
-  (nyan-mode))
+;; (use-package nyan-mode
+;;   :ensure t
+;;   :config
+;;   (nyan-mode))
 
 (use-package dashboard
   :ensure t
@@ -363,13 +363,6 @@
 
 ;; --------------- latex ---------------
 
-;; (use-package tex
-;;  :ensure auctex
-;;  :config
-;;  (setq-default TeX-master nil)
-;;  (setq TeX-parse-self t)
-;;  (setq TeX-auto-save t))
-
 (use-package org-fragtog
   :ensure t
   :hook (org-mode . org-fragtog-mode))
@@ -431,6 +424,9 @@
   :defer t
   :bind (("C-c a" . org-agenda) ("C-c c" . org-capture))
   :config
+  (add-to-list 'org-structure-template-alist '("L" . "latex"))
+  (add-to-list 'org-src-lang-modes '("latex" . LaTeX))
+
   (let ((agenda-path "/home/melt/zk/agenda/agenda.org"))
     (setq org-agenda-files (list agenda-path))
     (setq org-log-done 'time)
