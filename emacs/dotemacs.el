@@ -529,55 +529,66 @@
          ("C-c n f" . org-roam-node-find)
          ("C-c n i" . org-roam-node-insert))
   :config
-(setq org-roam-capture-templates
-        `(("d" "default (uni)" plain "%?"
-           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
-                                       ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
-                                       "#+title: ${title}\n#+author: melt\n"
-                                       "#+filetags: :uni:"))
-           :unnarrowed t)
-          ("s" "scrap" plain "%?"
-           :target (file+head "scraps/%<%Y%m%d%H%M%S>-${slug}.org"
-                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
-                                       ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
-                                       "#+title: ${title}\n#+author: melt\n"
-                                       "#+filetags: :scrap:"))
-           :unnarrowed t)
-          ("r" "dream" plain "%?"
-           :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
-                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
-                                       ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
-                                       "#+title: ${title}\n#+author: melt\n"
-                                       "#+filetags: :dream:"))
-           :unnarrowed t)
-          ("o" "person" plain "%?"
-           :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
-                              ,(concat ":PROPERTIES:\n"
-                                       ":ID: %(org-id-new)\n"
-                                       ":created: %<%Y-%m-%d %H:%M>\n"
-                                       ":END:\n"
-                                       "#+title: ${title}\n"
-                                       "#+filetags: :person:\n\n"
-                                       "* Dreams featuring ${title}\n"))
-           :unnarrowed t)
-          ("p" "paper" plain "%?"
-           :target (file+head "papers/%<%Y%m%d%H%M%S>-${slug}.org"
-                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
-                                       ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
-                                       "#+title: ${title}\n"
-                                       "#+author: melt\n"
-                                       "#+email: " my/org-email "\n"
-                                       "#+latex_class: cs-paper\n"
-                                       "#+latex_header: \\author{melt}\n"
-                                       "#+latex_header: \\affil{"
-                                       my/org-university
-                                       " \\\\ \\texttt{" my/org-email "}}\n"
-                                       "#+filetags: :paper:\n\n"
-                                       "* Abstract\n%?\n"
-                                       "* Introduction\n\n"
-                                       "* Bibliography\n"))
-           :unnarrowed t)))
+  (setq org-roam-capture-templates
+          `(("u" "uni")
+            ("uu" "uni" plain "%?"
+             :target (file+head "uni/%<%Y%m%d%H%M%S>-${slug}.org"
+                                ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                         ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                         "#+title: ${title}\n#+author: melt\n"
+                                         "#+filetags: :uni:"))
+             :unnarrowed t)
+            ("ui" "index" plain "%?"
+             :target (file+head "uni/%<%Y%m%d%H%M%S>-${slug}.org"
+                                ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                         ":created: %<%Y-%m-%d %H:%M>\n"
+                                         ":BOOK_TITLE: %^{Book Title}\n"
+                                         ":PDF_PATH: %^{PDF Path}\n:END:\n"
+                                         "#+title: ${title}\n#+author: melt\n"
+                                         "#+filetags: :uni:index:"))
+             :unnarrowed t)
+            ("up" "paper" plain "%?"
+             :target (file+head "uni/papers/%<%Y%m%d%H%M%S>-${slug}.org"
+                                ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                         ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                         "#+title: ${title}\n"
+                                         "#+author: melt\n"
+                                         "#+email: " my/org-email "\n"
+                                         "#+latex_class: cs-paper\n"
+                                         "#+latex_header: \\author{melt}\n"
+                                         "#+latex_header: \\affil{"
+                                         my/org-university
+                                         " \\\\ \\texttt{" my/org-email "}}\n"
+                                         "#+filetags: :paper:\n\n"
+                                         "* Abstract\n%?\n"
+                                         "* Introduction\n\n"
+                                         "* Bibliography\n"))
+             :unnarrowed t)
+            ("d" "dream")
+            ("dd" "dream" plain "%?"
+             :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
+                                ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                         ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                         "#+title: ${title}\n#+author: melt\n"
+                                         "#+filetags: :dream:"))
+             :unnarrowed t)
+            ("dp" "person" plain "%?"
+             :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
+                                ,(concat ":PROPERTIES:\n"
+                                         ":ID: %(org-id-new)\n"
+                                         ":created: %<%Y-%m-%d %H:%M>\n"
+                                         ":END:\n"
+                                         "#+title: ${title}\n"
+                                         "#+filetags: :person:\n\n"
+                                         "* Dreams featuring ${title}\n"))
+             :unnarrowed t)
+            ("s" "scrap" plain "%?"
+             :target (file+head "scraps/%<%Y%m%d%H%M%S>-${slug}.org"
+                                ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                         ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                         "#+title: ${title}\n#+author: melt\n"
+                                         "#+filetags: :scrap:"))
+             :unnarrowed t)))
   (org-roam-setup))
 
 (use-package org-roam-ui

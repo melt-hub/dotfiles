@@ -70,11 +70,11 @@
                             'face 'font-lock-variable-name-face))
         (insert "\n")
         
-        ;; List up to 10 recent files with the brain icon (filenames only)
+        ;; List up to 8 recent files with the brain icon (filenames only)
         (if recentf-list
             (let ((count 0))
               (dolist (file recentf-list)
-                (when (< count 10)
+                (when (< count 8)
                   (let ((file-name (file-name-nondirectory file)))
                     (insert "    ")
                     ;; Brain icon (udb82 udc91) in magenta
@@ -92,14 +92,30 @@
         (insert "\n")
         ;; Cohesive, left-aligned and centered action items block
         (let* ((width (window-width))
-               ;; The maximum length of the menu options is 23 characters
-               (menu-pad (max 0 (/ (- width 23) 2))))
+               ;; The maximum length of the menu options is 27 characters
+               (menu-pad (max 0 (/ (- width 27) 2))))
           (insert (make-string menu-pad ?\s))
           (insert (propertize "[d]   Capture Dream"
                               'face 'font-lock-string-face))
           (insert "\n")
           (insert (make-string menu-pad ?\s))
           (insert (propertize "[s]   Capture Scrap"
+                              'face 'font-lock-string-face))
+          (insert "\n")
+          (insert (make-string menu-pad ?\s))
+          (insert (propertize "[u]   Capture Uni Note"
+                              'face 'font-lock-string-face))
+          (insert "\n")
+          (insert (make-string menu-pad ?\s))
+          (insert (propertize "[i]   Capture Book Index"
+                              'face 'font-lock-string-face))
+          (insert "\n")
+          (insert (make-string menu-pad ?\s))
+          (insert (propertize "[p]   Capture Paper"
+                              'face 'font-lock-string-face))
+          (insert "\n")
+          (insert (make-string menu-pad ?\s))
+          (insert (propertize "[o]   Capture Person"
                               'face 'font-lock-string-face))
           (insert "\n")
           (insert (make-string menu-pad ?\s))
@@ -113,6 +129,10 @@
           (set-keymap-parent map special-mode-map)
           (define-key map (kbd "d") 'my/dream)
           (define-key map (kbd "s") 'my/scrap)
+          (define-key map (kbd "u") 'my/uni)
+          (define-key map (kbd "i") 'my/index)
+          (define-key map (kbd "p") 'my/paper)
+          (define-key map (kbd "o") 'my/person)
           (define-key map (kbd "q") (lambda ()
                                       (interactive)
                                       (kill-current-buffer)

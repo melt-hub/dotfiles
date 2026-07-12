@@ -27,6 +27,13 @@
 (eval-when-compile (require 'use-package))
 (setq use-package-always-ensure t)
 
+;; Academic identity variables used in capture templates
+(defvar my/org-university "Università di Milano Bicocca"
+  "Default university for scientific papers.")
+
+(defvar my/org-email "melt@campus.unimib.it"
+  "Default email address for academic exports.")
+
 ;; Configure Org
 (use-package org
   :defer t
@@ -45,21 +52,49 @@
   (org-roam-database-connector 'sqlite-builtin)
   :config
   (setq org-roam-capture-templates
-        `(("d" "dream" plain "%?"
+        `(("u" "uni")
+          ("uu" "uni" plain "%?"
+           :target (file+head "uni/%<%Y%m%d%H%M%S>-${slug}.org"
+                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                       ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                       "#+title: ${title}\n#+author: melt\n"
+                                       "#+filetags: :uni:"))
+           :unnarrowed t)
+          ("ui" "index" plain "%?"
+           :target (file+head "uni/%<%Y%m%d%H%M%S>-${slug}.org"
+                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                       ":created: %<%Y-%m-%d %H:%M>\n"
+                                       ":BOOK_TITLE: %^{Book Title}\n"
+                                       ":PDF_PATH: %^{PDF Path}\n:END:\n"
+                                       "#+title: ${title}\n#+author: melt\n"
+                                       "#+filetags: :uni:index:"))
+           :unnarrowed t)
+          ("up" "paper" plain "%?"
+           :target (file+head "uni/papers/%<%Y%m%d%H%M%S>-${slug}.org"
+                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                       ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                       "#+title: ${title}\n"
+                                       "#+author: melt\n"
+                                       "#+email: " my/org-email "\n"
+                                       "#+latex_class: cs-paper\n"
+                                       "#+latex_header: \\author{melt}\n"
+                                       "#+latex_header: \\affil{"
+                                       my/org-university
+                                       " \\\\ \\texttt{" my/org-email "}}\n"
+                                       "#+filetags: :paper:\n\n"
+                                       "* Abstract\n%?\n"
+                                       "* Introduction\n\n"
+                                       "* Bibliography\n"))
+           :unnarrowed t)
+          ("d" "dream")
+          ("dd" "dream" plain "%?"
            :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
                               ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
                                        ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
                                        "#+title: ${title}\n#+author: melt\n"
                                        "#+filetags: :dream:"))
            :unnarrowed t)
-          ("s" "scrap" plain "%?"
-           :target (file+head "scraps/%<%Y%m%d%H%M%S>-${slug}.org"
-                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
-                                       ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
-                                       "#+title: ${title}\n#+author: melt\n"
-                                       "#+filetags: :scrap:"))
-           :unnarrowed t)
-          ("o" "person" plain "%?"
+          ("dp" "person" plain "%?"
            :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
                               ,(concat ":PROPERTIES:\n"
                                        ":ID: %(org-id-new)\n"
@@ -68,12 +103,31 @@
                                        "#+title: ${title}\n"
                                        "#+filetags: :person:\n\n"
                                        "* Dreams featuring ${title}\n"))
+           :unnarrowed t)
+          ("s" "scrap" plain "%?"
+           :target (file+head "scraps/%<%Y%m%d%H%M%S>-${slug}.org"
+                              ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                       ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                       "#+title: ${title}\n#+author: melt\n"
+                                       "#+filetags: :scrap:"))
            :unnarrowed t)))
   (org-roam-db-autosync-mode))
 
 ;; Load built-in recentf-mode
 (require 'recentf)
 (recentf-mode 1)
+
+;; Unified indexing log function writing to *dreams-indexing*
+(defun my/debug-log (format-string &rest args)
+  "Log ARGS formatted by FORMAT-STRING into the *dreams-indexing* buffer."
+  (let ((buf (get-buffer-create "*dreams-indexing*")))
+    (with-current-buffer buf
+      (save-excursion
+        (goto-char (point-max))
+        (let ((inhibit-read-only t))
+          (insert (concat (format-time-string "[%H:%M:%S] ")
+                          (apply #'format format-string args)
+                          "\n")))))))
 
 ;; Load the visual and dashboard interface configuration
 (load "~/.emacs-mobile-tui.el" t)
@@ -95,17 +149,6 @@
               (get-buffer "*Dashboard*")))))
 
 ;; Shared Lisp indexing procedures for Org-Roam nodes
-(defun my/debug-log (format-string &rest args)
-  "Log ARGS formatted by FORMAT-STRING into the *dreams-indexing* buffer."
-  (let ((buf (get-buffer-create "*dreams-indexing*")))
-    (with-current-buffer buf
-      (save-excursion
-        (goto-char (point-max))
-        (let ((inhibit-read-only t))
-          (insert (concat (format-time-string "[%H:%M:%S] ")
-                          (apply #'format format-string args)
-                          "\n")))))))
-
 (defun my/find-file-for-id (id)
   "Find the file path for the given ID using Org-Roam, Org-Id, or local search."
   (let (file)
@@ -117,8 +160,7 @@
         (when file (my/debug-log "Found via Org-Roam: %s" file))))
     ;; 2. Try Org-Id fallback
     (unless file
-      (setq file (car (org-id-find id)))
-      (when file (my/debug-log "Found via Org-Id: %s" file)))
+      (setq file (car (org-id-find id))))
     ;; 3. Try local directory search (crucial for mobile offline sync)
     (unless file
       (let ((dir (file-name-directory buffer-file-name)))
@@ -176,12 +218,11 @@
           (with-current-buffer (find-file-noselect file)
             (save-excursion
               (goto-char (point-min))
-              (when (re-search-forward "^#\\+title:[ \t]*\\(.*\\)$" nil t)
-                (string-trim (match-string 1)))))))))
+              (re-search-forward "^#\\+title:[ \t]*\\(.*\\)$" nil t)
+              (string-trim (match-string 1))))))))
 
 (defun my/append-link-under-headings (file-path year month link-str)
   "Open FILE-PATH and append LINK-STR under Year and Month headings."
-  (my/debug-log "Appending link to central index: %s" file-path)
   (with-current-buffer (find-file-noselect file-path)
     (save-excursion
       (goto-char (point-min))
@@ -240,7 +281,7 @@
             (my/debug-log "Found first level-1 heading")
             (goto-char (match-beginning 0))
             (if (re-search-forward
-                     (regexp-quote link-str) end-of-subtree t)
+                 (regexp-quote link-str) end-of-subtree t)
                 (my/debug-log
                  "Duplicate link detected in person file, skipping")
               (my/debug-log "Inserting link under heading")
@@ -339,7 +380,7 @@
   (interactive)
   (my/dashboard)
   (redisplay)
-  (org-roam-capture nil "d"))
+  (org-roam-capture nil "dd"))
 
 (defun my/scrap ()
   "Launch native Org-Roam capture for a scrap node."
@@ -347,3 +388,31 @@
   (my/dashboard)
   (redisplay)
   (org-roam-capture nil "s"))
+
+(defun my/uni ()
+  "Launch native Org-Roam capture for a uni note."
+  (interactive)
+  (my/dashboard)
+  (redisplay)
+  (org-roam-capture nil "uu"))
+
+(defun my/index ()
+  "Launch native Org-Roam capture for a book index."
+  (interactive)
+  (my/dashboard)
+  (redisplay)
+  (org-roam-capture nil "ui"))
+
+(defun my/paper ()
+  "Launch native Org-Roam capture for an academic paper."
+  (interactive)
+  (my/dashboard)
+  (redisplay)
+  (org-roam-capture nil "up"))
+
+(defun my/person ()
+  "Launch native Org-Roam capture for a person node."
+  (interactive)
+  (my/dashboard)
+  (redisplay)
+  (org-roam-capture nil "dp"))
