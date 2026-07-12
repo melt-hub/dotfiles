@@ -1,7 +1,4 @@
-;; ~/.emacs-mobile-ui.el --- Visual and dashboard configuration
-
-;; Load high-contrast dark theme modus-vivendi (built-in)
-(load-theme 'modus-vivendi t)
+;; ~/.emacs-mobile-tui.el --- Visual and dashboard configuration
 
 ;; Default text scale zoom for the mobile dashboard
 (defvar my/dashboard-zoom 2
@@ -17,7 +14,7 @@
      (t "Good night"))))
 
 (defun my/insert-centered (string &optional face)
-  "Insert STRING centered horizontally in the current window, with optional FACE."
+  "Insert STRING centered horizontally in current window, with optional FACE."
   (let* ((width (window-width))
          (len (length string))
          (pad (max 0 (/ (- width len) 2))))
@@ -69,28 +66,21 @@
         
         ;; Left-aligned but cleanly indented recent files list
         (insert "  ")
-        (insert (propertize "Recent Files: (r)"
+        (insert (propertize "Recent Files:"
                             'face 'font-lock-variable-name-face))
         (insert "\n")
         
-        ;; List up to 10 recent files with corresponding icons
+        ;; List up to 10 recent files with the brain icon (filenames only)
         (if recentf-list
             (let ((count 0))
               (dolist (file recentf-list)
                 (when (< count 10)
-                  (let* ((abbrev-path (abbreviate-file-name file))
-                         (is-dream (string-match-p "/dreams/" file))
-                         ;; Brain icon for dreams, pencil for scraps
-                         (icon (cond (is-dream "󰧑")
-                                     ((string-match-p "/scraps/" file) "")
-                                     (t "")))
-                         (icon-face (if is-dream
-                                        'font-lock-keyword-face
-                                      'font-lock-string-face)))
+                  (let ((file-name (file-name-nondirectory file)))
                     (insert "    ")
-                    (insert (propertize icon 'face icon-face))
+                    ;; Brain icon (udb82 udc91) in magenta
+                    (insert (propertize "󰧑" 'face 'font-lock-keyword-face))
                     (insert "  ")
-                    (insert-button abbrev-path
+                    (insert-button file-name
                                    'action 'my/open-recent-file
                                    'path file
                                    'follow-link t
@@ -123,7 +113,10 @@
           (set-keymap-parent map special-mode-map)
           (define-key map (kbd "d") 'my/dream)
           (define-key map (kbd "s") 'my/scrap)
-          (define-key map (kbd "q") 'kill-current-buffer)
+          (define-key map (kbd "q") (lambda ()
+                                      (interactive)
+                                      (kill-current-buffer)
+                                      (save-buffers-kill-terminal)))
           (define-key map (kbd "RET") 'push-button)
           (use-local-map map))
         (setq buffer-read-only t)))
