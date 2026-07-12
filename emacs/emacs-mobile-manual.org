@@ -1,0 +1,103 @@
+#+TITLE: Mobile Org-Roam Capture System Integration
+
+* Introduction
+
+  This manual describes the configuration of a lightweight, package-free
+  mobile integration for an Org-Roam capture system. The mobile environment
+  writes new nodes directly into directories synchronized with Syncthing, 
+  allowing the main workstation to index them seamlessly without the overhead
+  of running an active database or Org-Roam on mobile.
+
+* Prerequisites
+
+** Install Emacs in Termux
+
+  Ensure Emacs is installed on your Android device and has access to local
+  shared storage by running the following commands in Termux:
+
+  #+begin_src bash
+    pkg update && pkg install emacs -y
+    termux-setup-storage
+  #+end_src
+
+* Explanation of Core Workflows
+
+** Dynamic UI Rendering and Centering
+
+  To avoid visual distortion when resizing the terminal or rotating the phone,
+  the dashboard uses =(window-width)= to compute the padding spaces needed.
+  Instead of centering lines individually, the ASCII brain art and action 
+  menu are formatted using their maximum line width as a boundary. This
+  preserves vertical alignment (such as the brain stem and menu brackets)
+  while centering the blocks cleanly.
+
+** Package-free Recent Files & Icons
+
+  Emacs's built-in =recentf-mode= tracks the files opened on mobile. The system 
+  evaluates the file paths at runtime to display custom Nerd Font icons:
+  a brain icon (=󰧑=) for dreams and a pencil icon (==) for scraps, styled in
+  high-contrast theme-inherited colors.
+
+** Zero-overhead Capturing
+
+  When executing =my/dream= or =my/scrap=, the dashboard is drawn and rendered
+  immediately using =(redisplay)=. The interactive string prompt is then shown
+  over the UI. The file is created with a generated UUID via =org-id-new=
+  and saved directly, avoiding the overhead of compiling a SQLite database on
+  mobile storage.
+
+* Shell Aliases
+
+  Add the following lines to your mobile shell configuration file (e.g.,
+  =~/.bashrc=) to register the shortcut commands:
+
+  #+begin_src bash
+    # Quick access to capture a dream node
+    alias dream="emacs -q -l $HOME/.emacs-mobile.el -f my/dream"
+
+    # Quick access to capture a scrap node
+    alias scrap="emacs -q -l $HOME/.emacs-mobile.el -f my/scrap"
+
+    # Start Emacs directly on the mobile dashboard
+    alias dashboard="emacs -q -l $HOME/.emacs-mobile.el"
+  #+end_src
+
+  Apply the changes to your active shell by running:
+
+  #+begin_src bash
+    source ~/.bashrc
+  #+end_src
+
+* Termux Shortcuts
+
+  To run commands directly from home screen widgets using the Termux:Widget
+  add-on, create executable shortcut scripts inside the =~/.shortcuts/= 
+  directory:
+
+  #+begin_src bash
+    mkdir -p ~/.shortcuts
+  #+end_src
+
+** Create Dashboard Shortcut
+
+  #+begin_src bash
+    echo -e '#!/data/data/com.termux/files/usr/bin/bash\nemacs -q -l $HOME/.emacs-mobile.el' > ~/.shortcuts/dashboard
+    chmod +x ~/.shortcuts/dashboard
+  #+end_src
+
+** Create Dream Capture Shortcut
+
+  #+begin_src bash
+    echo -e '#!/data/data/com.termux/files/usr/bin/bash\nemacs -q -l $HOME/.emacs-mobile.el -f my/dream' > ~/.shortcuts/dream
+    chmod +x ~/.shortcuts/dream
+  #+end_src
+
+** Create Scrap Capture Shortcut
+
+  #+begin_src bash
+    echo -e '#!/data/data/com.termux/files/usr/bin/bash\nemacs -q -l $HOME/.emacs-mobile.el -f my/scrap' > ~/.shortcuts/scrap
+    chmod +x ~/.shortcuts/scrap
+  #+end_src
+
+  Once created, drag a *Termux:Shortcut* widget onto your home screen and
+  link it to the desired script.
