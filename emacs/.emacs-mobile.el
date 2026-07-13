@@ -16,12 +16,6 @@
 ;; Load high-contrast dark theme modus-vivendi (built-in)
 (load-theme 'modus-vivendi t)
 
-;; Add Termux TeX Live binary directory to Emacs PATH and exec-path
-(let ((texlive-bin "/data/data/com.termux/files/usr/bin/texlive"))
-  (when (file-directory-p texlive-bin)
-    (add-to-list 'exec-path texlive-bin)
-    (setenv "PATH" (concat texlive-bin ":" (getenv "PATH")))))
-
 ;; Initialize package manager and use-package on Termux
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -47,7 +41,6 @@
 (use-package org
   :defer t
   :config
-  (setq org-latex-images-centered t)
   ;; Force capture buffer to open full screen (no split screen on mobile)
   (add-hook 'org-capture-mode-hook #'delete-other-windows))
 

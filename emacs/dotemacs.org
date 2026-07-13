@@ -388,8 +388,19 @@
     ;; High-performance terminal emulator inside Emacs
     (use-package vterm
       :ensure t
+      :bind ("C-c v" . vterm)
       :config
-      (setq vterm-max-scrollback 10000))
+      (setq vterm-max-scrollback 10000)
+      
+      ;; Force 24-bit truecolor for gorgeous TUI rendering (Ratatui/Kitty style)
+      (add-hook 'vterm-mode-hook
+                (lambda ()
+                  (setenv "COLORTERM" "truecolor")))
+      
+      ;; Map standard Emacs clipboard commands inside the terminal buffer
+      (with-eval-after-load 'vterm
+        (define-key vterm-mode-map (kbd "C-y") 'vterm-yank)
+        (define-key vterm-mode-map (kbd "M-y") 'yank-pop)))
 
     ;; Manual shortcut bindings for compilation and terminal tasks
     (with-eval-after-load 'rust-mode
