@@ -15,6 +15,9 @@
 (defvar my/org-email "melt@campus.unimib.it"
   "Default email address for academic exports.")
 
+(defvar my/org-author "melt"
+  "Default author for scientific papers.")
+
 ;; Automatically follow file symlinks
 (setq vc-follow-symlinks t)
 
@@ -506,7 +509,7 @@
   ;; Ensure images are centered by default
   (setq org-latex-images-centered t)
 
-  ;; Custom minimal class for CS papers (uses external cs-paper-style.sty)
+  ;; Custom minimal class for CS papers (uses external cs-paper-template.sty)
   (with-eval-after-load 'ox-latex
     (add-to-list 'org-latex-classes
                  '("cs-paper"
@@ -514,7 +517,7 @@
 [DEFAULT-PACKAGES]
 [PACKAGES]
 [EXTRA]
-\\usepackage{cs-paper-style}"
+\\usepackage{cs-paper-template}"
                    ("\\section{%s}" . "\\section*{%s}")
                    ("\\subsection{%s}" . "\\subsection*{%s}")
                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -549,20 +552,29 @@
              :unnarrowed t)
             ("up" "paper" plain "%?"
              :target (file+head "uni/papers/%<%Y%m%d%H%M%S>-${slug}.org"
-                                ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
-                                         ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                ,(concat ":PROPERTIES:\n"
+                                         ":ID: %(org-id-new)\n"
+                                         ":created: %<%Y-%m-%d %H:%M>\n"
+                                         ":END:\n"
                                          "#+title: ${title}\n"
-                                         "#+author: melt\n"
+                                         "#+author: " my/org-author "\n"
                                          "#+email: " my/org-email "\n"
                                          "#+latex_class: cs-paper\n"
-                                         "#+latex_header: \\author{melt}\n"
+                                         "#+latex_header: \\author{"
+                                         my/org-author
+                                         "\\thanks{Equal contribution.}}\n"
                                          "#+latex_header: \\affil{"
                                          my/org-university
                                          " \\\\ \\texttt{" my/org-email "}}\n"
                                          "#+filetags: :paper:\n\n"
-                                         "* Abstract\n%?\n"
+                                         "#+options: toc:t\n\n"
+                                         "#+begin_abstract\n"
+                                         "This is the abstract. [fn:1]\n"
+                                         "#+end_abstract\n\n"
                                          "* Introduction\n\n"
-                                         "* Bibliography\n"))
+                                         "The paper starts here.\n\n"
+                                         "* Bibliography\n\n"
+                                         "[fn:1] Footnote example.\n"))
              :unnarrowed t)
             ("d" "dream")
             ("dd" "dream" plain "%?"
