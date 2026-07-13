@@ -1,0 +1,29 @@
+% melt-setup.sty
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{melt-setup}[2026/07/06 Melt Custom Math and TikZ Setup]
+
+% Loads packages
+\RequirePackage{clrscode3e}
+\RequirePackage{tikz}
+\RequirePackage{pgfplots}
+\RequirePackage{forest}
+\RequirePackage{authblk}
+
+% Load libraries
+\usetikzlibrary{
+  positioning,
+  calc,
+  arrows.meta,
+  shapes.multipart,
+  automata,
+  matrix,
+  intersections
+}
+
+% Configure PGFPlots
+\usepgfplotslibrary{fillbetween, statistics}
+\pgfplotsset{compat=newest}
+
+% Hide red borders around links globally (ToC and references)
+\usepackage{hyperref}
+\hypersetup{hidelinks}

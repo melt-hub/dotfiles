@@ -1,0 +1,36 @@
+% cs-paper-style.sty
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cs-paper-style}[2026/07/06 Custom CS Paper Style]
+
+% NIPS-style title layout
+\makeatletter
+\renewcommand{\maketitle}{
+  \begingroup
+  \centering
+  \hrule height 4pt
+  \vskip 0.25in
+  {\LARGE\bfseries\@title\par}
+  \vskip 0.22in
+  \hrule height 1pt
+  \vskip 0.3in
+  {\def\and{\hskip 2em plus 1em minus 1em}%
+   \begin{tabular}[t]{c}\@author\end{tabular}\par}
+  \vskip 0.3in
+  \endgroup
+}
+\makeatother
+
+% Abstract layout with wider margins
+\renewenvironment{abstract}{
+  \small
+  \begin{center}
+    {\bfseries Abstract\par\vspace{0.5em}}
+  \end{center}
+  \list{}{
+    \setlength{\leftmargin}{1cm}
+    \setlength{\rightmargin}{\leftmargin}
+  }
+  \item\relax
+}{
+  \endlist
+}
