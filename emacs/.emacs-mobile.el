@@ -16,6 +16,12 @@
 ;; Load high-contrast dark theme modus-vivendi (built-in)
 (load-theme 'modus-vivendi t)
 
+;; Add Termux TeX Live binary directory to Emacs PATH and exec-path
+(let ((texlive-bin "/data/data/com.termux/files/usr/bin/texlive"))
+  (when (file-directory-p texlive-bin)
+    (add-to-list 'exec-path texlive-bin)
+    (setenv "PATH" (concat texlive-bin ":" (getenv "PATH")))))
+
 ;; Initialize package manager and use-package on Termux
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -34,6 +40,9 @@
 (defvar my/org-email "melt@campus.unimib.it"
   "Default email address for academic exports.")
 
+(defvar my/org-author "melt"
+  "Default author name for academic and general exports.")
+
 ;; Configure Org
 (use-package org
   :defer t
@@ -44,6 +53,7 @@
 
 ;; Configure Org-Roam with built-in SQLite engine
 (use-package org-roam
+  :demand t
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
          ("C-c n i" . org-roam-node-insert))
@@ -57,7 +67,8 @@
            :target (file+head "uni/%<%Y%m%d%H%M%S>-${slug}.org"
                               ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
                                        ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
-                                       "#+title: ${title}\n#+author: melt\n"
+                                       "#+title: ${title}\n"
+                                       "#+author: " my/org-author "\n"
                                        "#+filetags: :uni:"))
            :unnarrowed t)
           ("ui" "index" plain "%?"
@@ -66,7 +77,8 @@
                                        ":created: %<%Y-%m-%d %H:%M>\n"
                                        ":BOOK_TITLE: %^{Book Title}\n"
                                        ":PDF_PATH: %^{PDF Path}\n:END:\n"
-                                       "#+title: ${title}\n#+author: melt\n"
+                                       "#+title: ${title}\n"
+                                       "#+author: " my/org-author "\n"
                                        "#+filetags: :uni:index:"))
            :unnarrowed t)
           ("up" "paper" plain "%?"
@@ -74,10 +86,12 @@
                               ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
                                        ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
                                        "#+title: ${title}\n"
-                                       "#+author: melt\n"
+                                       "#+author: " my/org-author "\n"
                                        "#+email: " my/org-email "\n"
                                        "#+latex_class: cs-paper\n"
-                                       "#+latex_header: \\author{melt}\n"
+                                       "#+latex_header: \\author{"
+                                       my/org-author
+                                       "\\thanks{Equal contribution.}}\n"
                                        "#+latex_header: \\affil{"
                                        my/org-university
                                        " \\\\ \\texttt{" my/org-email "}}\n"
@@ -91,7 +105,8 @@
            :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
                               ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
                                        ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
-                                       "#+title: ${title}\n#+author: melt\n"
+                                       "#+title: ${title}\n"
+                                       "#+author: " my/org-author "\n"
                                        "#+filetags: :dream:"))
            :unnarrowed t)
           ("dp" "person" plain "%?"
@@ -108,7 +123,8 @@
            :target (file+head "scraps/%<%Y%m%d%H%M%S>-${slug}.org"
                               ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
                                        ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
-                                       "#+title: ${title}\n#+author: melt\n"
+                                       "#+title: ${title}\n"
+                                       "#+author: " my/org-author "\n"
                                        "#+filetags: :scrap:"))
            :unnarrowed t)))
   (org-roam-db-autosync-mode))
@@ -223,6 +239,7 @@
 
 (defun my/append-link-under-headings (file-path year month link-str)
   "Open FILE-PATH and append LINK-STR under Year and Month headings."
+  (my/debug-log "Appending link to central index: %s" file-path)
   (with-current-buffer (find-file-noselect file-path)
     (save-excursion
       (goto-char (point-min))
@@ -402,17 +419,3 @@
   (my/dashboard)
   (redisplay)
   (org-roam-capture nil "ui"))
-
-(defun my/paper ()
-  "Launch native Org-Roam capture for an academic paper."
-  (interactive)
-  (my/dashboard)
-  (redisplay)
-  (org-roam-capture nil "up"))
-
-(defun my/person ()
-  "Launch native Org-Roam capture for a person node."
-  (interactive)
-  (my/dashboard)
-  (redisplay)
-  (org-roam-capture nil "dp"))

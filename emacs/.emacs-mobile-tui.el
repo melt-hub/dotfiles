@@ -62,6 +62,10 @@
         ;; Centered dynamic greeting
         (my/insert-centered
          (concat "[CIRO] " (my/get-greeting) " melt!") 'bold)
+        
+        ;; Centered Emacs startup initialization time
+        (my/insert-centered
+         (concat "System loaded in " (emacs-init-time)) 'shadow)
         (insert "\n")
         
         ;; Left-aligned but cleanly indented recent files list
@@ -74,7 +78,7 @@
         (if recentf-list
             (let ((count 0))
               (dolist (file recentf-list)
-                (when (< count 8)
+                (when (< count 4)
                   (let ((file-name (file-name-nondirectory file)))
                     (insert "    ")
                     ;; Brain icon (udb82 udc91) in magenta
@@ -111,14 +115,6 @@
                               'face 'font-lock-string-face))
           (insert "\n")
           (insert (make-string menu-pad ?\s))
-          (insert (propertize "[p]   Capture Paper"
-                              'face 'font-lock-string-face))
-          (insert "\n")
-          (insert (make-string menu-pad ?\s))
-          (insert (propertize "[o]   Capture Person"
-                              'face 'font-lock-string-face))
-          (insert "\n")
-          (insert (make-string menu-pad ?\s))
           (insert (propertize "[q]   Exit Dashboard"
                               'face 'font-lock-string-face))
           (insert "\n"))
@@ -131,13 +127,14 @@
           (define-key map (kbd "s") 'my/scrap)
           (define-key map (kbd "u") 'my/uni)
           (define-key map (kbd "i") 'my/index)
-          (define-key map (kbd "p") 'my/paper)
-          (define-key map (kbd "o") 'my/person)
           (define-key map (kbd "q") (lambda ()
                                       (interactive)
                                       (kill-current-buffer)
                                       (save-buffers-kill-terminal)))
           (define-key map (kbd "RET") 'push-button)
           (use-local-map map))
+        
+        ;; Force the cursor to start at the very top of the dashboard
+        (goto-char (point-min))
         (setq buffer-read-only t)))
     (switch-to-buffer buf)))
