@@ -9,6 +9,7 @@
 (defvar os-packages-path "~/dotfiles/emacs/packages/")
 (defvar org-dir-path "~/zk/")
 
+;; Custom variables
 (defvar my/org-university "Università di Milano Bicocca"
   "Default university for scientific papers.")
 
@@ -17,6 +18,9 @@
 
 (defvar my/org-author "melt"
   "Default author for scientific papers.")
+
+(defvar my/temp-dir (expand-file-name ".tmp/" user-emacs-directory)
+  "Central directory for Emacs temporary files.")
 
 ;; Automatically follow file symlinks
 (setq vc-follow-symlinks t)
@@ -127,6 +131,45 @@
 ;; --------------- end spacing/indentation ---------------
 
 ;; ====================| END GENERAL |====================
+
+;; Ensure the main temp directory exists
+(unless (file-exists-p my/temp-dir)
+  (make-directory my/temp-dir t))
+
+;; Backups (file.org~) - Includes full path to avoid collisions
+(setq backup-directory-alist
+      `((".*" . ,(expand-file-name "backups/" my/temp-dir))))
+(setq backup-by-copying t)    ; Backup by copying to preserve symlinks
+(setq version-control t)      ; Use numbered backups (.~1~, .~2~, etc.)
+(setq kept-old-versions 2)    ; Keep the original version
+(setq kept-new-versions 5)    ; Keep the 5 most recent versions
+(setq delete-old-versions t)  ; Silently delete excess backups
+
+;; Auto-saves (#file.org#)
+(setq auto-save-file-name-transforms
+      `((".*" ,(expand-file-name "auto-save/" my/temp-dir) t)))
+(setq auto-save-list-file-prefix
+      (expand-file-name "auto-save-list/.saves-" my/temp-dir))
+
+;; Lock files (.#file.org) - Requires Emacs 28+
+(when (boundp 'lock-file-name-transforms)
+  (setq lock-file-name-transforms
+        `((".*" ,(expand-file-name "locks/" my/temp-dir) t))))
+
+;; Initialize subdirectories
+(dolist (dir '("backups" "auto-save" "locks" "auto-save-list"))
+  (let ((path (expand-file-name dir my/temp-dir)))
+    (unless (file-exists-p path)
+      (make-directory path t))))
+
+;; Use y/n instead of yes/no globally (Emacs 28+)
+(setq use-short-answers t)
+
+;; Confirm Emacs exit with a quick y/n prompt
+(setq confirm-kill-emacs 'y-or-n-p)
+
+;; Ensure 's' (save) is always an option in buffer-related prompts
+(setq save-some-buffers-default-predicate 'save-some-buffers-root)
 
 ;; ====================| PACKAGES |====================
 
@@ -250,40 +293,69 @@
         '(magit-process-password-auth-source)))
 ;; --------------- end git integration ---------------
 
-;; --------------- rust development ---------------
-;; Major mode for editing Rust source code
+(use-package cc-mode
+  :ensure nil
+  :bind (:map c-mode-map
+              ("C-c C-c" . compile)
+         :map c++-mode-map
+              ("C-c C-c" . compile))
+  :config
+  (setq-default c-basic-offset 4))
+
+(use-package prolog
+  :ensure nil
+  :mode ("\\.pl\\'" . prolog-mode)
+  :config
+  (setq prolog-program-name "swipl")
+  (setq prolog-system 'swi))
+
+(use-package java-mode
+  :ensure nil
+  :bind (:map java-mode-map
+              ("C-c C-c" . compile))
+  :config
+  (setq-default java-basic-offset 4))
+
+(use-package js
+  :ensure nil
+  :mode ("\\.js\\'" . js-mode)
+  :bind (:map js-mode-map
+              ("C-c C-c" . compile))
+  :config
+  (setq js-indent-level 2))
+
+(use-package julia-mode
+  :ensure t)
+
+;; Adds a proper CLI REPL for Julia
+(use-package julia-repl
+  :ensure t
+  :hook (julia-mode . julia-repl-mode))
+
+(use-package python
+  :ensure nil
+  :mode ("\\.py\\'" . python-mode)
+  :bind (:map python-mode-map
+              ("C-c C-c" . python-shell-send-buffer)
+              ("C-c C-z" . run-python))
+  :config
+  (setq python-shell-interpreter "python3"))
+
 (use-package rust-mode
   :ensure t
   :mode "\\.rs\\'")
 
-;; Compiler and dependency manager interaction
 (use-package cargo
   :ensure t
   :hook (rust-mode . cargo-minor-mode)
   :config
+  ;; The prefix automatically enables sub-keys (b, r, t, c, etc.)
   (setq cargo-minor-mode-key-prefix (kbd "C-c C-k"))
   (setq cargo-process--command-flags '("--color" "always")))
 
-;; High-performance terminal emulator inside Emacs
-(use-package vterm
-  :ensure t
-  :bind ("C-c v" . vterm)
-  :config
-  (setq vterm-max-scrollback 10000)
-  
-  ;; Map standard Emacs clipboard commands inside the terminal buffer
-  (with-eval-after-load 'vterm
-    (define-key vterm-mode-map (kbd "C-y") 'vterm-yank)
-    (define-key vterm-mode-map (kbd "M-y") 'yank-pop)))
-
-;; Manual shortcut bindings for compilation and terminal tasks
+;; Project-specific terminal shortcut
 (with-eval-after-load 'rust-mode
-  (define-key rust-mode-map (kbd "C-c C-k b") 'cargo-process-build)
-  (define-key rust-mode-map (kbd "C-c C-k r") 'cargo-process-run)
-  (define-key rust-mode-map (kbd "C-c C-k t") 'cargo-process-test)
-  (define-key rust-mode-map (kbd "C-c C-k c") 'cargo-process-check)
-  (define-key rust-mode-map (kbd "C-c C-v") 'vterm))
-;; --------------- end rust development ---------------
+  (define-key rust-mode-map (kbd "C-c C-v") #'vterm))
 
 ;; --------------- lisp developement  ---------------
 
@@ -646,6 +718,16 @@
   (pinentry-start))
 ;; --------------- end password management ---------------
 
+(use-package vterm
+  :ensure t
+  :bind ("C-c v" . vterm)
+  :custom
+  (vterm-max-scrollback 10000)
+  :config
+  ;; Standard yank (paste) bindings
+  (define-key vterm-mode-map (kbd "C-y") #'vterm-yank)
+  (define-key vterm-mode-map (kbd "M-y") #'vterm-yank-pop))
+
 ;; --------------- multimedia (emms) ---------------
 (use-package emms
   :ensure t
@@ -723,6 +805,28 @@
     (execute-kbd-macro (kbd "C-u C-u C-c C-x C-l"))
     (message "[CIRO]: LaTeX scaling set to %.1f" next)))
 
+(defun my/org-export-output-directory (orig-fun extension
+                                       &optional subtreep pub-dir)
+  "Redirect export output to an 'export/' subdirectory."
+  (unless pub-dir
+    (let ((base-dir (file-name-directory (buffer-file-name))))
+      (setq pub-dir (expand-file-name "export/" base-dir))
+      (unless (file-exists-p pub-dir)
+        (make-directory pub-dir t))))
+  (let ((output-file (apply orig-fun extension subtreep (list pub-dir))))
+    (message "[CIRO]: Exporting to %s" output-file)
+    output-file))
+
+;; Apply advice to redirect export
+(advice-add 'org-export-output-file-name
+            :around #'my/org-export-output-directory)
+
+;; Configure LaTeX cleanup
+(setq org-latex-remove-logfiles t)
+(setq org-latex-logfiles-extensions
+      '("aux" "idx" "log" "out" "toc" "nav" "snm"
+        "vrb" "fls" "fdb_latexmk" "blg" "bbl"))
+
 (defun my/debug-log (format-string &rest args)
   "Log ARGS formatted by FORMAT-STRING into the *dreams-indexing* buffer."
   (let ((buf (get-buffer-create "*dreams-indexing*")))
@@ -738,16 +842,16 @@
   "Find the file path for the given ID using Org-Roam, Org-Id, or local search."
   (let (file)
     (my/debug-log "Finding file for ID: %s" id)
-    ;; 1. Try Org-Roam database first
+    ;; Try Org-Roam database first
     (when (fboundp 'org-roam-node-from-id)
       (let ((node (org-roam-node-from-id id)))
         (setq file (when node (org-roam-node-file node)))
         (when file (my/debug-log "Found via Org-Roam: %s" file))))
-    ;; 2. Try Org-Id fallback
+    ;; Try Org-Id fallback
     (unless file
       (setq file (car (org-id-find id)))
       (when file (my/debug-log "Found via Org-Id: %s" file)))
-    ;; 3. Try local directory search (crucial for mobile offline sync)
+    ;; Try local directory search (crucial for mobile offline sync)
     (unless file
       (let ((dir (file-name-directory buffer-file-name)))
         (when dir
@@ -925,7 +1029,7 @@
 
           (my/debug-log "Found linked IDs: %s" linked-ids)
 
-          ;; 1. Update central dreams index (using your specific ID)
+          ;; Update central dreams index (using your specific ID)
           (let* ((dreams-file (my/find-file-for-id
                                "947ffe5d-e75f-4f99-8c17-82fe190ca665")))
             (if dreams-file
@@ -933,7 +1037,7 @@
                  dreams-file year month link-str)
               (my/debug-log "ERROR: Could not find dreams.org index file")))
 
-          ;; 2. Update person registers (only for person nodes)
+          ;; Update person registers (only for person nodes)
           (dolist (linked-id linked-ids)
             (unless (string= linked-id "947ffe5d-e75f-4f99-8c17-82fe190ca665")
               (my/debug-log "Processing linked ID: %s" linked-id)
