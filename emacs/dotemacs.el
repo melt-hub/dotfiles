@@ -271,11 +271,6 @@
   :config
   (setq vterm-max-scrollback 10000)
   
-  ;; Force 24-bit truecolor for gorgeous TUI rendering (Ratatui/Kitty style)
-  (add-hook 'vterm-mode-hook
-            (lambda ()
-              (setenv "COLORTERM" "truecolor")))
-  
   ;; Map standard Emacs clipboard commands inside the terminal buffer
   (with-eval-after-load 'vterm
     (define-key vterm-mode-map (kbd "C-y") 'vterm-yank)
@@ -379,7 +374,10 @@
 
 (use-package org-fragtog
   :ensure t
-  :hook (org-mode . org-fragtog-mode))
+  :hook (org-mode . org-fragtog-mode)
+  :config
+  (setq org-preview-latex-image-directory
+      (concat temporary-file-directory "ltximg/")))
 
 ;; --------------- end latex ---------------
 
@@ -456,30 +454,31 @@
           '(("p" "Project Overview" tags-todo "+proj")))
 
     (setq org-capture-templates
-          `(("t" "Todo [Inbox]" entry (file+headline ,agenda-path "Inbox")
+          `(("t" "todo [Inbox]" entry (file+headline ,agenda-path "Inbox")
              "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:" :empty-lines 1)
-            ("a" "Appointment" entry 
+            ("r" "reminder" entry 
              (file+headline ,agenda-path "Tasks & Appointments")
-             ,(concat "* %^{Description} :appo:\n%^t\n:PROPERTIES:\n"
+             ,(concat "* %^{Description} :rem:\n%^t\n:PROPERTIES:\n"
                       ":CONTACT: %^{Who}\n:LOCATION: %^{Where}\n"
-                      ":CREATED: %U\n:END:") :empty-lines 1)
-            ("k" "Task" entry
+                ":CREATED: %U\n:END:")
+              :empty-lines 1)
+            ("k" "task" entry
              (file+headline ,agenda-path "Tasks & Appointments")
              ,(concat "* TODO %^{Description} :task:\nSCHEDULED: %^t\n"
                       ":PROPERTIES:\n:CONTACT: %^{Who}\n"
                       ":LOCATION: %^{Where}\n:CREATED: %U\n:END:")
              :empty-lines 1)
-            ("c" "Call" entry 
+            ("c" "call" entry 
              (file+headline ,agenda-path "Tasks & Appointments")
              ,(concat "* TODO %^{Name} :call:\nSCHEDULED: %^t\n"
                       ":PROPERTIES:\n:CONTACT: %\\1\n:CREATED: %U\n:END:")
              :empty-lines 1)
-            ("b" "Birthday" entry 
+            ("b" "birthday" entry 
              (file+headline ,agenda-path "Birthdays & Recurrences")
              ,(concat "* Compleanno %^{Who} :bday:\n"
                       "%(concat \"<\" (org-read-date) \" +1y>\")")
              :empty-lines 1)
-            ("p" "Project" entry (file+headline ,agenda-path "Projects")
+            ("p" "project" entry (file+headline ,agenda-path "Projects")
              ,(concat "* TODO %^{Project Name} [%] :proj:\nDEADLINE: %^t\n"
                       ":PROPERTIES:\n:CREATED: %U\n:END:\n- [ ] %?")
              :empty-lines 1))))
@@ -546,23 +545,22 @@
   (setq org-roam-capture-templates
           `(("u" "uni")
             ("uu" "uni" plain "%?"
-             :target (file+head "uni/%<%Y%m%d%H%M%S>-${slug}.org"
+             :target (file+head "uni/${slug}.org"
                                 ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
                                          ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
                                          "#+title: ${title}\n#+author: melt\n"
                                          "#+filetags: :uni:"))
              :unnarrowed t)
             ("ui" "index" plain "%?"
-             :target (file+head "uni/%<%Y%m%d%H%M%S>-${slug}.org"
+             :target (file+head "uni/${slug}.org"
                                 ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
                                          ":created: %<%Y-%m-%d %H:%M>\n"
-                                         ":BOOK_TITLE: %^{Book Title}\n"
-                                         ":PDF_PATH: %^{PDF Path}\n:END:\n"
+                                         ":BOOK_TITLE: %^{Book Title}\n:END:\n"
                                          "#+title: ${title}\n#+author: melt\n"
                                          "#+filetags: :uni:index:"))
              :unnarrowed t)
             ("up" "paper" plain "%?"
-             :target (file+head "uni/papers/%<%Y%m%d%H%M%S>-${slug}.org"
+             :target (file+head "uni/papers/${slug}.org"
                                 ,(concat ":PROPERTIES:\n"
                                          ":ID: %(org-id-new)\n"
                                          ":created: %<%Y-%m-%d %H:%M>\n"
@@ -589,14 +587,14 @@
              :unnarrowed t)
             ("d" "dream")
             ("dd" "dream" plain "%?"
-             :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
+             :target (file+head "dreams/${slug}.org"
                                 ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
                                          ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
                                          "#+title: ${title}\n#+author: melt\n"
                                          "#+filetags: :dream:"))
              :unnarrowed t)
             ("dp" "person" plain "%?"
-             :target (file+head "dreams/%<%Y%m%d%H%M%S>-${slug}.org"
+             :target (file+head "dreams/${slug}.org"
                                 ,(concat ":PROPERTIES:\n"
                                          ":ID: %(org-id-new)\n"
                                          ":created: %<%Y-%m-%d %H:%M>\n"
@@ -606,7 +604,7 @@
                                          "* Dreams featuring ${title}\n"))
              :unnarrowed t)
             ("s" "scrap" plain "%?"
-             :target (file+head "scraps/%<%Y%m%d%H%M%S>-${slug}.org"
+             :target (file+head "scraps/${slug}.org"
                                 ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
                                          ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
                                          "#+title: ${title}\n#+author: melt\n"
