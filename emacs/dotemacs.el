@@ -3,8 +3,6 @@
 
 ;; ====================| STARTUP |====================
 
-(message "[CIRO]: Yo melt!")
-
 ;; Set directory paths
 (defvar os-packages-path "~/dotfiles/emacs/packages/")
 (defvar org-dir-path "~/zk/")
@@ -19,8 +17,38 @@
 (defvar my/org-author "melt"
   "Default author for scientific papers.")
 
+(defvar my/assistant "CIRO"
+  "Name of the Emacs assistant.")
+
+(defun my/say (text &rest args)
+  "Display a simple assistant message."
+  (message "[%s]: %s" my/assistant (apply #'format text args)))
+
+(my/say "Yo melt!")
+
 (defvar my/temp-dir (expand-file-name ".tmp/" user-emacs-directory)
   "Central directory for Emacs temporary files.")
+
+(defvar my/ascii-brain
+  (concat
+   "            ___    ___\n"
+   "        ..\"`)\" `..\" `(``..\n"
+   "      .'; _..=. :: `-'._ ;`.\n"
+   "     : ) ;\"`':._::_.      ( :.\n"
+   "   .:-\"   _.  `\"##\"` \"._   `-:\\\n"
+   "  /.\"   -\"`  ._.::._. .'\"-   \".:\n"
+   " : :    ( -: `\" :: \"` :- )    : )\n"
+   "( .\".:==._' `'=._##_.='` '_.==: .'\n"
+   "(:  `, `\"`    `\"##\"`    `\"` .'`\".)\n"
+   " \\`'  `\"--.  \"- )( -\" ..--\"`  `-/\n"
+   " (\" (_.\" =\"\"-...\"`...-\"\"= \"._) \")\n"
+   "  \"..__..-\"  )%`..'%(  \"-..__..\"\n"
+   "       (#\"...\'\\\\%%%%/`...\"#)\n"
+   "        `######`--'######\"\n"
+   "          \"###\")@@(`###\"\n"
+   "               \\@@/\n"
+   "                )(\n")
+  "Brain ASCII art.")
 
 ;; Automatically follow file symlinks
 (setq vc-follow-symlinks t)
@@ -36,6 +64,8 @@
 
 ;; Always display inline images by default
 (setq org-startup-with-inline-images t)
+
+(my/say "System variables and paths initialized.")
 
 ;; Load use-package path
 (add-to-list 'load-path (concat os-packages-path "use-package/"))
@@ -57,6 +87,8 @@
     ;; Temporarily disable default perl-mode association for .pl files
     (setq auto-mode-alist
       (rassq-delete-all 'perl-mode auto-mode-alist))
+
+    (my/say "Automodes for languages and RC files applied.")
 ;; --------------- end automodes for specific languages ---------------
 
 ;; ====================| END STARTUP |====================
@@ -128,6 +160,8 @@
     (setq mode-line-major-mode-keymap nil)
     (setq mode-line-minor-mode-keymap nil)
 
+(my/say "Indentation rules active. TAB: [%d], COL: [%d], C: [%d], LISP: [%d]."
+        tab-width fill-column c-basic-offset lisp-indent-offset)
 ;; --------------- end spacing/indentation ---------------
 
 ;; ====================| END GENERAL |====================
@@ -162,11 +196,10 @@
     (unless (file-exists-p path)
       (make-directory path t))))
 
+(my/say "Temporary files centralized in %s." my/temp-dir)
+
 ;; Use y/n instead of yes/no globally (Emacs 28+)
 (setq use-short-answers t)
-
-;; Confirm Emacs exit with a quick y/n prompt
-(setq confirm-kill-emacs 'y-or-n-p)
 
 ;; Ensure 's' (save) is always an option in buffer-related prompts
 (setq save-some-buffers-default-predicate 'save-some-buffers-root)
@@ -190,16 +223,16 @@
 (package-initialize)
 (require 'use-package)
 
-;; Gestione automatica e ottimizzata del Garbage Collector
+;; Automatic garbage collector optimization
 (use-package gcmh
   :ensure t
   :init
-  ;; Imposta la soglia a 16MB durante l'uso attivo (valore equilibrato)
+  ;; 16MB threshold
   (setq gcmh-high-cons-threshold (* 16 1024 1024)
-        ;; Avvia la pulizia della memoria dopo 15 secondi di inattività
         gcmh-idle-delay 15)
   :config
-  (gcmh-mode 1))
+  (gcmh-mode 1)
+  (my/say "Garbage Collector Magic Hack active."))
 
 ;; Fix safe theme validation issues for Emacs 29+
 (setq custom-safe-themes t)
@@ -231,23 +264,44 @@
 ;;   (let ((inhibit-message t)
 ;;         (warning-minimum-level :emergency))
 ;;     (load-theme 'ef-trio-dark t)))
+(my/say "Theme loaded.")
 
 (use-package beacon
   :ensure t
   :config
-  (beacon-mode 1))
+  (beacon-mode 1)
+  (my/say "Beacon following the cursor."))
 
 (use-package nerd-icons
   :ensure t)
 
 (use-package doom-modeline
   :ensure t
-  :init (doom-modeline-mode 1))
+  :init (doom-modeline-mode 1)
+  :config
+  (my/say "Modeline loaded."))
 
 ;; (use-package nyan-mode
 ;;   :ensure t
 ;;   :config
-;;   (nyan-mode))
+;;   (nyan-mode)
+;;   (message "[CIRO]: Nyancat loaded."))
+
+(defun my/dashboard-get-title ()
+  "Generate a dynamic greeting based on the current system hour."
+  (let ((hour (string-to-number (format-time-string "%H")))
+        (prefix (concat "[" my/assistant "]:")))
+    (cond
+     ((and (>= hour 4)  (< hour 7))
+      (concat prefix " Sei già sveglio o ancora sveglio?"))
+     ((and (>= hour 7)  (< hour 12))
+      (concat prefix " Buongiorno " my/org-author "!"))
+     ((and (>= hour 12) (< hour 18))
+      (concat prefix " Buon pomeriggio " my/org-author "!"))
+     ((and (>= hour 18) (< hour 24))
+      (concat prefix " Buona sera " my/org-author "!"))
+     (t
+      (concat prefix " Vatt a dorme " my/org-author "!")))))
 
 (use-package dashboard
   :ensure t
@@ -255,12 +309,27 @@
   :config
   (dashboard-setup-startup-hook)
 
-  ;; Specify custom branding banner
-  (setq dashboard-startup-banner "~/pics/other/spacemacs-logo-padded.png")
-  (setq dashboard-banner-logo-title "[CIRO]: Welcome back melt!")
+  ;; ASCII Art banner 
+  ;; Apply vertical padding and write the art to a temporary file
+  (let* ((top-padding (make-string 3 ?\n))
+         (bottom-padding (make-string 3 ?\n))
+         (banner-path (expand-file-name "dashboard-banner.txt" 
+                                        my/temp-dir)))
+    (with-temp-file banner-path
+      (insert top-padding my/ascii-brain bottom-padding))
+    (setq dashboard-startup-banner banner-path))
 
-  ;; Display standard sections
-  (setq dashboard-items '((recents  . 10)))
+  ;; Banner title
+  (setq dashboard-banner-logo-title (my/dashboard-get-title))
+  (add-hook 'dashboard-mode-hook
+            (lambda () (setq dashboard-banner-logo-title 
+                             (my/dashboard-get-title))))
+  (set-face-attribute 'dashboard-banner-logo-title nil 
+    :height 1.0
+    :weight 'normal
+    :foreground 'unspecified)
+
+  (setq dashboard-items '((recents . 10)))
 
   ;; Fine-tune visual options
   (setq dashboard-set-heading-icons nil)
@@ -278,7 +347,7 @@
               (local-set-key (kbd "q") 'quit-window)
               (setq buffer-read-only t)))
 
-  (message "[CIRO]: Dashboard is ready."))
+  (my/say "Dashboard is ready."))
 
 ;; --------------- git integration ---------------
 (use-package magit
@@ -290,7 +359,8 @@
   :config
   ;; Retrieve credentials using auth-source
   (setq magit-process-find-password-functions
-        '(magit-process-password-auth-source)))
+        '(magit-process-password-auth-source))
+  (my/say "Magit ready."))
 ;; --------------- end git integration ---------------
 
 (use-package cc-mode
@@ -300,21 +370,24 @@
          :map c++-mode-map
               ("C-c C-c" . compile))
   :config
-  (setq-default c-basic-offset 4))
+  (setq-default c-basic-offset 4)
+  (my/say "C/C++ development environment ready."))
 
 (use-package prolog
   :ensure nil
   :mode ("\\.pl\\'" . prolog-mode)
   :config
   (setq prolog-program-name "swipl")
-  (setq prolog-system 'swi))
+  (setq prolog-system 'swi)
+  (my/say "Prolog (SWI) environment ready."))
 
 (use-package java-mode
   :ensure nil
   :bind (:map java-mode-map
               ("C-c C-c" . compile))
   :config
-  (setq-default java-basic-offset 4))
+  (setq-default java-basic-offset 4)
+  (my/say "Java environment ready."))
 
 (use-package js
   :ensure nil
@@ -322,15 +395,21 @@
   :bind (:map js-mode-map
               ("C-c C-c" . compile))
   :config
-  (setq js-indent-level 2))
+  (setq js-indent-level 2)
+  (my/say "Javascript environment ready."))
 
 (use-package julia-mode
-  :ensure t)
+  :mode "\\.jl\\'"
+  :ensure t
+  :config
+  (my/say "Julia mode ready."))
 
 ;; Adds a proper CLI REPL for Julia
 (use-package julia-repl
   :ensure t
-  :hook (julia-mode . julia-repl-mode))
+  :hook (julia-mode . julia-repl-mode)
+  :config
+  (my/say "Julia REPL ready."))
 
 (use-package python
   :ensure nil
@@ -339,7 +418,8 @@
               ("C-c C-c" . python-shell-send-buffer)
               ("C-c C-z" . run-python))
   :config
-  (setq python-shell-interpreter "python3"))
+  (setq python-shell-interpreter "python3")
+  (my/say "Python environment ready."))
 
 (use-package rust-mode
   :ensure t
@@ -351,7 +431,8 @@
   :config
   ;; The prefix automatically enables sub-keys (b, r, t, c, etc.)
   (setq cargo-minor-mode-key-prefix (kbd "C-c C-k"))
-  (setq cargo-process--command-flags '("--color" "always")))
+  (setq cargo-process--command-flags '("--color" "always"))
+  (my/say "Rust/Cargo environment ready."))
 
 ;; Project-specific terminal shortcut
 (with-eval-after-load 'rust-mode
@@ -372,7 +453,8 @@
   :ensure t
   :after (slime company)
   :config
-  (setq slime-company-completion 'fuzzy))
+  (setq slime-company-completion 'fuzzy)
+  (my/say "Common Lisp (SLIME) environment ready."))
 
 (use-package lisp-extra-font-lock
   :ensure t
@@ -392,6 +474,7 @@
 
 ;; --------------- sql developement ---------------
 (use-package sql
+  :mode ("\\.sql\\'" . sql-mode)
   :config
   ;; Assign primary engine dialect
   (setq sql-product 'mysql)
@@ -429,7 +512,8 @@
       (toggle-truncate-lines t)))
 
   ;; Force standard ASCII formatting
-  (setq sql-mysql-options '("--table" "--unbuffered")))
+  (setq sql-mysql-options '("--table" "--unbuffered"))
+  (my/say "SQL/MySQL environment ready."))
 
 ;; Automatic capitalization utility for SQL keywords
 (use-package sqlup-mode
@@ -439,7 +523,8 @@
    (sql-interactive-mode . sqlup-mode))
   :config
   ;; Specify exclusion blacklist
-  (add-to-list 'sqlup-blacklist "name"))
+  (add-to-list 'sqlup-blacklist "name")
+  (my/say "SQL/MySQL mode loaded."))
 ;; --------------- end sql development ---------------
 
 ;; --------------- latex ---------------
@@ -456,41 +541,42 @@
 ;; --------------- pdf viewing ---------------
 
 (use-package pdf-tools
- :ensure t
- :magic ("%PDF" . pdf-view-mode)
- :config
- ;; Trigger backend installation
- (pdf-tools-install)
+  :ensure t
+  :magic ("%PDF" . pdf-view-mode)
+  :config
+  ;; Trigger backend installation
+  (pdf-tools-install)
 
- ;; Scale to window width
- (setq pdf-view-use-scaling t)
- (setq-default pdf-view-display-size 'fit-width)
- ;; (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
- (setq pdf-view-midnight-colors '("#ffffff" . "#121212"))
+  ;; Scale to window width
+  (setq pdf-view-use-scaling t)
+  (setq-default pdf-view-display-size 'fit-width)
+  ;; (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
+  (setq pdf-view-midnight-colors '("#ffffff" . "#121212"))
 
- ;; Enable night mode and annotator hook automatically
- (add-hook 'pdf-view-mode-hook
-           (lambda ()
-             (pdf-annot-minor-mode)
-             (pdf-view-midnight-minor-mode)
-             (pdf-links-minor-mode)
-             (pdf-outline-minor-mode)))
+  ;; Enable night mode and annotator hook automatically
+  (add-hook 'pdf-view-mode-hook
+            (lambda ()
+              (pdf-annot-minor-mode)
+              (pdf-view-midnight-minor-mode)
+              (pdf-links-minor-mode)
+              (pdf-outline-minor-mode)))
 
- ;; Bind operational shortcut keys
- (define-key pdf-view-mode-map (kbd "H")
-   'pdf-annot-add-highlight-markup-annotation)
- (define-key pdf-view-mode-map (kbd "U")
-   'pdf-annot-add-underline-markup-annotation)
- (define-key pdf-view-mode-map (kbd "D")
-   'pdf-annot-add-strikeout-markup-annotation)
- (define-key pdf-view-mode-map (kbd "C-=")
-   'pdf-view-enlarge)
- (define-key pdf-view-mode-map (kbd "C--")
-   'pdf-view-shrink)
- (define-key pdf-view-mode-map (kbd "0")
-   'pdf-view-scale-reset)
- (define-key pdf-view-mode-map (kbd "M")
-   'pdf-view-midnight-minor-mode))
+  ;; Bind operational shortcut keys
+  (define-key pdf-view-mode-map (kbd "H")
+    'pdf-annot-add-highlight-markup-annotation)
+  (define-key pdf-view-mode-map (kbd "U")
+    'pdf-annot-add-underline-markup-annotation)
+  (define-key pdf-view-mode-map (kbd "D")
+    'pdf-annot-add-strikeout-markup-annotation)
+  (define-key pdf-view-mode-map (kbd "C-+")
+    'pdf-view-enlarge)
+  (define-key pdf-view-mode-map (kbd "C--")
+    'pdf-view-shrink)
+  (define-key pdf-view-mode-map (kbd "0")
+    'pdf-view-scale-reset)
+  (define-key pdf-view-mode-map (kbd "M")
+    'pdf-view-midnight-minor-mode)
+  (my/say "PDF Tools initialized."))
 
 (use-package pdf-view-restore
   :ensure t
@@ -500,7 +586,8 @@
   (add-hook 'pdf-view-mode-hook 'pdf-view-restore-mode)
   (setq pdf-view-restore-filename
         (expand-file-name ".pdf-view-restore"
-                          user-emacs-directory)))
+          user-emacs-directory))
+  (my/say "PDF Restore initialized."))
 
 ;; --------------- end pdf viewing ---------------
 
@@ -563,7 +650,7 @@
 
   ;; Latex math display
   (setq org-format-latex-options
-        (plist-put org-format-latex-options :scale 1.1))
+        (plist-put org-format-latex-options :scale 1.8))
   (setq org-format-latex-options
         (plist-put org-format-latex-options :justify 'center))
   (setq org-preview-latex-default-process 'dvisvgm)
@@ -603,7 +690,11 @@
                    ("\\section{%s}" . "\\section*{%s}")
                    ("\\subsection{%s}" . "\\subsection*{%s}")
                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-                   ("\\paragraph{%s}" . "\\paragraph*{%s}")))))
+                   ("\\paragraph{%s}" . "\\paragraph*{%s}"))))
+
+  (my/say "Org-mode loaded. Agenda: %s, LaTeX scale: [x%.1f]."
+          org-agenda-files
+          (plist-get org-format-latex-options :scale)))
 
 (use-package org-roam
   :ensure t
@@ -682,40 +773,73 @@
                                          "#+title: ${title}\n#+author: melt\n"
                                          "#+filetags: :scrap:"))
              :unnarrowed t)))
-  (org-roam-setup))
+  (org-roam-setup)
+  (my/say "Zettelkasten (Org-Roam) active. Directory: %s, Database: %s."
+          org-roam-directory
+          (file-name-nondirectory org-roam-db-location)))
 
+;; --------------- org-roam-ui ---------------
 (use-package org-roam-ui
   :ensure t
   :after org-roam
+  :bind ("C-c n g" . org-roam-ui-mode)
   :config
-  (setq org-roam-ui-sync-theme t)
-  (setq org-roam-ui-follow t)
-  (setq org-roam-ui-update-on-save t)
-  (setq org-roam-ui-open-on-start t))
+  ;; Global UI settings (back to defaults)
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t)
+
+  ;; Fedora/Sway fix: Use Firefox directly to avoid recursion errors
+  (setq browse-url-generic-program "firefox"
+        org-roam-ui-browser-function #'browse-url-generic)
+
+  ;; Physics and node sizing parameters
+  (setq org-roam-ui-node-size-strategy 'all-links
+        org-roam-ui-extra-config
+        '(:gravity 0.5 :friction 0.9 :link-distance 50))
+
+  ;; Ensure hl-line-face exists to prevent startup crashes
+  (require 'hl-line)
+  (unless (boundp 'hl-line-face) (defvar hl-line-face 'hl-line))
+
+  ;; Status message
+  (let ((cfg org-roam-ui-extra-config))
+    (my/say "Org-Roam-UI ready. Gravity: [%.1f], Friction: [%.1f], Dist: [%d]."
+            (plist-get cfg :gravity)
+            (plist-get cfg :friction)
+            (plist-get cfg :link-distance))))
+;; --------------- end org-roam-ui ---------------
 
 ;; --------------- password management ---------------
 (use-package pass
   :ensure t
   :defer t
   :commands (pass)
-  :after password-store)
+  :after password-store
+  :config
+  (my/say "Password-store (pass) interface ready."))
 
 ;; Clear clipboard history automatically after 15 seconds
 (setq password-store-time-before-clipboard-restore 15)
 
 (use-package password-store
   :ensure t
-  :defer t)
+  :defer t
+  :config
+  (my/say "Password-store core loaded."))
 
 (use-package auth-source-pass
   :config
-  (auth-source-pass-enable))
+  (auth-source-pass-enable)
+  (my/say "Password-store core loaded."))
 
 (use-package pinentry
   :ensure t
   :config
   (setenv "EMACS" "t")
-  (pinentry-start))
+  (pinentry-start)
+  (my/say "Pinentry agent started."))
 ;; --------------- end password management ---------------
 
 (use-package vterm
@@ -726,7 +850,8 @@
   :config
   ;; Standard yank (paste) bindings
   (define-key vterm-mode-map (kbd "C-y") #'vterm-yank)
-  (define-key vterm-mode-map (kbd "M-y") #'vterm-yank-pop))
+  (define-key vterm-mode-map (kbd "M-y") #'vterm-yank-pop)
+  (my/say "Vterm terminal emulator ready."))
 
 ;; --------------- multimedia (emms) ---------------
 (use-package emms
@@ -748,7 +873,8 @@
 
   ;; Assign active media keys
   (global-set-key (kbd "C-c e p") 'emms-playlist-mode-go)
-  (global-set-key (kbd "C-c e l") 'emms-play-file))
+  (global-set-key (kbd "C-c e l") 'emms-play-file)
+  (my/say "EMMS multimedia system ready."))
 ;; --------------- end multimedia ------------------
 
 ;; ====================| END PACKAGES |====================
@@ -760,9 +886,17 @@
   (when (equal (buffer-file-name)
                (expand-file-name "~/dotfiles/emacs/dotemacs.org"))
     (org-babel-tangle)
-    (message "[CIRO]: Org Configuration file tangled!")))
+    (my/say "Org Configuration file tangled!")))
 
 (add-hook 'after-save-hook #'my/tangle-dotfiles)
+
+(defun my/say (text &rest args)
+  "Assistant log with themed colors."
+  (apply #'message
+         (concat (propertize (concat "[" my/assistant "]") 
+                             'face 'font-lock-keyword-face)
+                 ": " text)
+         args))
 
 (defun my/org-center-latex ()
   "Position and center inline LaTeX preview overlays in current buffer."
