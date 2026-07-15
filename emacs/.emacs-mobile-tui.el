@@ -1,17 +1,28 @@
 ;; ~/.emacs-mobile-tui.el --- Visual and dashboard configuration
 
+;; Assistant name
+(defvar my/assistant "CIRO"
+  "Name of the Emacs assistant.")
+
 ;; Default text scale zoom for the mobile dashboard
 (defvar my/dashboard-zoom 2
   "Default text scale zoom for the mobile dashboard.")
 
 (defun my/get-greeting ()
   "Return an appropriate greeting based on the current hour."
-  (let ((hour (string-to-number (format-time-string "%H"))))
+  (let ((hour (string-to-number (format-time-string "%H")))
+        (prefix (concat "[" my/assistant "]:")))
     (cond
-     ((and (>= hour 5) (< hour 12)) "Good morning")
-     ((and (>= hour 12) (< hour 18)) "Good afternoon")
-     ((and (>= hour 18) (< hour 22)) "Good evening")
-     (t "Good night"))))
+     ((and (>= hour 4)  (< hour 7))
+      (concat prefix " Sei già sveglio o ancora sveglio?"))
+     ((and (>= hour 7)  (< hour 12))
+      (concat prefix " Buongiorno " my/org-author "!"))
+     ((and (>= hour 12) (< hour 18))
+      (concat prefix " Buon pomeriggio " my/org-author "!"))
+     ((and (>= hour 18) (< hour 24))
+      (concat prefix " Buona sera " my/org-author "!"))
+     (t
+      (concat prefix " Vatt a dorme " my/org-author "!")))))
 
 (defun my/insert-centered (string &optional face)
   "Insert STRING centered horizontally in current window, with optional FACE."
@@ -60,8 +71,7 @@
         
         (insert "\n")
         ;; Centered dynamic greeting
-        (my/insert-centered
-         (concat "[CIRO] " (my/get-greeting) " melt!") 'bold)
+        (my/insert-centered (my/get-greeting) 'bold)
         
         ;; Centered Emacs startup initialization time
         (my/insert-centered

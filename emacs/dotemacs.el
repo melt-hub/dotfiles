@@ -287,7 +287,7 @@
 ;;   (nyan-mode)
 ;;   (message "[CIRO]: Nyancat loaded."))
 
-(defun my/dashboard-get-title ()
+(defun my/get-greeting ()
   "Generate a dynamic greeting based on the current system hour."
   (let ((hour (string-to-number (format-time-string "%H")))
         (prefix (concat "[" my/assistant "]:")))
@@ -320,10 +320,10 @@
     (setq dashboard-startup-banner banner-path))
 
   ;; Banner title
-  (setq dashboard-banner-logo-title (my/dashboard-get-title))
+  (setq dashboard-banner-logo-title (my/get-greeting))
   (add-hook 'dashboard-mode-hook
             (lambda () (setq dashboard-banner-logo-title 
-                             (my/dashboard-get-title))))
+                             (my/get-greeting))))
   (set-face-attribute 'dashboard-banner-logo-title nil 
     :height 1.0
     :weight 'normal
@@ -367,33 +367,39 @@
   :ensure nil
   :bind (:map c-mode-map
               ("C-c C-c" . compile)
+              ("C-c C-r" . my/compile-and-run-c)
+              ("C-c C-a" . my/c-generate-assembly)
+              ("C-c C-h" . my/c-hexdump-binary)
          :map c++-mode-map
-              ("C-c C-c" . compile))
+              ("C-c C-c" . compile)
+              ("C-c C-r" . my/compile-and-run-c)
+              ("C-c C-a" . my/c-generate-assembly)
+              ("C-c C-h" . my/c-hexdump-binary)
+         :map java-mode-map
+              ("C-c C-c" . compile)
+              ("C-c C-r" . my/compile-and-run-java)
+              ("C-c C-a" . my/java-generate-bytecode)
+              ("C-c C-h" . my/java-hexdump-class))
   :config
   (setq-default c-basic-offset 4)
-  (my/say "C/C++ development environment ready."))
+  (setq-default java-basic-offset 4)
+  (my/say "C-like languages environment ready (C, C++, Java)."))
 
 (use-package prolog
   :ensure nil
   :mode ("\\.pl\\'" . prolog-mode)
+  :bind (:map prolog-mode-map
+              ("C-c C-z" . run-prolog))
   :config
   (setq prolog-program-name "swipl")
   (setq prolog-system 'swi)
   (my/say "Prolog (SWI) environment ready."))
 
-(use-package java-mode
-  :ensure nil
-  :bind (:map java-mode-map
-              ("C-c C-c" . compile))
-  :config
-  (setq-default java-basic-offset 4)
-  (my/say "Java environment ready."))
-
 (use-package js
   :ensure nil
   :mode ("\\.js\\'" . js-mode)
   :bind (:map js-mode-map
-              ("C-c C-c" . compile))
+              ("C-c C-r" . my/run-js))
   :config
   (setq js-indent-level 2)
   (my/say "Javascript environment ready."))
@@ -898,68 +904,141 @@
                  ": " text)
          args))
 
-(defun my/org-center-latex ()
-  "Position and center inline LaTeX preview overlays in current buffer."
-  (dolist (ov (overlays-in (point-min) (point-max)))
-    (when (and (eq (overlay-get ov 'org-overlay-type) 'org-latex-overlay)
-               (my/org-latex-block-p ov))
-      (overlay-put ov
-                   'before-string
-                   (propertize " " 'display (my/build-space ov))))))
+(defvar my/use-vterm-for-run nil
+  "When non-nil, run steps execute inside a persistent vterm buffer
+   instead of the `*compilation*' buffer. Build/analysis steps always
+   use synchronous shell calls or `compile', regardless of this flag.")
 
-(defun my/build-space (overlay)
-  "Construct empty margin space width mapping coordinates."
-  `(space :align-to (- center ,(/ (my/get-image-width-px overlay)
-                                   2
-                                   (frame-char-width)))))
+(defun my/vterm-run-command (command)
+  "Send COMMAND to a dedicated *run-vterm* buffer, creating it if needed."
+  (require 'vterm)
+  (let ((buf (get-buffer-create "*run-vterm*")))
+    (with-current-buffer buf
+      (unless (derived-mode-p 'vterm-mode)
+        (vterm-mode)))
+    (pop-to-buffer buf)
+    (vterm-send-string command)
+    (vterm-send-return)))
 
-(defun my/get-image-width-px (overlay)
-  "Retrieve pixel width of the target overlay."
-  (car (image-size (overlay-get overlay 'display) t)))
+(defun my/execute-command (command)
+  "Run COMMAND via `compile' or vterm, depending on `my/use-vterm-for-run'."
+  (if my/use-vterm-for-run
+      (my/vterm-run-command command)
+    (compile command)))
 
-(defun my/org-latex-block-p (overlay)
-  "Verify if target overlay represents a LaTeX equation block."
-  (let ((text (buffer-substring-no-properties
-                (overlay-start overlay)
-                (overlay-end overlay))))
-    (or (string-match-p "\\`\\s-*\\$\\$" text)
-        (string-match-p "\\`\\s-*\\\\\\[" text)
-        (string-match-p "\\`\\s-*\\\\begin{" text))))
+(defun my/c-compiler ()
+  "Return \"g++\" in c++-mode, \"gcc\" otherwise."
+  (if (derived-mode-p 'c++-mode) "g++" "gcc"))
 
-(advice-add 'org-latex-preview :after
-  (lambda (&rest _) (my/org-center-latex)))
+(defvar my/c-compile-flags "-O2 -Wall -Wextra -Iinclude"
+  "Default gcc flags used when compiling C/C++ files.")
 
-(defun my/latex-switch-scaling ()
-  "Toggle LaTeX preview scaling between 1.1 and 1.8."
+(defun my/compile-and-run-c ()
+  "Compile and immediately run the current C/C++ file."
   (interactive)
-  (let* ((current (plist-get org-format-latex-options :scale))
-         (next (if (< current 1.5) 1.8 1.1)))
-    (setq org-format-latex-options
-          (plist-put org-format-latex-options :scale next))
-    (execute-kbd-macro (kbd "C-u C-u C-c C-x C-l"))
-    (message "[CIRO]: LaTeX scaling set to %.1f" next)))
+  (let* ((file (buffer-file-name))
+         (bin (file-name-sans-extension file)))
+    (my/execute-command
+     (format "%s %s -o %s %s && %s"
+             (my/c-compiler) my/c-compile-flags bin file bin))))
 
-(defun my/org-export-output-directory (orig-fun extension
-                                       &optional subtreep pub-dir)
-  "Redirect export output to an 'export/' subdirectory."
-  (unless pub-dir
-    (let ((base-dir (file-name-directory (buffer-file-name))))
-      (setq pub-dir (expand-file-name "export/" base-dir))
-      (unless (file-exists-p pub-dir)
-        (make-directory pub-dir t))))
-  (let ((output-file (apply orig-fun extension subtreep (list pub-dir))))
-    (message "[CIRO]: Exporting to %s" output-file)
-    output-file))
+(defun my/c-generate-assembly ()
+  "Generate and open the assembly output (AT&T syntax) for the
+current C/C++ file."
+  (interactive)
+  (let* ((file (buffer-file-name))
+         (asm-file (concat (file-name-sans-extension file) ".s")))
+    (if (= 0 (shell-command
+              (format "%s %s -S -o %s %s"
+                      (my/c-compiler) my/c-compile-flags asm-file file)))
+        (find-file-other-window asm-file)
+      (my/say "Assembly generation failed, check *Shell Command Output*."))))
 
-;; Apply advice to redirect export
-(advice-add 'org-export-output-file-name
-            :around #'my/org-export-output-directory)
+(defun my/c-hexdump-binary ()
+  "Compile the current C/C++ file and display a hexdump of the binary."
+  (interactive)
+  (let* ((file (buffer-file-name))
+         (bin (file-name-sans-extension file)))
+    (if (= 0 (shell-command
+              (format "%s %s -o %s %s" (my/c-compiler) my/c-compile-flags bin file)))
+        (progn
+          (shell-command (format "hexdump -C %s" bin) "*hexdump*")
+          (display-buffer "*hexdump*"))
+      (my/say "Compilation failed, check *Shell Command Output*."))))
 
-;; Configure LaTeX cleanup
-(setq org-latex-remove-logfiles t)
-(setq org-latex-logfiles-extensions
-      '("aux" "idx" "log" "out" "toc" "nav" "snm"
-        "vrb" "fls" "fdb_latexmk" "blg" "bbl"))
+(defun my/java-get-package (file)
+  "Return the package name declared in FILE, or nil if none."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (goto-char (point-min))
+    (when (re-search-forward
+           "^\\s-*package\\s-+\\([a-zA-Z0-9_.]+\\)\\s-*;" nil t)
+      (match-string 1))))
+
+(defun my/java-package-root (dir package)
+  "Walk up from DIR by PACKAGE's segment count to find the source root."
+  (let ((levels (length (split-string package "\\."))))
+    (expand-file-name (apply #'concat (make-list levels "../")) dir)))
+
+(defun my/java-classpath-and-class (file)
+  "Return (CLASSPATH . FULL-CLASS-NAME) for FILE, package-aware."
+  (let* ((dir (file-name-directory file))
+         (class-name (file-name-base file))
+         (package (my/java-get-package file))
+         (classpath (if package (my/java-package-root dir package) dir))
+         (full-class (if package (concat package "." class-name) class-name)))
+    (cons classpath full-class)))
+
+(defun my/compile-and-run-java ()
+  "Compile and run the current Java file, respecting its package."
+  (interactive)
+  (let* ((file (buffer-file-name))
+         (cp+class (my/java-classpath-and-class file))
+         (classpath (car cp+class))
+         (full-class (cdr cp+class)))
+    (my/execute-command
+     (format "javac -d %s %s && java -cp %s %s"
+             classpath file classpath full-class))))
+
+(defun my/java-generate-bytecode ()
+  "Compile the current Java file and display its disassembled
+bytecode via javap."
+  (interactive)
+  (let* ((file (buffer-file-name))
+         (cp+class (my/java-classpath-and-class file))
+         (classpath (car cp+class))
+         (full-class (cdr cp+class)))
+    (if (= 0 (shell-command (format "javac -d %s %s" classpath file)))
+        (progn
+          (shell-command (format "javap -c -cp %s %s" classpath full-class)
+                          "*java-bytecode*")
+          (display-buffer "*java-bytecode*"))
+      (my/say "Java compilation failed, check *Shell Command Output*."))))
+
+(defun my/java-hexdump-class ()
+  "Compile the current Java file and display a hexdump of the .class file."
+  (interactive)
+  (let* ((file (buffer-file-name))
+         (cp+class (my/java-classpath-and-class file))
+         (classpath (car cp+class))
+         (full-class (cdr cp+class))
+         (class-file (expand-file-name
+                      (concat (replace-regexp-in-string "\\." "/" full-class)
+                              ".class")
+                      classpath)))
+    (if (= 0 (shell-command (format "javac -d %s %s" classpath file)))
+        (progn
+          (shell-command (format "hexdump -C %s" class-file) "*hexdump*")
+          (display-buffer "*hexdump*"))
+      (my/say "Java compilation failed, check *Shell Command Output*."))))
+
+(defvar my/js-interpreter "node"
+  "Interpreter used to run JavaScript files. Lighter alternatives.")
+
+(defun my/run-js ()
+  "Run the current JavaScript file with `my/js-interpreter'."
+  (interactive)
+  (my/execute-command (format "%s %s" my/js-interpreter (buffer-file-name))))
 
 (defun my/debug-log (format-string &rest args)
   "Log ARGS formatted by FORMAT-STRING into the *dreams-indexing* buffer."
@@ -1188,6 +1267,69 @@
 
 ;; Automate indexing every time you save an Org file on mobile or PC
 (add-hook 'after-save-hook #'my/org-roam-index-dream-on-save)
+
+(defun my/org-center-latex ()
+  "Position and center inline LaTeX preview overlays in current buffer."
+  (dolist (ov (overlays-in (point-min) (point-max)))
+    (when (and (eq (overlay-get ov 'org-overlay-type) 'org-latex-overlay)
+               (my/org-latex-block-p ov))
+      (overlay-put ov
+                   'before-string
+                   (propertize " " 'display (my/build-space ov))))))
+
+(defun my/build-space (overlay)
+  "Construct empty margin space width mapping coordinates."
+  `(space :align-to (- center ,(/ (my/get-image-width-px overlay)
+                                   2
+                                   (frame-char-width)))))
+
+(defun my/get-image-width-px (overlay)
+  "Retrieve pixel width of the target overlay."
+  (car (image-size (overlay-get overlay 'display) t)))
+
+(defun my/org-latex-block-p (overlay)
+  "Verify if target overlay represents a LaTeX equation block."
+  (let ((text (buffer-substring-no-properties
+                (overlay-start overlay)
+                (overlay-end overlay))))
+    (or (string-match-p "\\`\\s-*\\$\\$" text)
+        (string-match-p "\\`\\s-*\\\\\\[" text)
+        (string-match-p "\\`\\s-*\\\\begin{" text))))
+
+(advice-add 'org-latex-preview :after
+  (lambda (&rest _) (my/org-center-latex)))
+
+(defun my/latex-switch-scaling ()
+  "Toggle LaTeX preview scaling between 1.1 and 1.8."
+  (interactive)
+  (let* ((current (plist-get org-format-latex-options :scale))
+         (next (if (< current 1.5) 1.8 1.1)))
+    (setq org-format-latex-options
+          (plist-put org-format-latex-options :scale next))
+    (execute-kbd-macro (kbd "C-u C-u C-c C-x C-l"))
+    (message "[CIRO]: LaTeX scaling set to %.1f" next)))
+
+(defun my/org-export-output-directory (orig-fun extension
+                                       &optional subtreep pub-dir)
+  "Redirect export output to an 'export/' subdirectory."
+  (unless pub-dir
+    (let ((base-dir (file-name-directory (buffer-file-name))))
+      (setq pub-dir (expand-file-name "export/" base-dir))
+      (unless (file-exists-p pub-dir)
+        (make-directory pub-dir t))))
+  (let ((output-file (apply orig-fun extension subtreep (list pub-dir))))
+    (message "[CIRO]: Exporting to %s" output-file)
+    output-file))
+
+;; Apply advice to redirect export
+(advice-add 'org-export-output-file-name
+            :around #'my/org-export-output-directory)
+
+;; Configure LaTeX cleanup
+(setq org-latex-remove-logfiles t)
+(setq org-latex-logfiles-extensions
+      '("aux" "idx" "log" "out" "toc" "nav" "snm"
+        "vrb" "fls" "fdb_latexmk" "blg" "bbl"))
 
 ;; ====================| END MY FUNCTIONS |====================
 
