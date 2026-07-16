@@ -2,7 +2,7 @@
 /* Import palette */
 configuration {
     show-icons: true;
-    icon-theme: "Papirus-Dark";
+    icon-theme: "breeze-dark";
     
     /* Display icons for modes */
     display-combi: "󰀻 ";

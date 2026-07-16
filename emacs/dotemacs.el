@@ -790,11 +790,6 @@
   :after org-roam
   :bind ("C-c n g" . org-roam-ui-mode)
   :config
-  ;; Global UI settings (back to defaults)
-  (setq org-roam-ui-sync-theme t
-        org-roam-ui-follow t
-        org-roam-ui-update-on-save t
-        org-roam-ui-open-on-start t)
 
   ;; Fedora/Sway fix: Use Firefox directly to avoid recursion errors
   (setq browse-url-generic-program "firefox"
