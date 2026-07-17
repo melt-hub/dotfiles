@@ -349,6 +349,29 @@
 
   (my/say "Dashboard is ready."))
 
+(use-package cc-mode
+  :ensure nil
+  :bind (:map c-mode-map
+              ("C-c C-c" . my/compile-smart)
+              ("C-c C-r" . my/compile-and-run-c)
+              ("C-c C-a" . my/c-generate-assembly)
+              ("C-c C-h" . my/c-hexdump-binary)
+         :map c++-mode-map
+              ("C-c C-c" . my/compile-smart)
+              ("C-c C-r" . my/compile-and-run-c)
+              ("C-c C-a" . my/c-generate-assembly)
+              ("C-c C-h" . my/c-hexdump-binary)
+         :map java-mode-map
+              ("C-c C-c" . my/compile-smart)
+              ("C-c C-r" . my/compile-and-run-java)
+              ("C-c C-a" . my/java-generate-bytecode)
+              ("C-c C-h" . my/java-hexdump-class))
+  :config
+  (setq-default c-basic-offset 4)
+  (setq-default java-basic-offset 4)
+  (setq compilation-scroll-output t)
+  (my/say "C-like languages environment ready (C, C++, Java)."))
+
 ;; --------------- git integration ---------------
 (use-package magit
   :ensure t
@@ -362,38 +385,6 @@
         '(magit-process-password-auth-source))
   (my/say "Magit ready."))
 ;; --------------- end git integration ---------------
-
-(use-package cc-mode
-  :ensure nil
-  :bind (:map c-mode-map
-              ("C-c C-c" . compile)
-              ("C-c C-r" . my/compile-and-run-c)
-              ("C-c C-a" . my/c-generate-assembly)
-              ("C-c C-h" . my/c-hexdump-binary)
-         :map c++-mode-map
-              ("C-c C-c" . compile)
-              ("C-c C-r" . my/compile-and-run-c)
-              ("C-c C-a" . my/c-generate-assembly)
-              ("C-c C-h" . my/c-hexdump-binary)
-         :map java-mode-map
-              ("C-c C-c" . compile)
-              ("C-c C-r" . my/compile-and-run-java)
-              ("C-c C-a" . my/java-generate-bytecode)
-              ("C-c C-h" . my/java-hexdump-class))
-  :config
-  (setq-default c-basic-offset 4)
-  (setq-default java-basic-offset 4)
-  (my/say "C-like languages environment ready (C, C++, Java)."))
-
-(use-package prolog
-  :ensure nil
-  :mode ("\\.pl\\'" . prolog-mode)
-  :bind (:map prolog-mode-map
-              ("C-c C-z" . run-prolog))
-  :config
-  (setq prolog-program-name "swipl")
-  (setq prolog-system 'swi)
-  (my/say "Prolog (SWI) environment ready."))
 
 (use-package js
   :ensure nil
@@ -416,33 +407,6 @@
   :hook (julia-mode . julia-repl-mode)
   :config
   (my/say "Julia REPL ready."))
-
-(use-package python
-  :ensure nil
-  :mode ("\\.py\\'" . python-mode)
-  :bind (:map python-mode-map
-              ("C-c C-c" . python-shell-send-buffer)
-              ("C-c C-z" . run-python))
-  :config
-  (setq python-shell-interpreter "python3")
-  (my/say "Python environment ready."))
-
-(use-package rust-mode
-  :ensure t
-  :mode "\\.rs\\'")
-
-(use-package cargo
-  :ensure t
-  :hook (rust-mode . cargo-minor-mode)
-  :config
-  ;; The prefix automatically enables sub-keys (b, r, t, c, etc.)
-  (setq cargo-minor-mode-key-prefix (kbd "C-c C-k"))
-  (setq cargo-process--command-flags '("--color" "always"))
-  (my/say "Rust/Cargo environment ready."))
-
-;; Project-specific terminal shortcut
-(with-eval-after-load 'rust-mode
-  (define-key rust-mode-map (kbd "C-c C-v") #'vterm))
 
 ;; --------------- lisp developement  ---------------
 
@@ -477,6 +441,57 @@
   :hook (emacs-lisp-mode . highlight-defined-mode))
 
 ;; --------------- end lisp developement  ---------------
+
+(use-package prolog
+  :ensure nil
+  :mode ("\\.pl\\'" . prolog-mode)
+  :bind (:map prolog-mode-map
+              ("C-c C-z" . run-prolog))
+  :config
+  (setq prolog-program-name "swipl")
+  (setq prolog-system 'swi)
+  (my/say "Prolog (SWI) environment ready."))
+
+(use-package python
+  :ensure nil
+  :mode ("\\.py\\'" . python-mode)
+  :bind (:map python-mode-map
+              ("C-c C-c" . python-shell-send-buffer)
+              ("C-c C-z" . run-python))
+  :config
+  (setq python-shell-interpreter "python3")
+  (my/say "Python environment ready."))
+
+(use-package rust-mode
+  :ensure t
+  :mode "\\.rs\\'")
+
+(use-package cargo
+  :ensure t
+  :hook (rust-mode . cargo-minor-mode)
+  :config
+  ;; The prefix automatically enables sub-keys (b, r, t, c, etc.)
+  (setq cargo-minor-mode-key-prefix (kbd "C-c C-k"))
+  (setq cargo-process--command-flags '("--color" "always"))
+  (my/say "Rust/Cargo environment ready."))
+
+;; Project-specific terminal shortcut
+(with-eval-after-load 'rust-mode
+  (define-key rust-mode-map (kbd "C-c C-v") #'vterm))
+
+(use-package ess
+  :ensure t
+  :defer t
+  :mode ("\\.R\\'" . R-mode)
+  :bind (:map ess-r-mode-map
+              ("C-c C-z" . ess-switch-to-inferior-or-script-buffer)
+              ("C-c C-c" . ess-eval-region-or-function-or-paragraph)
+              ("C-c C-r" . my/run-r))
+  :config
+  ;; Set indentation level and disable fancy comment formatting
+  (setq ess-indent-level 4)
+  (setq ess-fancy-comments nil)
+  (my/say "R (ESS) environment ready."))
 
 ;; --------------- sql developement ---------------
 (use-package sql
@@ -921,6 +936,103 @@
       (my/vterm-run-command command)
     (compile command)))
 
+;; Path and Project Root Resolution
+
+(defun my/find-makefile-dir ()
+  "Search up the directory tree for a Makefile.
+Return the directory containing it, or nil if none is found."
+  (let ((file (locate-dominating-file default-directory "Makefile")))
+    (when file
+      (file-name-as-directory file))))
+
+(defun my/c-auto-include-flag (dir)
+  "Detect an include directory relative to DIR and return the -I flag.
+Check for `./include' and `../include' relative to DIR."
+  (cond
+   ((file-directory-p (expand-file-name "include" dir))
+    "-Iinclude")
+   ((file-directory-p (expand-file-name "../include" dir))
+    "-I../include")
+   (t "")))
+
+(defun my/buffer-binary-name ()
+  "Get a candidate binary name based on the current buffer file name."
+  (when buffer-file-name
+    (file-name-base buffer-file-name)))
+
+;; Makefile Parsing and Binary Resolution
+
+(defun my/parse-makefile-targets (makefile-path)
+  "Parse and return a list of all target names declared in MAKEFILE-PATH."
+  (when (file-readable-p makefile-path)
+    (with-temp-buffer
+      (insert-file-contents makefile-path)
+      (goto-char (point-min))
+      (let (targets)
+        (while (re-search-forward "^\\([a-zA-Z0-9_-]+\\):" nil t)
+          (let ((target (match-string 1)))
+            (unless (member target
+                            '(".PHONY" "all" "directories" "clean"))
+              (push target targets))))
+        (nreverse targets)))))
+
+(defun my/parse-makefile-target-binary (makefile-path)
+  "Extract the value of the TARGET variable from MAKEFILE-PATH."
+  (when (file-readable-p makefile-path)
+    (with-temp-buffer
+      (insert-file-contents makefile-path)
+      (goto-char (point-min))
+      (when (re-search-forward
+             "^\\s-*TARGET\\s-*[:?+]*=\\s-*\\([^#\n\r]*\\)" nil t)
+        (let ((val (string-trim (match-string 1))))
+          (setq val (replace-regexp-in-string "\\$(BIN)" "bin" val))
+          (setq val (replace-regexp-in-string
+                     "\\$([a-zA-Z0-9_-]+)" "" val))
+          val)))))
+
+(defun my/find-makefile-binary (makefile-dir)
+  "Attempt to find the compiled binary in MAKEFILE-DIR."
+  (let* ((makefile-path (expand-file-name "Makefile" makefile-dir))
+         (parsed-bin (my/parse-makefile-target-binary makefile-path))
+         (buf-bin (my/buffer-binary-name))
+         (candidates (list (and parsed-bin
+                                (expand-file-name
+                                 parsed-bin makefile-dir))
+                           (and buf-bin
+                                (expand-file-name
+                                 (concat "bin/" buf-bin)
+                                 makefile-dir))
+                           (and buf-bin
+                                (expand-file-name
+                                 buf-bin makefile-dir))
+                           (expand-file-name
+                            "bin/testunit" makefile-dir)
+                           (expand-file-name
+                            "testunit" makefile-dir)))
+         (found nil))
+    (dolist (path candidates found)
+      (when (and (not found)
+                 path
+                 (file-exists-p path)
+                 (not (file-directory-p path)))
+        (setq found path)))))
+
+(defun my/select-makefile-target (makefile-dir)
+  "Prompt the user to select an execution target from MAKEFILE-DIR."
+  (let* ((makefile-path (expand-file-name "Makefile" makefile-dir))
+         (targets (my/parse-makefile-targets makefile-path))
+         (default-target (or (car (member "runc" targets))
+                             (car (member "run" targets))
+                             (car targets)
+                             "")))
+    (if targets
+        (completing-read
+         (format "Select target to run (default %s): " default-target)
+         targets nil t nil nil default-target)
+      "")))
+
+;; Compiler Configuration and Execution
+
 (defun my/c-compiler ()
   "Return \"g++\" in c++-mode, \"gcc\" otherwise."
   (if (derived-mode-p 'c++-mode) "g++" "gcc"))
@@ -928,50 +1040,129 @@
 (defvar my/c-compile-flags "-O2 -Wall -Wextra -Iinclude"
   "Default gcc flags used when compiling C/C++ files.")
 
-(defun my/compile-and-run-c ()
-  "Compile and immediately run the current C/C++ file."
+(defun my/c-compile-command ()
+  "Generate the appropriate compilation command for the current buffer.
+If a Makefile is found, return the make command and run directory.
+Otherwise, return a single-file compilation command."
+  (let ((makefile-dir (my/find-makefile-dir))
+        (file (buffer-file-name)))
+    (if makefile-dir
+        (cons makefile-dir "make")
+      (let* ((dir (file-name-directory file))
+             (bin (file-name-sans-extension file))
+             (inc-flag (my/c-auto-include-flag dir))
+             (compiler (my/c-compiler))
+             (flags (if (string-empty-p inc-flag)
+                        my/c-compile-flags
+                      (concat my/c-compile-flags " " inc-flag))))
+        (cons dir (format "%s %s -o %s %s"
+                          compiler flags bin file))))))
+
+(defun my/compile-smart ()
+  "Compile the current C/C++ or Java project/file without prompting."
   (interactive)
-  (let* ((file (buffer-file-name))
-         (bin (file-name-sans-extension file)))
-    (my/execute-command
-     (format "%s %s -o %s %s && %s"
-             (my/c-compiler)
-             my/c-compile-flags
-             bin
-             file
-             bin))))
+  (cond
+   ((derived-mode-p 'c-mode 'c++-mode)
+    (let* ((cmd-info (my/c-compile-command))
+           (dir (car cmd-info))
+           (cmd (cdr cmd-info))
+           (default-directory dir))
+      (compile cmd)))
+   ((derived-mode-p 'java-mode)
+    (let ((pom-dir (my/find-pom-dir)))
+      (if pom-dir
+          (let ((default-directory pom-dir))
+            (compile "mvn test-compile"))
+        (let* ((file (buffer-file-name))
+               (cp+class (my/java-classpath-and-class file))
+               (classpath (car cp+class))
+               (default-directory classpath))
+          (compile (format "javac -d %s -sourcepath %s %s"
+                           classpath classpath file))))))
+   (t (call-interactively 'compile))))
+
+(defun my/compile-and-run-c ()
+  "Compile and run the current C/C++ project or single file."
+  (interactive)
+  (let ((makefile-dir (my/find-makefile-dir))
+        (file (buffer-file-name)))
+    (if makefile-dir
+        (let* ((target (my/select-makefile-target makefile-dir))
+               (default-directory makefile-dir))
+          (my/execute-command (format "make %s" target)))
+      (let* ((dir (file-name-directory file))
+             (bin (file-name-sans-extension file))
+             (inc-flag (my/c-auto-include-flag dir))
+             (compiler (my/c-compiler))
+             (flags (if (string-empty-p inc-flag)
+                        my/c-compile-flags
+                      (concat my/c-compile-flags " " inc-flag)))
+             (default-directory dir))
+        (my/execute-command
+         (format "%s %s -o %s %s && %s"
+                 compiler flags bin file bin))))))
+
+;; Binary Analysis Tools
 
 (defun my/c-generate-assembly ()
   "Generate and open assembly output for the current C/C++ file."
   (interactive)
   (let* ((file (buffer-file-name))
+         (dir (file-name-directory file))
          (asm-file (concat (file-name-sans-extension file) ".s"))
+         (inc-flag (my/c-auto-include-flag dir))
+         (compiler (my/c-compiler))
+         (flags (if (string-empty-p inc-flag)
+                    my/c-compile-flags
+                  (concat my/c-compile-flags " " inc-flag)))
          (cmd (format "%s %s -S -o %s %s"
-                      (my/c-compiler)
-                      my/c-compile-flags
-                      asm-file
-                      file)))
+                      compiler flags asm-file file))
+         (default-directory dir))
     (if (= 0 (shell-command cmd))
         (find-file-other-window asm-file)
       (my/say (concat "Assembly generation failed, "
                       "check *Shell Command Output*.")))))
 
 (defun my/c-hexdump-binary ()
-  "Compile the current C/C++ file and display a hexdump of the binary."
+  "Compile the current C/C++ project or file and display its hexdump."
   (interactive)
-  (let* ((file (buffer-file-name))
-         (bin (file-name-sans-extension file))
-         (cmd (format "%s %s -o %s %s"
-                      (my/c-compiler)
-                      my/c-compile-flags
-                      bin
-                      file)))
-    (if (= 0 (shell-command cmd))
-        (progn
-          (shell-command (format "hexdump -C %s" bin) "*hexdump*")
-          (display-buffer "*hexdump*"))
-      (my/say (concat "Compilation failed, "
-                      "check *Shell Command Output*.")))))
+  (let ((makefile-dir (my/find-makefile-dir))
+        (file (buffer-file-name)))
+    (if makefile-dir
+        (let ((default-directory makefile-dir))
+          (if (= 0 (shell-command "make"))
+              (let ((bin (my/find-makefile-binary makefile-dir)))
+                (if bin
+                    (progn
+                      (shell-command (format "hexdump -C %s" bin)
+                                     "*hexdump*")
+                      (display-buffer "*hexdump*"))
+                  (my/say "Could not locate compiled binary for hexdump.")))
+            (my/say "Compilation failed, check *Shell Command Output*.")))
+      (let* ((dir (file-name-directory file))
+             (bin (file-name-sans-extension file))
+             (inc-flag (my/c-auto-include-flag dir))
+             (compiler (my/c-compiler))
+             (flags (if (string-empty-p inc-flag)
+                        my/c-compile-flags
+                      (concat my/c-compile-flags " " inc-flag)))
+             (cmd (format "%s %s -o %s %s" compiler flags bin file))
+             (default-directory dir))
+        (if (= 0 (shell-command cmd))
+            (progn
+              (shell-command (format "hexdump -C %s" bin) "*hexdump*")
+              (display-buffer "*hexdump*"))
+          (my/say (concat "Compilation failed, "
+                          "check *Shell Command Output*.")))))))
+
+;; Java Package and Path Resolution
+
+(defun my/find-pom-dir ()
+  "Search up the directory tree for a pom.xml.
+Return the directory containing it, or nil if none is found."
+  (let ((file (locate-dominating-file default-directory "pom.xml")))
+    (when file
+      (file-name-as-directory file))))
 
 (defun my/java-get-package (file)
   "Return the package name declared in FILE, or nil if none."
@@ -1002,16 +1193,72 @@
                        class-name)))
     (cons classpath full-class)))
 
+(defun my/java-execution-classpath (classpath)
+  "Get the appropriate classpath for running/disassembling classes.
+Append Maven build target directories if a pom.xml is found."
+  (let ((pom-dir (my/find-pom-dir)))
+    (if pom-dir
+        (concat (expand-file-name "target/classes" pom-dir)
+                path-separator
+                (expand-file-name "target/test-classes" pom-dir)
+                path-separator
+                classpath)
+      classpath)))
+
+(defun my/find-java-class-file (classpath full-class)
+  "Locate the compiled .class file for FULL-CLASS given CLASSPATH."
+  (let* ((pom-dir (my/find-pom-dir))
+         (class-rel (concat
+                     (replace-regexp-in-string "\\." "/" full-class)
+                     ".class"))
+         (candidates (list
+                      (expand-file-name class-rel classpath)
+                      (and pom-dir
+                           (expand-file-name
+                            (concat "target/classes/" class-rel)
+                            pom-dir))
+                      (and pom-dir
+                           (expand-file-name
+                            (concat "target/test-classes/" class-rel)
+                            pom-dir))))
+         (found nil))
+    (dolist (path candidates found)
+      (when (and (not found) path (file-exists-p path))
+        (setq found path)))))
+
+;; Java Compilation and Execution
+
+(defun my/select-maven-goal (pom-dir)
+  "Prompt the user to select a Maven goal in POM-DIR."
+  (let ((goals '("test" "exec:java" "compile" "clean test" "package")))
+    (completing-read
+     "Select Maven goal (default test): "
+     goals nil nil nil nil "test")))
+
 (defun my/compile-and-run-java ()
-  "Compile and run the current Java file, respecting its package."
+  "Compile and run the current Java file, respecting its package/Maven."
   (interactive)
-  (let* ((file (buffer-file-name))
-         (cp+class (my/java-classpath-and-class file))
-         (classpath (car cp+class))
-         (full-class (cdr cp+class)))
-    (my/execute-command
-     (format "javac -d %s %s && java -cp %s %s"
-             classpath file classpath full-class))))
+  (let ((pom-dir (my/find-pom-dir))
+        (file (buffer-file-name)))
+    (if pom-dir
+        (let* ((goal (my/select-maven-goal pom-dir))
+               (cp+class (my/java-classpath-and-class file))
+               (full-class (cdr cp+class))
+               (default-directory pom-dir)
+               (cmd (if (string= goal "exec:java")
+                        (format "mvn exec:java -Dexec.mainClass=%s"
+                                full-class)
+                      (format "mvn %s" goal))))
+          (my/execute-command cmd))
+      (let* ((cp+class (my/java-classpath-and-class file))
+             (classpath (car cp+class))
+             (full-class (cdr cp+class))
+             (default-directory classpath))
+        (my/execute-command
+         (format "javac -d %s -sourcepath %s %s && java -cp %s %s"
+                 classpath classpath file classpath full-class))))))
+
+;; Java Low-Level Inspection and Hexdump Tools
 
 (defun my/java-generate-bytecode ()
   "Compile the current Java file and display its disassembled bytecode."
@@ -1020,8 +1267,14 @@
          (cp+class (my/java-classpath-and-class file))
          (classpath (car cp+class))
          (full-class (cdr cp+class))
-         (comp-cmd (format "javac -d %s %s" classpath file))
-         (dis-cmd (format "javap -c -cp %s %s" classpath full-class)))
+         (pom-dir (my/find-pom-dir))
+         (default-directory (or pom-dir classpath))
+         (comp-cmd (if pom-dir
+                       "mvn test-compile"
+                     (format "javac -d %s -sourcepath %s %s"
+                             classpath classpath file)))
+         (exec-cp (my/java-execution-classpath classpath))
+         (dis-cmd (format "javap -c -cp %s %s" exec-cp full-class)))
     (if (= 0 (shell-command comp-cmd))
         (progn
           (shell-command dis-cmd "*java-bytecode*")
@@ -1036,16 +1289,21 @@
          (cp+class (my/java-classpath-and-class file))
          (classpath (car cp+class))
          (full-class (cdr cp+class))
-         (class-path (replace-regexp-in-string "\\." "/" full-class))
-         (class-file (expand-file-name
-                      (concat class-path ".class")
-                      classpath))
-         (comp-cmd (format "javac -d %s %s" classpath file))
-         (hex-cmd (format "hexdump -C %s" class-file)))
+         (pom-dir (my/find-pom-dir))
+         (default-directory (or pom-dir classpath))
+         (comp-cmd (if pom-dir
+                       "mvn test-compile"
+                     (format "javac -d %s -sourcepath %s %s"
+                             classpath classpath file))))
     (if (= 0 (shell-command comp-cmd))
-        (progn
-          (shell-command hex-cmd "*hexdump*")
-          (display-buffer "*hexdump*"))
+        (let ((class-file (my/find-java-class-file classpath full-class)))
+          (if class-file
+              (progn
+                (shell-command
+                 (format "hexdump -C %s" class-file)
+                 "*hexdump*")
+                (display-buffer "*hexdump*"))
+            (my/say "Could not locate compiled .class file for hexdump.")))
       (my/say (concat "Java compilation failed, "
                       "check *Shell Command Output*.")))))
 
@@ -1056,6 +1314,15 @@
   "Run the current JavaScript file with `my/js-interpreter'."
   (interactive)
   (my/execute-command (format "%s %s" my/js-interpreter (buffer-file-name))))
+
+(defvar my/r-interpreter "Rscript"
+  "Interpreter used to execute R scripts in non-interactive mode.")
+
+(defun my/run-r ()
+  "Run the current R script using `my/r-interpreter'."
+  (interactive)
+  (my/execute-command
+   (format "%s %s" my/r-interpreter (buffer-file-name))))
 
 ;;; Automated Dream Indexing
 
