@@ -1290,7 +1290,12 @@
         (compile command)))
   #+end_src
 
-*** C and C++
+*** C/C++ compilation utilities
+**** Compiler Configuration and Execution
+
+  Provides base configuration for C and C++ compilation, including compiler
+  resolution and flag definition. Contains commands to compile and execute the
+  active buffer directly.
 
   #+begin_src emacs-lisp
     (defun my/c-compiler ()
@@ -1307,34 +1312,58 @@
              (bin (file-name-sans-extension file)))
         (my/execute-command
          (format "%s %s -o %s %s && %s"
-                 (my/c-compiler) my/c-compile-flags bin file bin))))
+                 (my/c-compiler)
+                 my/c-compile-flags
+                 bin
+                 file
+                 bin))))
+  #+end_src
 
+**** Binary Analysis Tools
+
+  Includes utility commands to inspect compiled C and C++ binaries. Enables
+  direct assembly code generation and raw binary hexdump viewing from within
+  the editor.
+
+  #+begin_src emacs-lisp
     (defun my/c-generate-assembly ()
-      "Generate and open the assembly output (AT&T syntax) for the
-    current C/C++ file."
+      "Generate and open assembly output for the current C/C++ file."
       (interactive)
       (let* ((file (buffer-file-name))
-             (asm-file (concat (file-name-sans-extension file) ".s")))
-        (if (= 0 (shell-command
-                  (format "%s %s -S -o %s %s"
-                          (my/c-compiler) my/c-compile-flags asm-file file)))
+             (asm-file (concat (file-name-sans-extension file) ".s"))
+             (cmd (format "%s %s -S -o %s %s"
+                          (my/c-compiler)
+                          my/c-compile-flags
+                          asm-file
+                          file)))
+        (if (= 0 (shell-command cmd))
             (find-file-other-window asm-file)
-          (my/say "Assembly generation failed, check *Shell Command Output*."))))
+          (my/say (concat "Assembly generation failed, "
+                          "check *Shell Command Output*.")))))
 
     (defun my/c-hexdump-binary ()
       "Compile the current C/C++ file and display a hexdump of the binary."
       (interactive)
       (let* ((file (buffer-file-name))
-             (bin (file-name-sans-extension file)))
-        (if (= 0 (shell-command
-                  (format "%s %s -o %s %s" (my/c-compiler) my/c-compile-flags bin file)))
+             (bin (file-name-sans-extension file))
+             (cmd (format "%s %s -o %s %s"
+                          (my/c-compiler)
+                          my/c-compile-flags
+                          bin
+                          file)))
+        (if (= 0 (shell-command cmd))
             (progn
               (shell-command (format "hexdump -C %s" bin) "*hexdump*")
               (display-buffer "*hexdump*"))
-          (my/say "Compilation failed, check *Shell Command Output*."))))
+          (my/say (concat "Compilation failed, "
+                          "check *Shell Command Output*.")))))
   #+end_src
 
-*** Java
+*** Java compilation utilities
+**** Java Package and Path Resolution
+
+  Defines helpers to parse package statements and calculate source roots.
+  Provides correct classpath resolution for package-aware Java projects.
 
   #+begin_src emacs-lisp
     (defun my/java-get-package (file)
@@ -1349,17 +1378,30 @@
     (defun my/java-package-root (dir package)
       "Walk up from DIR by PACKAGE's segment count to find the source root."
       (let ((levels (length (split-string package "\\."))))
-        (expand-file-name (apply #'concat (make-list levels "../")) dir)))
+        (expand-file-name
+         (apply #'concat (make-list levels "../"))
+         dir)))
 
     (defun my/java-classpath-and-class (file)
       "Return (CLASSPATH . FULL-CLASS-NAME) for FILE, package-aware."
       (let* ((dir (file-name-directory file))
              (class-name (file-name-base file))
              (package (my/java-get-package file))
-             (classpath (if package (my/java-package-root dir package) dir))
-             (full-class (if package (concat package "." class-name) class-name)))
+             (classpath (if package
+                            (my/java-package-root dir package)
+                          dir))
+             (full-class (if package
+                             (concat package "." class-name)
+                           class-name)))
         (cons classpath full-class)))
+  #+end_src
 
+**** Java Compilation and Execution
+
+  Contains the main interactive command to compile and run the active Java
+  class, automatically respecting package structures and classpaths.
+
+  #+begin_src emacs-lisp
     (defun my/compile-and-run-java ()
       "Compile and run the current Java file, respecting its package."
       (interactive)
@@ -1370,41 +1412,52 @@
         (my/execute-command
          (format "javac -d %s %s && java -cp %s %s"
                  classpath file classpath full-class))))
+  #+end_src
 
+**** Java Low-Level Inspection and Hexdump Tools
+
+  Provides commands to inspect Java class files. Enables bytecode disassembly
+  using javap and raw class file hexdump inspection.
+
+  #+begin_src emacs-lisp
     (defun my/java-generate-bytecode ()
-      "Compile the current Java file and display its disassembled
-    bytecode via javap."
-      (interactive)
-      (let* ((file (buffer-file-name))
-             (cp+class (my/java-classpath-and-class file))
-             (classpath (car cp+class))
-             (full-class (cdr cp+class)))
-        (if (= 0 (shell-command (format "javac -d %s %s" classpath file)))
-            (progn
-              (shell-command (format "javap -c -cp %s %s" classpath full-class)
-                              "*java-bytecode*")
-              (display-buffer "*java-bytecode*"))
-          (my/say "Java compilation failed, check *Shell Command Output*."))))
-
-    (defun my/java-hexdump-class ()
-      "Compile the current Java file and display a hexdump of the .class file."
+      "Compile the current Java file and display its disassembled bytecode."
       (interactive)
       (let* ((file (buffer-file-name))
              (cp+class (my/java-classpath-and-class file))
              (classpath (car cp+class))
              (full-class (cdr cp+class))
-             (class-file (expand-file-name
-                          (concat (replace-regexp-in-string "\\." "/" full-class)
-                                  ".class")
-                          classpath)))
-        (if (= 0 (shell-command (format "javac -d %s %s" classpath file)))
+             (comp-cmd (format "javac -d %s %s" classpath file))
+             (dis-cmd (format "javap -c -cp %s %s" classpath full-class)))
+        (if (= 0 (shell-command comp-cmd))
             (progn
-              (shell-command (format "hexdump -C %s" class-file) "*hexdump*")
+              (shell-command dis-cmd "*java-bytecode*")
+              (display-buffer "*java-bytecode*"))
+          (my/say (concat "Java compilation failed, "
+                          "check *Shell Command Output*.")))))
+
+    (defun my/java-hexdump-class ()
+      "Compile the current Java file and display a hexdump of the class file."
+      (interactive)
+      (let* ((file (buffer-file-name))
+             (cp+class (my/java-classpath-and-class file))
+             (classpath (car cp+class))
+             (full-class (cdr cp+class))
+             (class-path (replace-regexp-in-string "\\." "/" full-class))
+             (class-file (expand-file-name
+                          (concat class-path ".class")
+                          classpath))
+             (comp-cmd (format "javac -d %s %s" classpath file))
+             (hex-cmd (format "hexdump -C %s" class-file)))
+        (if (= 0 (shell-command comp-cmd))
+            (progn
+              (shell-command hex-cmd "*hexdump*")
               (display-buffer "*hexdump*"))
-          (my/say "Java compilation failed, check *Shell Command Output*."))))
+          (my/say (concat "Java compilation failed, "
+                          "check *Shell Command Output*.")))))
   #+end_src
 
-*** JavaScript
+*** JavaScript interpretation utilities
 
   #+begin_src emacs-lisp
     (defvar my/js-interpreter "node"
@@ -1415,6 +1468,7 @@
       (interactive)
       (my/execute-command (format "%s %s" my/js-interpreter (buffer-file-name))))
   #+end_src
+
 ** Org
 
   Automated workflows, capturing engines, database integrations, and
@@ -1426,240 +1480,409 @@
   links to relevant person nodes when saving a dream file on PC.
 
   #+begin_src emacs-lisp
-      (defun my/debug-log (format-string &rest args)
-        "Log ARGS formatted by FORMAT-STRING into the *dreams-indexing* buffer."
-        (let ((buf (get-buffer-create "*dreams-indexing*")))
-          (with-current-buffer buf
+    ;;; Automated Dream Indexing
+
+    ;; This system automatically updates the central dreams node and appends
+    ;; cross-reference links to relevant person nodes when saving a dream file.
+    ;; It completely separates functional logic from logging using Elisp advice.
+
+    ;;;; =========================================================================
+    ;;;; 1. Logging Foundation
+    ;;;; =========================================================================
+
+    (defvar my/dreams-log-buffer "*dreams-indexing*"
+      "Name of the buffer used for dreams indexing logs.")
+
+    (defun my/debug-log (format-string &rest args)
+      "Log ARGS formatted by FORMAT-STRING into `my/dreams-log-buffer'."
+      (let ((buf (get-buffer-create my/dreams-log-buffer)))
+        (with-current-buffer buf
+          (save-excursion
+            (goto-char (point-max))
+            (let ((inhibit-read-only t))
+              (insert (concat (format-time-string "[%H:%M:%S] ")
+                              (apply #'format format-string args)
+                              "\n")))))))
+
+    ;;;; =========================================================================
+    ;;;; 2. Node Resolution and Lookup
+    ;;;; =========================================================================
+
+    (defun my/find-file-for-id (id)
+      "Find the file path for the given ID.
+    Search Org-Roam first, then Org-Id, and finally local files."
+      (let (file)
+        ;; Try Org-Roam database first
+        (when (fboundp 'org-roam-node-from-id)
+          (let ((node (org-roam-node-from-id id)))
+            (setq file (when node (org-roam-node-file node)))))
+        ;; Try Org-Id fallback
+        (unless file
+          (setq file (car (org-id-find id))))
+        ;; Try local directory search (crucial for mobile offline sync)
+        (unless file
+          (let ((dir (and buffer-file-name
+                          (file-name-directory buffer-file-name))))
+            (when dir
+              (let ((files (directory-files dir t "\\.org$")))
+                (dolist (f files)
+                  (unless file
+                    (with-current-buffer (find-file-noselect f)
+                      (save-excursion
+                        (goto-char (point-min))
+                        (when (re-search-forward
+                               (concat "^:ID:[ \t]*"
+                                       (regexp-quote id) "$")
+                               nil t)
+                          (setq file f))))))))))
+        file))
+
+    (defun my/get-node-title (node-id)
+      "Get the title of the node with NODE-ID."
+      (let ((file (my/find-file-for-id node-id)))
+        (when file
+          (with-current-buffer (find-file-noselect file)
             (save-excursion
-              (goto-char (point-max))
-              (let ((inhibit-read-only t))
-                (insert (concat (format-time-string "[%H:%M:%S] ")
-                                (apply #'format format-string args)
-                                "\n")))))))
-
-      (defun my/find-file-for-id (id)
-        "Find the file path for the given ID using Org-Roam, Org-Id, or local search."
-        (let (file)
-          (my/debug-log "Finding file for ID: %s" id)
-          ;; Try Org-Roam database first
-          (when (fboundp 'org-roam-node-from-id)
-            (let ((node (org-roam-node-from-id id)))
-              (setq file (when node (org-roam-node-file node)))
-              (when file (my/debug-log "Found via Org-Roam: %s" file))))
-          ;; Try Org-Id fallback
-          (unless file
-            (setq file (car (org-id-find id)))
-            (when file (my/debug-log "Found via Org-Id: %s" file)))
-          ;; Try local directory search (crucial for mobile offline sync)
-          (unless file
-            (let ((dir (file-name-directory buffer-file-name)))
-              (when dir
-                (let ((files (directory-files dir t "\\.org$")))
-                  (dolist (f files)
-                    (unless file
-                      (with-current-buffer (find-file-noselect f)
-                        (save-excursion
-                          (goto-char (point-min))
-                          (when (re-search-forward
-                                 (concat "^:ID:[ \t]*" (regexp-quote id) "$")
-                                 nil t)
-                            (setq file f)
-                            (my/debug-log "Found via local search: %s" f))))))))))
-          (unless file
-            (my/debug-log "ERROR: Could not find file for ID: %s" id))
-          file))
-
-      (defun my/is-person-node (node-id)
-        "Check if the node with NODE-ID is a person node."
-        (my/debug-log "Checking if ID is a person node: %s" node-id)
-        (let* ((file (my/find-file-for-id node-id))
-               is-person)
-          (when file
-            (my/debug-log "Checking file contents directly: %s" file)
-            (with-current-buffer (find-file-noselect file)
-              (save-excursion
-                (goto-char (point-min))
-                (let ((found (re-search-forward
-                              "^#\\+filetags:[ \t]*.*person" nil t)))
-                  (if found
-                      (progn
-                        (my/debug-log "Match found in file content: %s"
-                                      (match-string 0))
-                        (setq is-person t))
-                    (my/debug-log "No 'person' tag match in file content"))))))
-          is-person))
-
-      (defun my/get-node-title (node-id)
-        "Get the title of the node with NODE-ID."
-        (let ((file (my/find-file-for-id node-id)))
-          (when file
-            (with-current-buffer (find-file-noselect file)
-              (save-excursion
-                (goto-char (point-min))
-                (when (re-search-forward "^#\\+title:[ \t]*\\(.*\\)$" nil t)
-                  (string-trim (match-string 1))))))))
-
-      (defun my/append-link-under-headings (file-path year month link-str)
-        "Open FILE-PATH and append LINK-STR under Year and Month headings."
-        (my/debug-log "Appending link to central index: %s" file-path)
-        (with-current-buffer (find-file-noselect file-path)
-          (save-excursion
-            (goto-char (point-min))
-            (let ((year-heading (concat "* " year))
-                  (month-heading (concat "** " year "-" month)))
-              ;; Find or create Year heading
-              (if (re-search-forward
-                   (concat "^" (regexp-quote year-heading) "$") nil t)
-                  (progn
-                    (my/debug-log "Found Year heading: %s" year-heading)
-                    (org-end-of-subtree t t))
-                (my/debug-log "Creating Year heading: %s" year-heading)
-                (goto-char (point-max))
-                (unless (bolp) (insert "\n"))
-                (insert "\n" year-heading "\n"))
-
-              ;; Search within this subtree for the Month heading
               (goto-char (point-min))
-              (if (re-search-forward
-                   (concat "^" (regexp-quote year-heading) "$") nil t)
-                  (let ((end-of-year (save-excursion
-                                       (org-end-of-subtree t t) (point))))
-                    (if (re-search-forward
-                         (concat "^" (regexp-quote month-heading) "$")
-                         end-of-year t)
-                        (let ((end-of-month (save-excursion
-                                              (org-end-of-subtree t t) (point))))
-                          (my/debug-log "Found Month heading: %s" month-heading)
-                          (goto-char (match-beginning 0))
-                          (if (re-search-forward
-                               (regexp-quote link-str) end-of-month t)
-                              (my/debug-log "Duplicate link detected, skipping")
-                            (my/debug-log "Inserting link under month heading")
-                            (goto-char end-of-month)
-                            (unless (bolp) (insert "\n"))
-                            (insert "  " link-str "\n")))
-                      (my/debug-log "Creating Month heading: %s" month-heading)
-                      (goto-char end-of-year)
-                      (unless (bolp) (insert "\n"))
-                      (insert "\n" month-heading "\n\n  " link-str "\n")))
-                (my/debug-log "ERROR: Failed to find Year heading subtree")
-                (goto-char (point-max))
-                (insert "\n" year-heading "\n"
-                        month-heading "\n\n  " link-str "\n"))))
-      (save-buffer)))
+              (when (re-search-forward "^#\\+title:[ \t]*\\(.*\\)$" nil t)
+                (string-trim (match-string 1))))))))
 
-      (defun my/append-link-to-person-file (file-path person-title link-str)
-        "Open FILE-PATH of a person and append LINK-STR under its only heading."
-        (my/debug-log "Appending link to person file: %s" file-path)
-        (with-current-buffer (find-file-noselect file-path)
-          (save-excursion
+    ;;;; =========================================================================
+    ;;;; 3. Node Metadata and Validation
+    ;;;; =========================================================================
+
+    (defun my/extract-dream-metadata ()
+      "Extract metadata from the current dream buffer.
+    Create a new Org-Id if it is missing.
+    Return a list of the form (ID TITLE (YEAR MONTH))."
+      (save-excursion
+        (goto-char (point-min))
+        (let (title id date)
+          (when (re-search-forward "^#\\+title:[ \t]*\\(.*\\)$" nil t)
+            (setq title (string-trim (match-string 1))))
+          (goto-char (point-min))
+          (if (re-search-forward "^:ID:[ \t]*\\(.*\\)$" nil t)
+              (setq id (string-trim (match-string 1)))
+            (setq id (org-id-get-create)))
+          (goto-char (point-min))
+          (when (re-search-forward
+                 "^:created:[ \t]*\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)"
+                 nil t)
+            (setq date (list (match-string 1) (match-string 2))))
+          (list id title date))))
+
+    (defun my/get-linked-ids ()
+      "Find all Org-Id links in the current buffer.
+    Return a list of unique ID strings."
+      (save-excursion
+        (goto-char (point-min))
+        (let (ids)
+          (while (re-search-forward "\\[\\[id:\\([^]]*\\)\\]" nil t)
+            (push (match-string 1) ids))
+          (delete-dups ids))))
+
+    (defun my/is-person-node (node-id)
+      "Check if the node with NODE-ID is a person node."
+      (let* ((file (my/find-file-for-id node-id))
+             is-person)
+        (when file
+          (with-current-buffer (find-file-noselect file)
+            (save-excursion
+              (goto-char (point-min))
+              (when (re-search-forward
+                     "^#\\+filetags:[ \t]*.*person" nil t)
+                (setq is-person t)))))
+        is-person))
+
+    ;;;; =========================================================================
+    ;;;; 4. Org File Modification
+    ;;;; =========================================================================
+
+    (defun my/append-link-under-headings (file-path year month link-str)
+      "Open FILE-PATH and append LINK-STR under Year and Month headings.
+    Return a symbol indicating the action taken."
+      (with-current-buffer (find-file-noselect file-path)
+        (save-excursion
+          (goto-char (point-min))
+          (let ((year-heading (concat "* " year))
+                (month-heading (concat "** " year "-" month))
+                (status 'inserted))
+            ;; Find or create Year heading
+            (if (re-search-forward
+                 (concat "^" (regexp-quote year-heading) "$") nil t)
+                (org-end-of-subtree t t)
+              (goto-char (point-max))
+              (unless (bolp) (insert "\n"))
+              (insert "\n" year-heading "\n")
+              (setq status 'created-year))
+
+            ;; Search within this subtree for the Month heading
             (goto-char (point-min))
-            ;; Find the first level-1 heading (independent of its actual text)
+            (if (re-search-forward
+                 (concat "^" (regexp-quote year-heading) "$") nil t)
+                (let ((end-of-year (save-excursion
+                                     (org-end-of-subtree t t) (point))))
+                  (if (re-search-forward
+                       (concat "^" (regexp-quote month-heading) "$")
+                       end-of-year t)
+                      (let ((end-of-month (save-excursion
+                                            (org-end-of-subtree t t)
+                                            (point))))
+                        (goto-char (match-beginning 0))
+                        (if (re-search-forward
+                             (regexp-quote link-str) end-of-month t)
+                            (setq status 'duplicate)
+                          (goto-char end-of-month)
+                          (unless (bolp) (insert "\n"))
+                          (insert "  " link-str "\n")))
+                    (goto-char end-of-year)
+                    (unless (bolp) (insert "\n"))
+                    (insert "\n" month-heading "\n\n  " link-str "\n")
+                    (unless (eq status 'created-year)
+                      (setq status 'created-month))))
+              (setq status 'error-year-subtree)
+              (goto-char (point-max))
+              (insert "\n" year-heading "\n"
+                      month-heading "\n\n  " link-str "\n"))
+            (save-buffer)
+            status))))
+
+    (defun my/append-link-to-person-file (file-path person-title link-str)
+      "Open FILE-PATH of a person and append LINK-STR under its only heading.
+    Return a symbol indicating the action taken."
+      (with-current-buffer (find-file-noselect file-path)
+        (save-excursion
+          (goto-char (point-min))
+          (let (status)
+            ;; Find the first level-1 heading
             (if (re-search-forward "^\\* " nil t)
                 (let ((end-of-subtree (save-excursion
                                         (org-end-of-subtree t t) (point))))
-                  (my/debug-log "Found first level-1 heading")
                   (goto-char (match-beginning 0))
                   (if (re-search-forward
                        (regexp-quote link-str) end-of-subtree t)
-                      (my/debug-log
-                       "Duplicate link detected in person file, skipping")
-                    (my/debug-log "Inserting link under heading")
+                      (setq status 'duplicate)
                     (goto-char end-of-subtree)
                     (unless (bolp) (insert "\n"))
-                    (insert "  " link-str "\n")))
-              (my/debug-log "No heading found in person file, appending to end")
+                    (insert "  " link-str "\n")
+                    (setq status 'inserted)))
               (goto-char (point-max))
               (unless (bolp) (insert "\n"))
               (unless (re-search-backward (regexp-quote link-str) nil t)
                 (goto-char (point-max))
                 (insert "\n* Dreams featuring " person-title "\n\n  "
-                        link-str "\n"))))
-          (save-buffer)))
+                        link-str "\n")
+                (setq status 'created-heading-and-inserted)))
+            (save-buffer)
+            (or status 'duplicate)))))
 
-      (defun my/org-roam-index-dream-on-save ()
-        "Hook function to index the current dream node upon saving."
-        (my/debug-log "Save hook triggered for: %s" (buffer-file-name))
-        (when (and (derived-mode-p 'org-mode)
-                   buffer-file-name
-                   (save-excursion
-                     (goto-char (point-min))
-                     (re-search-forward "^#\\+filetags:[ \t]*:dream:" nil t)))
-          (my/debug-log "Confirmed file is a dream node")
-          (let (title id date)
-            (save-excursion
-              (goto-char (point-min))
-              (when (re-search-forward "^#\\+title:[ \t]*\\(.*\\)$" nil t)
-                (setq title (string-trim (match-string 1))))
-              (goto-char (point-min))
-              (when (re-search-forward "^:ID:[ \t]*\\(.*\\)$" nil t)
-                (setq id (string-trim (match-string 1))))
-              (goto-char (point-min))
-              (when (re-search-forward
-                     "^:created:[ \t]*\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)" nil t)
-                (setq date (list (match-string 1) (match-string 2)))))
+    ;;;; =========================================================================
+    ;;;; 5. Orchestration and Save Hook
+    ;;;; =========================================================================
 
-            (my/debug-log "Metadata extracted:")
-            (my/debug-log " - ID: %s" id)
-            (my/debug-log " - Title: %s" title)
-            (my/debug-log " - Date: %s" date)
+    (defun my/process-linked-person-id (linked-id link-str)
+      "Process a single LINKED-ID if it is a person node, appending LINK-STR.
+    Return a status symbol indicating the outcome."
+      (unless (string= linked-id "947ffe5d-e75f-4f99-8c17-82fe190ca665")
+        (if (my/is-person-node linked-id)
+            (let ((file (my/find-file-for-id linked-id))
+                  (person-title (my/get-node-title linked-id)))
+              (if file
+                  (progn
+                    (my/append-link-to-person-file
+                     file person-title link-str)
+                    'processed)
+                'file-not-found))
+          'not-person-node)))
 
-            (unless id
-              (setq id (org-id-get-create))
-              (my/debug-log "Created missing ID: %s" id))
+    (defun my/process-dream-indexing (id title date linked-ids)
+      "Index a dream with ID, TITLE, and DATE, linking it to LINKED-IDS.
+    Return 'ok or 'missing-index-file."
+      (if (or (null id)
+              (string= id "947ffe5d-e75f-4f99-8c17-82fe190ca665"))
+          'ignored-node
+        (let* ((year (or (car date) (format-time-string "%Y")))
+               (month (or (cadr date) (format-time-string "%m")))
+               (link-str (concat "[[id:" id "][" title "]]"))
+               (dreams-file (my/find-file-for-id
+                             "947ffe5d-e75f-4f99-8c17-82fe190ca665")))
+          (if (null dreams-file)
+              'missing-index-file
+            (progn
+              (my/append-link-under-headings
+               dreams-file year month link-str)
+              (dolist (linked-id linked-ids)
+                (my/process-linked-person-id linked-id link-str))
+              'ok)))))
 
-            ;; Exclude the central index file from auto-indexing itself
-            (unless (or (null id)
-                        (string= id "947ffe5d-e75f-4f99-8c17-82fe190ca665"))
-              (unless date
-                (setq date (list (format-time-string "%Y")
-                                 (format-time-string "%m"))))
+    (defun my/org-roam-index-dream-on-save ()
+      "Hook function to index the current dream node upon saving."
+      (when (and (derived-mode-p 'org-mode)
+                 buffer-file-name
+                 (save-excursion
+                   (goto-char (point-min))
+                   (re-search-forward "^#\\+filetags:[ \t]*:dream:" nil t)))
+        (condition-case err
+            (let* ((metadata (my/extract-dream-metadata))
+                   (id (car metadata))
+                   (title (cadr metadata))
+                   (date (caddr metadata))
+                   (linked-ids (my/get-linked-ids)))
+              (my/process-dream-indexing id title date linked-ids))
+          (error
+           (my/debug-log "ERROR in save hook: %s"
+                         (error-message-string err))))))
 
-              (let* ((year (car date))
-                     (month (cadr date))
-                     (link-str (concat "[[id:" id "][" title "]]"))
-                     (linked-ids
-                      (save-excursion
-                        (goto-char (point-min))
-                        (let (ids)
-                          (while (re-search-forward "\\[\\[id:\\([^]]*\\)\\]" nil t)
-                            (push (match-string 1) ids))
-                          (delete-dups ids)))))
+    ;;;; =========================================================================
+    ;;;; 6. Decoupled Logging Advices
+    ;;;; =========================================================================
 
-                (my/debug-log "Found linked IDs: %s" linked-ids)
+    (defun my/log-find-file-advice (orig-fun id &rest args)
+      "Log the start and outcome of `my/find-file-for-id'."
+      (my/debug-log "Finding file for ID: %s" id)
+      (let ((file (apply orig-fun id args)))
+        (if file
+            (my/debug-log "Found file: %s" file)
+          (my/debug-log "ERROR: Could not find file for ID: %s" id))
+        file))
 
-                ;; Update central dreams index (using your specific ID)
-                (let* ((dreams-file (my/find-file-for-id
-                                     "947ffe5d-e75f-4f99-8c17-82fe190ca665")))
-                  (if dreams-file
-                      (my/append-link-under-headings
-                       dreams-file year month link-str)
-                    (my/debug-log "ERROR: Could not find dreams.org index file")))
+    (defun my/log-is-person-node-advice (orig-fun node-id &rest args)
+      "Log the check for person node status of NODE-ID."
+      (my/debug-log "Checking if ID is a person node: %s" node-id)
+      (let ((is-person (apply orig-fun node-id args)))
+        (my/debug-log "Person check result for %s: %s"
+                      node-id (if is-person "YES" "NO"))
+        is-person))
 
-                ;; Update person registers (only for person nodes)
-                (dolist (linked-id linked-ids)
-                  (unless (string= linked-id "947ffe5d-e75f-4f99-8c17-82fe190ca665")
-                    (my/debug-log "Processing linked ID: %s" linked-id)
-                    (if (my/is-person-node linked-id)
-                        (let ((file (my/find-file-for-id linked-id))
-                              (person-title (my/get-node-title linked-id)))
-                          (if file
-                              (my/append-link-to-person-file
-                               file person-title link-str)
-                            (my/debug-log "ERROR: File for person ID %s not found"
-                                          linked-id)))
-                      (my/debug-log "ID %s is not a person node, skipping"
-                                    linked-id)))))))))
+    (defun my/log-append-link-under-headings
+        (orig-fun file-path year month link-str &rest args)
+      "Log the operations performed by `my/append-link-under-headings'."
+      (my/debug-log "Appending link to central index: %s" file-path)
+      (let ((status (apply orig-fun file-path year month link-str args)))
+        (pcase status
+          ('duplicate
+           (my/debug-log
+            "Duplicate link detected in central index, skipping"))
+          ('inserted
+           (my/debug-log "Inserting link under month heading"))
+          ('created-year
+           (my/debug-log "Created Year heading and appended link"))
+          ('created-month
+           (my/debug-log "Created Month heading and appended link"))
+          ('error-year-subtree
+           (my/debug-log "ERROR: Failed to find Year heading subtree"))
+          (_
+           (my/debug-log
+            "Unknown status during index update: %s" status)))
+        status))
 
-      ;; Automate indexing every time you save an Org file on mobile or PC
-      (add-hook 'after-save-hook #'my/org-roam-index-dream-on-save)
+    (defun my/log-append-link-to-person-file
+        (orig-fun file-path person-title link-str &rest args)
+      "Log the operations performed by `my/append-link-to-person-file'."
+      (my/debug-log "Appending link to person file: %s" file-path)
+      (let ((status (apply orig-fun file-path person-title link-str args)))
+        (pcase status
+          ('duplicate
+           (my/debug-log "Duplicate link in person file, skipping"))
+          ('inserted
+           (my/debug-log "Inserting link under person file heading"))
+          ('created-heading-and-inserted
+           (my/debug-log
+            "Created missing person heading and appended link"))
+          (_
+           (my/debug-log
+            "Unknown status during person update: %s" status)))
+        status))
+
+    (defun my/log-extract-metadata-advice (orig-fun &rest args)
+      "Log metadata extracted by `my/extract-dream-metadata'."
+      (let* ((had-id (save-excursion
+                       (goto-char (point-min))
+                       (re-search-forward "^:ID:" nil t)))
+             (res (apply orig-fun args))
+             (id (car res)))
+        (my/debug-log "Metadata extracted:")
+        (unless had-id
+          (my/debug-log " - Created missing ID: %s" id))
+        (my/debug-log " - ID: %s" id)
+        (my/debug-log " - Title: %s" (cadr res))
+        (my/debug-log " - Date: %s" (caddr res))
+        res))
+
+    (defun my/log-process-linked-person-advice
+        (orig-fun linked-id link-str &rest args)
+      "Log the processing of a LINKED-ID."
+      (my/debug-log "Processing linked ID: %s" linked-id)
+      (let ((res (apply orig-fun linked-id link-str args)))
+        (pcase res
+          ('file-not-found
+           (my/debug-log "ERROR: File for person ID %s not found"
+                         linked-id))
+          ('not-person-node
+           (my/debug-log "ID %s is not a person node, skipping"
+                         linked-id))
+          (_ nil))
+        res))
+
+    (defun my/log-process-indexing-advice
+        (orig-fun id title date linked-ids &rest args)
+      "Log the dream indexing process."
+      (my/debug-log "Starting dream indexing for ID: %s" id)
+      (my/debug-log "Found linked IDs: %s" linked-ids)
+      (let ((res (apply orig-fun id title date linked-ids args)))
+        (pcase res
+          ('missing-index-file
+           (my/debug-log "ERROR: Could not find dreams.org index file"))
+          ('ignored-node
+           (my/debug-log "Ignored index node matching exclusion rules"))
+          ('ok
+           (my/debug-log
+            "Indexing completed successfully for ID: %s" id)))
+        res))
+
+    (defun my/log-save-hook-advice (orig-fun &rest args)
+      "Log trigger and completion of the save hook."
+      (when (and (derived-mode-p 'org-mode)
+                 buffer-file-name)
+        (my/debug-log "Save hook triggered for: %s" buffer-file-name)
+        (when (save-excursion
+                (goto-char (point-min))
+                (re-search-forward "^#\\+filetags:[ \t]*:dream:" nil t))
+          (my/debug-log "Confirmed file is a dream node")))
+      (apply orig-fun args))
+
+    ;;;; =========================================================================
+    ;;;; 7. Hook and Advice Registrations
+    ;;;; =========================================================================
+
+    ;; Apply the logging advices to keep functional code clean
+    (advice-add 'my/find-file-for-id
+                :around #'my/log-find-file-advice)
+    (advice-add 'my/is-person-node
+                :around #'my/log-is-person-node-advice)
+    (advice-add 'my/append-link-under-headings
+                :around #'my/log-append-link-under-headings)
+    (advice-add 'my/append-link-to-person-file
+                :around #'my/log-append-link-to-person-file)
+    (advice-add 'my/extract-dream-metadata
+                :around #'my/log-extract-metadata-advice)
+    (advice-add 'my/process-linked-person-id
+                :around #'my/log-process-linked-person-advice)
+    (advice-add 'my/process-dream-indexing
+                :around #'my/log-process-indexing-advice)
+    (advice-add 'my/org-roam-index-dream-on-save
+                :around #'my/log-save-hook-advice)
+
+    ;; Register the auto-indexing hook
+    (add-hook 'after-save-hook #'my/org-roam-index-dream-on-save)
   #+end_src
-** LaTeX
+
+*** LaTeX
 
   Visual adjustments, scaling utilities, and alignment procedures for LaTeX
   rendering in Org-mode.
 
-*** LaTeX Preview Alignment and Rendering
+**** LaTeX Preview Alignment and Rendering
 
   This collection of procedures parses mathematical symbols within active Org
   modes and computes spaces to center equation previews inside the buffer.
@@ -1697,7 +1920,7 @@
       (lambda (&rest _) (my/org-center-latex)))
   #+end_src
 
-*** LaTeX Preview Scale Switcher
+**** LaTeX Preview Scale Switcher
 
   Quickly increases or decreases rendering sizes of mathematical previews
   between standard scales (1.1 and 1.8).
@@ -1714,7 +1937,7 @@
         (message "[CIRO]: LaTeX scaling set to %.1f" next)))
   #+end_src
 
-*** LaTeX Export Subdirectory and Cleanup
+**** LaTeX Export Subdirectory and Cleanup
 
   Automatically redirects all exported files into an 'export/' 
   subdirectory and cleans up intermediate LaTeX compilation files.
