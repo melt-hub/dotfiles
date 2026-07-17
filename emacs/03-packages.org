@@ -247,7 +247,6 @@
       :config
       (setq-default c-basic-offset 4)
       (setq-default java-basic-offset 4)
-      (setq compilation-scroll-output t)
       (my/say "C-like languages environment ready (C, C++, Java)."))
   #+end_src
 
@@ -418,16 +417,26 @@
   #+begin_src emacs-lisp
     (use-package rust-mode
       :ensure t
-      :mode "\\.rs\\'")
+      :mode "\\.rs\\'"
+      :bind (:map rust-mode-map
+                  ("C-c C-c" . my/compile-smart)
+                  ("C-c C-r" . my/compile-and-run-rust))
+      :config
+      ;; Enable automatic code formatting on save using rustfmt
+      (setq rust-format-on-save t)
+      (my/say "Rust mode ready with format-on-save."))
 
     (use-package cargo
       :ensure t
       :hook (rust-mode . cargo-minor-mode)
       :config
-      ;; The prefix automatically enables sub-keys (b, r, t, c, etc.)
-      (setq cargo-minor-mode-key-prefix (kbd "C-c C-k"))
+      ;; Unbind C-c C-c from cargo to let my/compile-smart execute instantly
+      (define-key cargo-minor-mode-map (kbd "C-c C-c") nil)
+      ;; Bind the cargo command map prefix to C-c C-k
+      (define-key cargo-minor-mode-map
+        (kbd "C-c C-k") 'cargo-minor-mode-command-map)
       (setq cargo-process--command-flags '("--color" "always"))
-      (my/say "Rust/Cargo environment ready."))
+      (my/say "Cargo minor mode loaded with C-c C-k prefix."))
 
     ;; Project-specific terminal shortcut
     (with-eval-after-load 'rust-mode

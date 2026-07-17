@@ -17,6 +17,9 @@
     (defvar os-packages-path "~/dotfiles/emacs/packages/")
     (defvar org-dir-path "~/zk/")
 
+    ;; Compilation buffer autoscroll
+    (setq compilation-scroll-output t)
+
     ;; Custom variables
     (defvar my/org-university "Università di Milano Bicocca"
       "Default university for scientific papers.")

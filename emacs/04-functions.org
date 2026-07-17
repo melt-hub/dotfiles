@@ -245,6 +245,15 @@
                    (default-directory classpath))
               (compile (format "javac -d %s -sourcepath %s %s"
                                classpath classpath file))))))
+       ((derived-mode-p 'rust-mode)
+        (let ((cargo-dir (my/find-cargo-dir)))
+          (if cargo-dir
+              (let ((default-directory cargo-dir))
+                (compile "cargo build"))
+            (let* ((file (buffer-file-name))
+                   (bin (file-name-sans-extension file))
+                   (default-directory (file-name-directory file)))
+              (compile (format "rustc %s -o %s" file bin))))))
        (t (call-interactively 'compile))))
 
     (defun my/compile-and-run-c ()
@@ -526,6 +535,34 @@
       (interactive)
       (my/execute-command
        (format "%s %s" my/r-interpreter (buffer-file-name))))
+  #+end_src
+*** Rust compilation utilities
+
+  #+begin_src emacs-lisp
+    ;; Rust Path and Project Root Resolution
+
+    (defun my/find-cargo-dir ()
+      "Search up the directory tree for a Cargo.toml.
+    Return the directory containing it, or nil if none is found."
+      (let ((file (locate-dominating-file default-directory "Cargo.toml")))
+        (when file
+          (file-name-as-directory file))))
+
+    ;; Rust Compilation and Execution
+
+    (defun my/compile-and-run-rust ()
+      "Compile and run the current Rust project or single file."
+      (interactive)
+      (let ((cargo-dir (my/find-cargo-dir))
+            (file (buffer-file-name)))
+        (if cargo-dir
+            (let ((default-directory cargo-dir))
+              (my/execute-command "cargo run"))
+          (let* ((dir (file-name-directory file))
+                 (bin (file-name-sans-extension file))
+                 (default-directory dir))
+            (my/execute-command
+             (format "rustc %s -o %s && %s" file bin bin))))))
   #+end_src
 ** Org
 
