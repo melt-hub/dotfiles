@@ -34,8 +34,12 @@
       "Name of the Emacs assistant.")
 
     (defun my/say (text &rest args)
-      "Display a simple assistant message."
-      (message "[%s]: %s" my/assistant (apply #'format text args)))
+      "Display a colored assistant log message."
+      (apply #'message
+             (concat (propertize (concat "[" my/assistant "]") 
+                                 'face 'font-lock-keyword-face)
+                     ": " text)
+             args))
 
     (my/say "Yo melt!")
 
@@ -101,6 +105,10 @@
         ;; Prolog
         (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
 
+        ;; CPP/INO
+        (add-to-list 'auto-mode-alist '("\\.ino\\'" . c++-mode))
+
+
         ;; Rofi, Sway/Swaylock e file RC generici
         (add-to-list 'auto-mode-alist '("\\.rasi\\'" . css-mode))
         (add-to-list 'auto-mode-alist '("config\\'" . conf-mode))
@@ -119,5 +127,6 @@
   #+end_src
 
   #+begin_src emacs-lisp
+    (my/say "Startup module loaded.")
     (provide 'my-startup)
   #+end_src

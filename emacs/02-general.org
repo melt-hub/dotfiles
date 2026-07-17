@@ -142,5 +142,6 @@
   #+end_src
 
   #+begin_src emacs-lisp
+    (my/say "Packages configuration module loaded.")
     (provide 'my-general)
   #+end_src

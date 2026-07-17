@@ -228,26 +228,31 @@
 
   #+begin_src emacs-lisp
     (use-package cc-mode
-      :ensure nil
-      :bind (:map c-mode-map
-                  ("C-c C-c" . my/compile-smart)
-                  ("C-c C-r" . my/compile-and-run-c)
-                  ("C-c C-a" . my/c-generate-assembly)
-                  ("C-c C-h" . my/c-hexdump-binary)
-             :map c++-mode-map
-                  ("C-c C-c" . my/compile-smart)
-                  ("C-c C-r" . my/compile-and-run-c)
-                  ("C-c C-a" . my/c-generate-assembly)
-                  ("C-c C-h" . my/c-hexdump-binary)
-             :map java-mode-map
-                  ("C-c C-c" . my/compile-smart)
-                  ("C-c C-r" . my/compile-and-run-java)
-                  ("C-c C-a" . my/java-generate-bytecode)
-                  ("C-c C-h" . my/java-hexdump-class))
-      :config
-      (setq-default c-basic-offset 4)
-      (setq-default java-basic-offset 4)
-      (my/say "C-like languages environment ready (C, C++, Java)."))
+          :ensure nil
+          :config
+          (setq-default c-basic-offset 4)
+          (setq-default java-basic-offset 4)
+          (setq compilation-scroll-output t)
+
+          ;; Bind keys in c-mode-map
+          (define-key c-mode-map (kbd "C-c C-c") #'my/compile-smart)
+          (define-key c-mode-map (kbd "C-c C-r") #'my/compile-and-run-c)
+          (define-key c-mode-map (kbd "C-c C-a") #'my/c-generate-assembly)
+          (define-key c-mode-map (kbd "C-c C-h") #'my/c-hexdump-binary)
+
+          ;; Bind keys in c++-mode-map
+          (define-key c++-mode-map (kbd "C-c C-c") #'my/compile-smart)
+          (define-key c++-mode-map (kbd "C-c C-r") #'my/compile-and-run-c)
+          (define-key c++-mode-map (kbd "C-c C-a") #'my/c-generate-assembly)
+          (define-key c++-mode-map (kbd "C-c C-h") #'my/c-hexdump-binary)
+
+          ;; Bind keys in java-mode-map
+          (define-key java-mode-map (kbd "C-c C-c") #'my/compile-smart)
+          (define-key java-mode-map (kbd "C-c C-r") #'my/compile-and-run-java)
+          (define-key java-mode-map (kbd "C-c C-a") #'my/java-generate-bytecode)
+          (define-key java-mode-map (kbd "C-c C-h") #'my/java-hexdump-class)
+
+          (my/say "C-like languages environment ready (C, C++, Java)."))
   #+end_src
 
 *** Git
@@ -274,14 +279,14 @@
 *** JavaScript
 
   #+begin_src emacs-lisp
+
     (use-package js
-      :ensure nil
-      :mode ("\\.js\\'" . js-mode)
-      :bind (:map js-mode-map
-                  ("C-c C-r" . my/run-js))
-      :config
-      (setq js-indent-level 2)
-      (my/say "Javascript environment ready."))
+          :ensure nil
+          :mode ("\\.js\\'" . js-mode)
+          :config
+          (setq js-indent-level 2)
+          (define-key js-mode-map (kbd "C-c C-r") #'my/run-js)
+          (my/say "Javascript environment ready."))
   #+end_src
 
 *** Julia
@@ -416,31 +421,30 @@
 
   #+begin_src emacs-lisp
     (use-package rust-mode
-      :ensure t
-      :mode "\\.rs\\'"
-      :bind (:map rust-mode-map
-                  ("C-c C-c" . my/compile-smart)
-                  ("C-c C-r" . my/compile-and-run-rust))
-      :config
-      ;; Enable automatic code formatting on save using rustfmt
-      (setq rust-format-on-save t)
-      (my/say "Rust mode ready with format-on-save."))
+           :ensure t
+           :mode "\\.rs\\'"
+           :config
+           ;; Enable automatic code formatting on save using rustfmt
+           (setq rust-format-on-save t)
+           (define-key rust-mode-map (kbd "C-c C-c") #'my/compile-smart)
+           (define-key rust-mode-map (kbd "C-c C-r") #'my/compile-and-run-rust)
+           (my/say "Rust mode ready with format-on-save."))
 
-    (use-package cargo
-      :ensure t
-      :hook (rust-mode . cargo-minor-mode)
-      :config
-      ;; Unbind C-c C-c from cargo to let my/compile-smart execute instantly
-      (define-key cargo-minor-mode-map (kbd "C-c C-c") nil)
-      ;; Bind the cargo command map prefix to C-c C-k
-      (define-key cargo-minor-mode-map
-        (kbd "C-c C-k") 'cargo-minor-mode-command-map)
-      (setq cargo-process--command-flags '("--color" "always"))
-      (my/say "Cargo minor mode loaded with C-c C-k prefix."))
+         (use-package cargo
+           :ensure t
+           :hook (rust-mode . cargo-minor-mode)
+           :config
+           ;; Unbind C-c C-c from cargo to let my/compile-smart execute instantly
+           (define-key cargo-minor-mode-map (kbd "C-c C-c") nil)
+           ;; Bind the cargo command map prefix to C-c C-k
+           (define-key cargo-minor-mode-map
+             (kbd "C-c C-k") 'cargo-minor-mode-command-map)
+           (setq cargo-process--command-flags '("--color" "always"))
+           (my/say "Cargo minor mode loaded with C-c C-k prefix."))
 
-    ;; Project-specific terminal shortcut
-    (with-eval-after-load 'rust-mode
-      (define-key rust-mode-map (kbd "C-c C-v") #'vterm))
+         ;; Project-specific terminal shortcut
+         (with-eval-after-load 'rust-mode
+           (define-key rust-mode-map (kbd "C-c C-v") #'vterm))
   #+end_src
 *** R
 
@@ -450,18 +454,18 @@
 
   #+begin_src emacs-lisp
     (use-package ess
-      :ensure t
-      :defer t
-      :mode ("\\.R\\'" . R-mode)
-      :bind (:map ess-r-mode-map
-                  ("C-c C-z" . ess-switch-to-inferior-or-script-buffer)
-                  ("C-c C-c" . ess-eval-region-or-function-or-paragraph)
-                  ("C-c C-r" . my/run-r))
-      :config
-      ;; Set indentation level and disable fancy comment formatting
-      (setq ess-indent-level 4)
-      (setq ess-fancy-comments nil)
-      (my/say "R (ESS) environment ready."))
+          :ensure t
+          :defer t
+          :mode ("\\.R\\'" . R-mode)
+          :bind (:map ess-r-mode-map
+                      ("C-c C-z" . ess-switch-to-inferior-or-script-buffer)
+                      ("C-c C-c" . ess-eval-region-or-function-or-paragraph))
+          :config
+          ;; Set indentation level and disable fancy comment formatting
+          (setq ess-indent-level 4)
+          (setq ess-fancy-comments nil)
+          (define-key ess-r-mode-map (kbd "C-c C-r") #'my/run-r)
+          (my/say "R (ESS) environment ready.")) 
   #+end_src
 *** SQL
 
@@ -986,5 +990,6 @@
   #+end_src
 
   #+begin_src emacs-lisp
+    (my/say "Packages configuration module loaded.")
     (provide 'my-packages)
   #+end_src

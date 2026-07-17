@@ -31,21 +31,6 @@
     (add-hook 'after-save-hook #'my/tangle-dotfiles)
   #+end_src
 
-*** Formatted logging
-
-  'Say' function that formats a logging message with colors and the name of the
-  "assistant":
-
-  #+begin_src emacs-lisp
-    (defun my/say (text &rest args)
-      "Assistant log with themed colors."
-      (apply #'message
-             (concat (propertize (concat "[" my/assistant "]") 
-                                 'face 'font-lock-keyword-face)
-                     ": " text)
-             args))
-  #+end_src
-
 ** Software Development
 
   Custom compile/run/analysis helpers for C-like languages and JavaScript.
@@ -84,11 +69,11 @@
 *** C/C++ compilation utilities
 **** Path and Project Root Resolution
 
-  Helpers to locate the project root (Makefile directory) and automatically
-  detect standard header folders in unstructured environments.
+  Helpers to locate the project root (Makefile or PlatformIO directory) and
+  automatically detect standard header folders in unstructured environments.
 
   #+begin_src emacs-lisp
-    ;; Path and Project Root Resolution
+    ;;; --- Makefile Directory Discovery ---
 
     (defun my/find-makefile-dir ()
       "Search up the directory tree for a Makefile.
@@ -96,6 +81,18 @@
       (let ((file (locate-dominating-file default-directory "Makefile")))
         (when file
           (file-name-as-directory file))))
+
+    ;;; --- PlatformIO Directory Discovery ---
+
+    (defun my/find-platformio-dir ()
+      "Search up the directory tree for a platformio.ini file.
+    Return the directory containing it, or nil if none is found."
+      (let ((file (locate-dominating-file
+                   default-directory "platformio.ini")))
+        (when file
+          (file-name-as-directory file))))
+
+    ;;; --- Single-File Auto-Include Detection ---
 
     (defun my/c-auto-include-flag (dir)
       "Detect an include directory relative to DIR and return the -I flag.
@@ -106,6 +103,8 @@
        ((file-directory-p (expand-file-name "../include" dir))
         "-I../include")
        (t "")))
+
+    ;;; --- Binary Name Fallback Resolution ---
 
     (defun my/buffer-binary-name ()
       "Get a candidate binary name based on the current buffer file name."
@@ -119,7 +118,7 @@
   to automate run tasks and binary analysis.
 
   #+begin_src emacs-lisp
-    ;; Makefile Parsing and Binary Resolution
+    ;;; --- Makefile Target Parsing ---
 
     (defun my/parse-makefile-targets (makefile-path)
       "Parse and return a list of all target names declared in MAKEFILE-PATH."
@@ -135,8 +134,12 @@
                   (push target targets))))
             (nreverse targets)))))
 
+    ;;; --- Makefile Target Binary Parsing ---
+
     (defun my/parse-makefile-target-binary (makefile-path)
-      "Extract the value of the TARGET variable from MAKEFILE-PATH."
+      "Extract the value of the TARGET variable from MAKEFILE-PATH.
+    Support common assignment operators (=, :=, ?=, +=) and strip
+    trailing comments or carriage returns."
       (when (file-readable-p makefile-path)
         (with-temp-buffer
           (insert-file-contents makefile-path)
@@ -149,8 +152,12 @@
                          "\\$([a-zA-Z0-9_-]+)" "" val))
               val)))))
 
+    ;;; --- Makefile Binary Path Discovery ---
+
     (defun my/find-makefile-binary (makefile-dir)
-      "Attempt to find the compiled binary in MAKEFILE-DIR."
+      "Attempt to find the compiled binary in MAKEFILE-DIR.
+    Search using the extracted TARGET name, current buffer base name,
+    or common fallback names like testunit."
       (let* ((makefile-path (expand-file-name "Makefile" makefile-dir))
              (parsed-bin (my/parse-makefile-target-binary makefile-path))
              (buf-bin (my/buffer-binary-name))
@@ -176,6 +183,8 @@
                      (not (file-directory-p path)))
             (setq found path)))))
 
+    ;;; --- Makefile Interactive Target Selector ---
+
     (defun my/select-makefile-target (makefile-dir)
       "Prompt the user to select an execution target from MAKEFILE-DIR."
       (let* ((makefile-path (expand-file-name "Makefile" makefile-dir))
@@ -197,7 +206,7 @@
   fallback compiling routines for unstructured single files.
 
   #+begin_src emacs-lisp
-    ;; Compiler Configuration and Execution
+    ;;; --- Compiler and Flag Constants ---
 
     (defun my/c-compiler ()
       "Return \"g++\" in c++-mode, \"gcc\" otherwise."
@@ -205,6 +214,8 @@
 
     (defvar my/c-compile-flags "-O2 -Wall -Wextra -Iinclude"
       "Default gcc flags used when compiling C/C++ files.")
+
+    ;;; --- Single-File Compilation Command Generator ---
 
     (defun my/c-compile-command ()
       "Generate the appropriate compilation command for the current buffer.
@@ -224,16 +235,24 @@
             (cons dir (format "%s %s -o %s %s"
                               compiler flags bin file))))))
 
+    ;;; --- Smart Compilation Dispatcher ---
+
     (defun my/compile-smart ()
-      "Compile the current C/C++ or Java project/file without prompting."
+      "Compile the current C/C++, Java, Rust, or PlatformIO project."
       (interactive)
       (cond
+       ;; 1. C/C++ and PlatformIO
        ((derived-mode-p 'c-mode 'c++-mode)
-        (let* ((cmd-info (my/c-compile-command))
-               (dir (car cmd-info))
-               (cmd (cdr cmd-info))
-               (default-directory dir))
-          (compile cmd)))
+        (let ((pio-dir (my/find-platformio-dir)))
+          (if pio-dir
+              (let ((default-directory pio-dir))
+                (compile "pio run"))
+            (let* ((cmd-info (my/c-compile-command))
+                   (dir (car cmd-info))
+                   (cmd (cdr cmd-info))
+                   (default-directory dir))
+              (compile cmd)))))
+       ;; 2. Java (Maven-aware)
        ((derived-mode-p 'java-mode)
         (let ((pom-dir (my/find-pom-dir)))
           (if pom-dir
@@ -245,6 +264,7 @@
                    (default-directory classpath))
               (compile (format "javac -d %s -sourcepath %s %s"
                                classpath classpath file))))))
+       ;; 3. Rust (Cargo-aware)
        ((derived-mode-p 'rust-mode)
         (let ((cargo-dir (my/find-cargo-dir)))
           (if cargo-dir
@@ -254,17 +274,29 @@
                    (bin (file-name-sans-extension file))
                    (default-directory (file-name-directory file)))
               (compile (format "rustc %s -o %s" file bin))))))
+       ;; 4. Default fallback
        (t (call-interactively 'compile))))
 
+    ;;; --- Compile and Run Dispatcher ---
+
     (defun my/compile-and-run-c ()
-      "Compile and run the current C/C++ project or single file."
+      "Compile and run the current C/C++ or PlatformIO project."
       (interactive)
-      (let ((makefile-dir (my/find-makefile-dir))
+      (let ((pio-dir (my/find-platformio-dir))
+            (makefile-dir (my/find-makefile-dir))
             (file (buffer-file-name)))
-        (if makefile-dir
-            (let* ((target (my/select-makefile-target makefile-dir))
-                   (default-directory makefile-dir))
-              (my/execute-command (format "make %s" target)))
+        (cond
+         ;; 1. PlatformIO project upload and serial monitor
+         (pio-dir
+          (let ((default-directory pio-dir))
+            (my/execute-command "pio run -t upload -t monitor")))
+         ;; 2. Makefile project target execution
+         (makefile-dir
+          (let* ((target (my/select-makefile-target makefile-dir))
+                 (default-directory makefile-dir))
+            (my/execute-command (format "make %s" target))))
+         ;; 3. Single-file compilation and direct run
+         (t
           (let* ((dir (file-name-directory file))
                  (bin (file-name-sans-extension file))
                  (inc-flag (my/c-auto-include-flag dir))
@@ -275,7 +307,7 @@
                  (default-directory dir))
             (my/execute-command
              (format "%s %s -o %s %s && %s"
-                     compiler flags bin file bin))))))
+                     compiler flags bin file bin)))))))
   #+end_src
 
 **** Binary Analysis Tools
@@ -285,7 +317,7 @@
   the editor.
 
   #+begin_src emacs-lisp
-    ;; Binary Analysis Tools
+    ;;; --- Assembly Code Generation ---
 
     (defun my/c-generate-assembly ()
       "Generate and open assembly output for the current C/C++ file."
@@ -306,6 +338,8 @@
           (my/say (concat "Assembly generation failed, "
                           "check *Shell Command Output*.")))))
 
+    ;;; --- Binary Hexdump Inspection ---
+
     (defun my/c-hexdump-binary ()
       "Compile the current C/C++ project or file and display its hexdump."
       (interactive)
@@ -320,7 +354,8 @@
                           (shell-command (format "hexdump -C %s" bin)
                                          "*hexdump*")
                           (display-buffer "*hexdump*"))
-                      (my/say "Could not locate compiled binary for hexdump.")))
+                      (my/say (concat "Could not locate compiled "
+                                      "binary for hexdump."))))
                 (my/say "Compilation failed, check *Shell Command Output*.")))
           (let* ((dir (file-name-directory file))
                  (bin (file-name-sans-extension file))
@@ -338,7 +373,6 @@
               (my/say (concat "Compilation failed, "
                               "check *Shell Command Output*.")))))))
   #+end_src
-
 *** Java compilation utilities
 **** Java Package and Path Resolution
 
@@ -564,6 +598,20 @@
             (my/execute-command
              (format "rustc %s -o %s && %s" file bin bin))))))
   #+end_src
+*** PlatformIO Project Root Resolution
+
+  Helper to locate the PlatformIO project root directory by searching
+  for the configuration file.
+
+  #+begin_src emacs-lisp
+    (defun my/find-platformio-dir ()
+      "Search up the directory tree for a platformio.ini.
+    Return the directory containing it, or nil if none is found."
+      (let ((file (locate-dominating-file
+                   default-directory "platformio.ini")))
+        (when file
+          (file-name-as-directory file))))
+  #+end_src
 ** Org
 
   Automated workflows, capturing engines, database integrations, and
@@ -573,6 +621,10 @@
 
   Automatically updates the central dreams node and appends cross-reference
   links to relevant person nodes when saving a dream file on PC.
+
+**** Logging Foundation
+
+  Buffer and helper functions to isolate indexing logs.
 
   #+begin_src emacs-lisp
     ;;; Automated Dream Indexing
@@ -588,9 +640,25 @@
     (defvar my/dreams-log-buffer "*dreams-indexing*"
       "Name of the buffer used for dreams indexing logs.")
 
+    (defun my/setup-dreams-log-buffer (buf)
+      "Set up font-lock keywords for the dreams log BUF."
+      (with-current-buffer buf
+        (unless (local-variable-p 'font-lock-defaults)
+          (setq font-lock-defaults
+                '((("\\[[0-9]\\{2\\}:[0-9]\\{2\\}:[0-9]\\{2\\}\\]"
+                    . 'shadow)
+                   ("\\(/[^ \n\t]+\\|~/[^ \n\t]+\\)"
+                    . 'font-lock-variable-name-face)
+                   ("ERROR" . 'font-lock-warning-face)
+                   ("Confirmed" . 'font-lock-string-face)
+                   ("Starting" . 'font-lock-function-name-face)
+                   ("completed" . 'font-lock-string-face))))
+          (font-lock-mode 1))))
+
     (defun my/debug-log (format-string &rest args)
       "Log ARGS formatted by FORMAT-STRING into `my/dreams-log-buffer'."
       (let ((buf (get-buffer-create my/dreams-log-buffer)))
+        (my/setup-dreams-log-buffer buf)
         (with-current-buffer buf
           (save-excursion
             (goto-char (point-max))
@@ -598,7 +666,12 @@
               (insert (concat (format-time-string "[%H:%M:%S] ")
                               (apply #'format format-string args)
                               "\n")))))))
+  #+end_src
+**** Node Resolution and Lookup
 
+  Searches databases and local directories to map Org-IDs to actual file paths.
+
+  #+begin_src emacs-lisp
     ;;;; =========================================================================
     ;;;; 2. Node Resolution and Lookup
     ;;;; =========================================================================
@@ -641,7 +714,14 @@
               (goto-char (point-min))
               (when (re-search-forward "^#\\+title:[ \t]*\\(.*\\)$" nil t)
                 (string-trim (match-string 1))))))))
+  #+end_src
 
+**** Node Metadata and Validation
+
+  Extracts properties from dream buffers and validates if linked nodes belong
+  to specific categories (like person nodes).
+
+  #+begin_src emacs-lisp
     ;;;; =========================================================================
     ;;;; 3. Node Metadata and Validation
     ;;;; =========================================================================
@@ -688,7 +768,14 @@
                      "^#\\+filetags:[ \t]*.*person" nil t)
                 (setq is-person t)))))
         is-person))
+  #+end_src
 
+**** Org File Modification
+
+  Handles the physical insertion of Org links into target files, ensuring
+  correct heading hierarchies and avoiding duplicates.
+
+  #+begin_src emacs-lisp
     ;;;; =========================================================================
     ;;;; 4. Org File Modification
     ;;;; =========================================================================
@@ -770,7 +857,14 @@
                 (setq status 'created-heading-and-inserted)))
             (save-buffer)
             (or status 'duplicate)))))
+  #+end_src
 
+**** Orchestration and Save Hook
+
+  The core logic tying metadata extraction to file modification, executed
+  automatically when saving an Org buffer.
+
+  #+begin_src emacs-lisp
     ;;;; =========================================================================
     ;;;; 5. Orchestration and Save Hook
     ;;;; =========================================================================
@@ -814,6 +908,8 @@
       "Hook function to index the current dream node upon saving."
       (when (and (derived-mode-p 'org-mode)
                  buffer-file-name
+                 ;; Prevent the central index from self-indexing
+                 (not (string-suffix-p "dreams.org" buffer-file-name))
                  (save-excursion
                    (goto-char (point-min))
                    (re-search-forward "^#\\+filetags:[ \t]*:dream:" nil t)))
@@ -827,7 +923,13 @@
           (error
            (my/debug-log "ERROR in save hook: %s"
                          (error-message-string err))))))
+  #+end_src
+**** Decoupled Logging Advices
 
+  Aspect-oriented programming techniques to intercept function calls and
+  dump state information into a dedicated buffer without polluting the logic.
+
+  #+begin_src emacs-lisp
     ;;;; =========================================================================
     ;;;; 6. Decoupled Logging Advices
     ;;;; =========================================================================
@@ -923,7 +1025,13 @@
         (orig-fun id title date linked-ids &rest args)
       "Log the dream indexing process."
       (my/debug-log "Starting dream indexing for ID: %s" id)
-      (my/debug-log "Found linked IDs: %s" linked-ids)
+      (my/debug-log "Found linked IDs:")
+      (dolist (linked-id linked-ids)
+        (unless (string= linked-id "947ffe5d-e75f-4f99-8c17-82fe190ca665")
+          (let ((person-title (my/get-node-title linked-id)))
+            (my/debug-log " - ID: %s" linked-id)
+            (my/debug-log " - Title: %s" (or person-title "Unknown"))
+            (my/debug-log "---"))))
       (let ((res (apply orig-fun id title date linked-ids args)))
         (pcase res
           ('missing-index-file
@@ -940,12 +1048,16 @@
       (when (and (derived-mode-p 'org-mode)
                  buffer-file-name)
         (my/debug-log "Save hook triggered for: %s" buffer-file-name)
-        (when (save-excursion
-                (goto-char (point-min))
-                (re-search-forward "^#\\+filetags:[ \t]*:dream:" nil t))
+        (when (and (not (string-suffix-p "dreams.org" buffer-file-name))
+                   (save-excursion
+                     (goto-char (point-min))
+                     (re-search-forward "^#\\+filetags:[ \t]*:dream:" nil t)))
           (my/debug-log "Confirmed file is a dream node")))
       (apply orig-fun args))
+  #+end_src
+**** Hook Registration
 
+  #+begin_src emacs-lisp
     ;;;; =========================================================================
     ;;;; 7. Hook and Advice Registrations
     ;;;; =========================================================================
@@ -971,7 +1083,6 @@
     ;; Register the auto-indexing hook
     (add-hook 'after-save-hook #'my/org-roam-index-dream-on-save)
   #+end_src
-
 *** LaTeX
 
   Visual adjustments, scaling utilities, and alignment procedures for LaTeX
@@ -1066,5 +1177,6 @@
   #+end_src
 
   #+begin_src emacs-lisp
+    (my/say "Custom functions module loaded.")
     (provide 'my-functions)
   #+end_src
