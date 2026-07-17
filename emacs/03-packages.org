@@ -1,0 +1,981 @@
+#+TITLE: Emacs Packages Configuration
+#+PROPERTY: header-args :tangle "~/.emacs.d/modules/my-packages.el"
+
+* Packages
+
+  This section manages repository registration, initialization, and configuration
+  of third-party libraries grouped by category.
+
+  #+begin_src emacs-lisp
+    ;; ====================| PACKAGES |====================
+  #+end_src
+
+** Initialization
+
+  Configurations for package managers, archive priorities, and load paths.
+
+  #+begin_src emacs-lisp
+    ;; Remote ELPA and MELPA archives configuration
+    (use-package package
+      :config
+      (setq package-archive-priorities
+            '(("melpa-stable" . 2)
+              ("MELPA" . 1)
+              ("gnu" . 0)))
+      (setq package-archives
+            '(("melpa-stable" . "https://stable.melpa.org/packages/")
+              ("MELPA" . "https://melpa.org/packages/")
+              ("gnu" . "https://elpa.gnu.org/packages/"))))
+
+    ;; Setup statistics tracking and load use-package engine
+    (setq use-package-compute-statistics t)
+    (package-initialize)
+    (require 'use-package)
+  #+end_src
+
+*** Gcmh
+
+  #+begin_src emacs-lisp
+    ;; Automatic garbage collector optimization
+    (use-package gcmh
+      :ensure t
+      :init
+      ;; 16MB threshold
+      (setq gcmh-high-cons-threshold (* 16 1024 1024)
+            gcmh-idle-delay 15)
+      :config
+      (gcmh-mode 1)
+      (my/say "Garbage Collector Magic Hack active."))
+  #+end_src
+  
+** UI and Theming
+
+  Packages related to interface styling, themes, icons, and status indicators.
+
+*** Emacs themes
+
+  A high-contrast dark color scheme optimized for readability and extended
+  development.
+
+  #+begin_src emacs-lisp
+    ;; Fix safe theme validation issues for Emacs 29+
+    (setq custom-safe-themes t)
+    (setq warning-minimum-level :error)
+
+    ;; change 'load-theme' value to change theme
+
+    ;; emacs built in themes
+    (use-package emacs
+      :init
+      (let ((inhibit-message t)
+            (warning-minimum-level :emergency))
+        (load-theme 'modus-vivendi t)))
+
+    ;; spacemacs dark
+    ;; (use-package spacemacs-theme
+    ;;   :ensure t
+    ;;   :defer t
+    ;;   :init
+    ;;   (let ((inhibit-message t)
+    ;;         (warning-minimum-level :emergency))
+    ;;     (load-theme 'spacemacs-dark t)))
+
+    ;; ef themes
+    ;; (use-package ef-themes
+    ;;   :ensure t
+    ;;   :defer t
+    ;;   :init
+    ;;   (let ((inhibit-message t)
+    ;;         (warning-minimum-level :emergency))
+    ;;     (load-theme 'ef-trio-dark t)))
+    (my/say "Theme loaded.")
+
+  #+end_src
+
+*** Beacon
+
+  Provides a visual flash animation at the cursor when shifting focus
+  between windows or buffers.
+
+  #+begin_src emacs-lisp
+    (use-package beacon
+      :ensure t
+      :config
+      (beacon-mode 1)
+      (my/say "Beacon following the cursor."))
+
+  #+end_src
+
+*** Nerd Icons
+
+  A vector icon set integration utilized across multiple modelines and
+  dashboard modules.
+
+  #+begin_src emacs-lisp
+    (use-package nerd-icons
+      :ensure t)
+  #+end_src
+
+*** Doom Modeline
+
+  A streamlined, highly informative modeline interface.
+
+  #+begin_src emacs-lisp
+    (use-package doom-modeline
+      :ensure t
+      :init (doom-modeline-mode 1)
+      :config
+      (my/say "Modeline loaded."))
+  #+end_src
+
+*** Nyan Mode
+
+  An animated buffer position indicator using the classic Nyan Cat sprite.
+
+  #+begin_src emacs-lisp
+    ;; (use-package nyan-mode
+    ;;   :ensure t
+    ;;   :config
+    ;;   (nyan-mode)
+    ;;   (message "[CIRO]: Nyancat loaded."))
+  #+end_src
+
+*** Dashboard
+**** Dynamic Dashboard Greeting
+
+  Generates a time-aware greeting for the dashboard banner title 
+  using the assistant name and the author's login.
+
+  #+begin_src emacs-lisp
+    (defun my/get-greeting ()
+      "Generate a dynamic greeting based on the current system hour."
+      (let ((hour (string-to-number (format-time-string "%H")))
+            (prefix (concat "[" my/assistant "]:")))
+        (cond
+         ((and (>= hour 4)  (< hour 7))
+          (concat prefix " Sei già sveglio o ancora sveglio?"))
+         ((and (>= hour 7)  (< hour 12))
+          (concat prefix " Buongiorno " my/org-author "!"))
+         ((and (>= hour 12) (< hour 18))
+          (concat prefix " Buon pomeriggio " my/org-author "!"))
+         ((and (>= hour 18) (< hour 24))
+          (concat prefix " Buona sera " my/org-author "!"))
+         (t
+          (concat prefix " Vatt a dorme " my/org-author "!")))))
+  #+end_src
+
+  A clean and responsive startup splash screen featuring list views of
+  recent documents and active agenda items.
+
+  #+begin_src emacs-lisp
+    (use-package dashboard
+      :ensure t
+      :init (recentf-mode 1)
+      :config
+      (dashboard-setup-startup-hook)
+
+      ;; ASCII Art banner 
+      ;; Apply vertical padding and write the art to a temporary file
+      (let* ((top-padding (make-string 3 ?\n))
+             (bottom-padding (make-string 3 ?\n))
+             (banner-path (expand-file-name "dashboard-banner.txt" 
+                                            my/temp-dir)))
+        (with-temp-file banner-path
+          (insert top-padding my/ascii-brain bottom-padding))
+        (setq dashboard-startup-banner banner-path))
+
+      ;; Banner title
+      (setq dashboard-banner-logo-title (my/get-greeting))
+      (add-hook 'dashboard-mode-hook
+                (lambda () (setq dashboard-banner-logo-title 
+                                 (my/get-greeting))))
+      (set-face-attribute 'dashboard-banner-logo-title nil 
+        :height 1.0
+        :weight 'normal
+        :foreground 'unspecified)
+
+      (setq dashboard-items '((recents . 10)))
+
+      ;; Fine-tune visual options
+      (setq dashboard-set-heading-icons nil)
+      (setq dashboard-set-file-icons t)
+      (setq dashboard-icon-type 'nerd-icons)
+
+      ;; Center content alignment
+      (setq dashboard-center-content t)
+      (setq dashboard-section-gap 2)
+      (setq dashboard-set-footer t)
+
+      ;; Custom buffer interactions
+      (add-hook 'dashboard-mode-hook
+                (lambda ()
+                  (local-set-key (kbd "q") 'quit-window)
+                  (setq buffer-read-only t)))
+
+      (my/say "Dashboard is ready."))
+  #+end_src
+
+** Software Development
+
+  Development systems, compiler interfaces, and languages integrations.
+  Custom compile/run/analysis functions referenced by the bindings below
+  live under * My Functions > Software Development.
+
+*** C-like Languages (C, C++, Java)
+
+  C, C++, and Java all share the same underlying library (cc-mode.el),
+  so they are configured together to avoid loading conflicts.
+
+  #+begin_src emacs-lisp
+    (use-package cc-mode
+      :ensure nil
+      :bind (:map c-mode-map
+                  ("C-c C-c" . my/compile-smart)
+                  ("C-c C-r" . my/compile-and-run-c)
+                  ("C-c C-a" . my/c-generate-assembly)
+                  ("C-c C-h" . my/c-hexdump-binary)
+             :map c++-mode-map
+                  ("C-c C-c" . my/compile-smart)
+                  ("C-c C-r" . my/compile-and-run-c)
+                  ("C-c C-a" . my/c-generate-assembly)
+                  ("C-c C-h" . my/c-hexdump-binary)
+             :map java-mode-map
+                  ("C-c C-c" . my/compile-smart)
+                  ("C-c C-r" . my/compile-and-run-java)
+                  ("C-c C-a" . my/java-generate-bytecode)
+                  ("C-c C-h" . my/java-hexdump-class))
+      :config
+      (setq-default c-basic-offset 4)
+      (setq-default java-basic-offset 4)
+      (setq compilation-scroll-output t)
+      (my/say "C-like languages environment ready (C, C++, Java)."))
+  #+end_src
+
+*** Git
+
+  Magit is a comprehensive, keyboard-driven interface for Git, enabling
+  efficient version control management directly from editing buffers.
+
+  #+begin_src emacs-lisp
+    ;; --------------- git integration ---------------
+    (use-package magit
+      :ensure t
+      :defer t
+      :bind
+      (("C-x g"   . magit-status)
+       ("C-x M-g" . magit-dispatch))
+      :config
+      ;; Retrieve credentials using auth-source
+      (setq magit-process-find-password-functions
+            '(magit-process-password-auth-source))
+      (my/say "Magit ready."))
+    ;; --------------- end git integration ---------------
+  #+end_src
+
+*** JavaScript
+
+  #+begin_src emacs-lisp
+    (use-package js
+      :ensure nil
+      :mode ("\\.js\\'" . js-mode)
+      :bind (:map js-mode-map
+                  ("C-c C-r" . my/run-js))
+      :config
+      (setq js-indent-level 2)
+      (my/say "Javascript environment ready."))
+  #+end_src
+
+*** Julia
+
+  Support for the Julia language, providing syntax highlighting 
+  and a connection to the Julia REPL.
+
+  #+begin_src emacs-lisp
+    (use-package julia-mode
+      :mode "\\.jl\\'"
+      :ensure t
+      :config
+      (my/say "Julia mode ready."))
+
+    ;; Adds a proper CLI REPL for Julia
+    (use-package julia-repl
+      :ensure t
+      :hook (julia-mode . julia-repl-mode)
+      :config
+      (my/say "Julia REPL ready."))
+  #+end_src
+*** Lisp
+
+  Interactive REPL systems, custom formatting, and completions for Common
+  Lisp, Scheme, and Emacs Lisp.
+
+  #+begin_src emacs-lisp
+    ;; --------------- lisp developement  ---------------
+  #+end_src
+
+**** SLIME
+
+  Superior Lisp Interaction Mode for Emacs. Evaluates forms, inspects
+  environments, and handles debugging by interfacing with an external
+  Common Lisp compiler thread.
+
+  #+begin_src emacs-lisp
+    ;; Core environment setup
+    (use-package slime
+      :ensure t
+      :commands (slime slime-mode)
+      :config
+      (setq inferior-lisp-program "sbcl")
+      (slime-setup '(slime-fancy)))
+
+    ;; Complete-at-point suggestions via Company
+    (use-package slime-company
+      :ensure t
+      :after (slime company)
+      :config
+      (setq slime-company-completion 'fuzzy)
+      (my/say "Common Lisp (SLIME) environment ready."))
+  #+end_src
+
+**** Lisp Extra Font Lock
+
+  Extends visual syntax color rules targeting custom macros and standard
+  special operators.
+
+  #+begin_src emacs-lisp
+    (use-package lisp-extra-font-lock
+      :ensure t
+      :hook (lisp-mode . lisp-extra-font-lock-mode)
+      :config
+      (lisp-extra-font-lock-global-mode 1))
+  #+end_src
+
+**** Racket Mode
+
+  Interactive syntax structures and execution tools for the Racket
+  language ecosystem.
+
+  #+begin_src emacs-lisp
+    (use-package racket-mode
+      :ensure t
+      :mode "\\.rkt\\'")
+  #+end_src
+
+**** Highlight Defined
+
+  Locates and colorizes defined functions, variables, and macros in
+  Emacs Lisp buffers.
+
+  #+begin_src emacs-lisp
+    (use-package highlight-defined
+      :ensure t
+      :hook (emacs-lisp-mode . highlight-defined-mode))
+  #+end_src
+
+  #+begin_src emacs-lisp
+  ;; --------------- end lisp developement  ---------------
+  #+end_src
+
+*** Prolog
+
+  Syntax highlighting and interaction with the Prolog interpreter 
+  (SWI-Prolog or similar).
+
+  #+begin_src emacs-lisp
+    (use-package prolog
+      :ensure nil
+      :mode ("\\.pl\\'" . prolog-mode)
+      :bind (:map prolog-mode-map
+                  ("C-c C-z" . run-prolog))
+      :config
+      (setq prolog-program-name "swipl")
+      (setq prolog-system 'swi)
+      (my/say "Prolog (SWI) environment ready."))
+  #+end_src
+
+*** Python
+
+  Native Python integration. Provides a REPL (run-python) and 
+  buffer execution.
+
+  #+begin_src emacs-lisp
+    (use-package python
+      :ensure nil
+      :mode ("\\.py\\'" . python-mode)
+      :bind (:map python-mode-map
+                  ("C-c C-c" . python-shell-send-buffer)
+                  ("C-c C-z" . run-python))
+      :config
+      (setq python-shell-interpreter "python3")
+      (my/say "Python environment ready."))
+  #+end_src
+
+*** Rust
+
+  Configurations for Rust language support, containing syntax coloring,
+  Cargo integration, and fast terminal emulation.
+
+  #+begin_src emacs-lisp
+    (use-package rust-mode
+      :ensure t
+      :mode "\\.rs\\'")
+
+    (use-package cargo
+      :ensure t
+      :hook (rust-mode . cargo-minor-mode)
+      :config
+      ;; The prefix automatically enables sub-keys (b, r, t, c, etc.)
+      (setq cargo-minor-mode-key-prefix (kbd "C-c C-k"))
+      (setq cargo-process--command-flags '("--color" "always"))
+      (my/say "Rust/Cargo environment ready."))
+
+    ;; Project-specific terminal shortcut
+    (with-eval-after-load 'rust-mode
+      (define-key rust-mode-map (kbd "C-c C-v") #'vterm))
+  #+end_src
+*** R
+
+  Emacs Speaks Statistics (ESS) provides interactive statistical programming
+  and data analysis support for the R language, featuring a robust REPL,
+  syntax coloring, and dynamic documentation lookups.
+
+  #+begin_src emacs-lisp
+    (use-package ess
+      :ensure t
+      :defer t
+      :mode ("\\.R\\'" . R-mode)
+      :bind (:map ess-r-mode-map
+                  ("C-c C-z" . ess-switch-to-inferior-or-script-buffer)
+                  ("C-c C-c" . ess-eval-region-or-function-or-paragraph)
+                  ("C-c C-r" . my/run-r))
+      :config
+      ;; Set indentation level and disable fancy comment formatting
+      (setq ess-indent-level 4)
+      (setq ess-fancy-comments nil)
+      (my/say "R (ESS) environment ready."))
+  #+end_src
+*** SQL
+
+  SQL interactions including connection profiling, formatting, and keyword
+  capitalization.
+
+  #+begin_src emacs-lisp
+    ;; --------------- sql developement ---------------
+    (use-package sql
+      :mode ("\\.sql\\'" . sql-mode)
+      :config
+      ;; Assign primary engine dialect
+      (setq sql-product 'mysql)
+
+      ;; Declare active profiles mapping credentials to auth-source
+      (setq sql-connection-alist
+        '((mysql-melt
+           (sql-product  'mysql)
+           (sql-server   "127.0.0.1")
+           (sql-port     3306)
+           (sql-user     "melt")
+           (sql-password
+            (auth-source-pass-get 'secret "mysql/melt"))
+           (sql-database ""))
+          (mysql-root
+           (sql-product  'mysql)
+           (sql-server   "127.0.0.1")
+           (sql-port     3306)
+           (sql-user     "root")
+           (sql-password
+            (auth-source-pass-get 'secret "mysql/root"))
+           (sql-database ""))))
+
+      ;; Set buffer options
+      (add-hook 'sql-mode-hook
+        (lambda ()
+          (sql-set-product 'mysql)
+          ;; Use simple indentation copying previous line spacing
+          (setq-local indent-line-function 'indent-relative)
+          (electric-indent-local-mode -1)))
+
+      ;; Truncate layout inside interactive shells to preserve ASCII table width
+      (add-hook 'sql-interactive-mode-hook
+        (lambda ()
+          (toggle-truncate-lines t)))
+
+      ;; Force standard ASCII formatting
+      (setq sql-mysql-options '("--table" "--unbuffered"))
+      (my/say "SQL/MySQL environment ready."))
+
+    ;; Automatic capitalization utility for SQL keywords
+    (use-package sqlup-mode
+      :defer t
+      :hook
+      ((sql-mode . sqlup-mode)
+       (sql-interactive-mode . sqlup-mode))
+      :config
+      ;; Specify exclusion blacklist
+      (add-to-list 'sqlup-blacklist "name")
+      (my/say "SQL/MySQL mode loaded."))
+    ;; --------------- end sql development ---------------
+  #+end_src
+
+** PDF and Document Editing
+
+  PDF and LaTeX documents dedicated packages.
+
+*** LaTeX
+
+  Support suites facilitating document compilation and real-time equation
+  previews.
+
+  #+begin_src emacs-lisp
+    ;; --------------- latex ---------------
+  #+end_src
+
+**** Org Fragtog
+
+  Automatically renders inline LaTeX snippets as graphic images when the
+  cursor exits the markup block.
+
+  #+begin_src emacs-lisp
+    (use-package org-fragtog
+      :ensure t
+      :hook (org-mode . org-fragtog-mode)
+      :config
+      (setq org-preview-latex-image-directory
+          (concat temporary-file-directory "ltximg/")))
+  #+end_src
+
+  #+begin_src emacs-lisp
+  ;; --------------- end latex ---------------
+  #+end_src
+
+*** PDF Viewing
+
+  Navigating, reading, scaling, and processing PDF documents within Emacs.
+
+  #+begin_src emacs-lisp
+  ;; --------------- pdf viewing ---------------
+  #+end_src
+
+**** PDF Tools
+
+  A fast vector-based rendering viewer supporting night-mode conversion
+  and markup annotation.
+
+  #+begin_src emacs-lisp
+    (use-package pdf-tools
+      :ensure t
+      :magic ("%PDF" . pdf-view-mode)
+      :config
+      ;; Trigger backend installation
+      (pdf-tools-install)
+
+      ;; Scale to window width
+      (setq pdf-view-use-scaling t)
+      (setq-default pdf-view-display-size 'fit-width)
+      ;; (setq pdf-view-midnight-colors '("#b2b2b2" . "#292B2E"))
+      (setq pdf-view-midnight-colors '("#ffffff" . "#121212"))
+
+      ;; Enable night mode and annotator hook automatically
+      (add-hook 'pdf-view-mode-hook
+                (lambda ()
+                  (pdf-annot-minor-mode)
+                  (pdf-view-midnight-minor-mode)
+                  (pdf-links-minor-mode)
+                  (pdf-outline-minor-mode)))
+
+      ;; Bind operational shortcut keys
+      (define-key pdf-view-mode-map (kbd "H")
+        'pdf-annot-add-highlight-markup-annotation)
+      (define-key pdf-view-mode-map (kbd "U")
+        'pdf-annot-add-underline-markup-annotation)
+      (define-key pdf-view-mode-map (kbd "D")
+        'pdf-annot-add-strikeout-markup-annotation)
+      (define-key pdf-view-mode-map (kbd "C-+")
+        'pdf-view-enlarge)
+      (define-key pdf-view-mode-map (kbd "C--")
+        'pdf-view-shrink)
+      (define-key pdf-view-mode-map (kbd "0")
+        'pdf-view-scale-reset)
+      (define-key pdf-view-mode-map (kbd "M")
+        'pdf-view-midnight-minor-mode)
+      (my/say "PDF Tools initialized."))
+  #+end_src
+
+**** PDF Restore
+
+  Remembers and jumps to the last visited page coordinates when reopening a
+  PDF document.
+
+  #+begin_src emacs-lisp
+    (use-package pdf-view-restore
+      :ensure t
+      :after pdf-tools
+      :hook (pdf-view-mode . pdf-view-restore-mode)
+      :config
+      (add-hook 'pdf-view-mode-hook 'pdf-view-restore-mode)
+      (setq pdf-view-restore-filename
+            (expand-file-name ".pdf-view-restore"
+              user-emacs-directory))
+      (my/say "PDF Restore initialized."))
+  #+end_src
+
+  #+begin_src emacs-lisp
+  ;; --------------- end pdf viewing ---------------
+  #+end_src
+
+** Org
+
+  Packages focused on text editing, task management, knowledge graphs, and
+  outlining.
+
+*** Org Mode
+
+  A versatile note-taking, planning, and document-exporting system.
+
+  #+begin_src emacs-lisp
+    (use-package org
+      :defer t
+      :bind (("C-c a" . org-agenda) ("C-c c" . org-capture))
+      :config
+      (add-to-list 'org-structure-template-alist '("L" . "latex"))
+      (add-to-list 'org-src-lang-modes '("latex" . LaTeX))
+
+      (let ((agenda-path "/home/melt/zk/agenda/agenda.org"))
+        (setq org-agenda-files (list agenda-path))
+        (setq org-log-done 'time)
+        (setq org-log-into-drawer t)
+
+        (setq org-tag-alist
+              '((:startgroup)
+                ("call" . ?c) ("appo" . ?a) ("bday" . ?b) 
+                ("proj" . ?p) ("task" . ?k)
+                (:endgroup)))
+
+        (setq org-agenda-custom-commands
+              '(("p" "Project Overview" tags-todo "+proj")))
+
+        (setq org-capture-templates
+              `(("t" "todo [Inbox]" entry (file+headline ,agenda-path "Inbox")
+                 "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:" :empty-lines 1)
+                ("r" "reminder" entry 
+                 (file+headline ,agenda-path "Tasks & Appointments")
+                 ,(concat "* %^{Description} :rem:\n%^t\n:PROPERTIES:\n"
+                          ":CONTACT: %^{Who}\n:LOCATION: %^{Where}\n"
+                    ":CREATED: %U\n:END:")
+                  :empty-lines 1)
+                ("k" "task" entry
+                 (file+headline ,agenda-path "Tasks & Appointments")
+                 ,(concat "* TODO %^{Description} :task:\nSCHEDULED: %^t\n"
+                          ":PROPERTIES:\n:CONTACT: %^{Who}\n"
+                          ":LOCATION: %^{Where}\n:CREATED: %U\n:END:")
+                 :empty-lines 1)
+                ("c" "call" entry 
+                 (file+headline ,agenda-path "Tasks & Appointments")
+                 ,(concat "* TODO %^{Name} :call:\nSCHEDULED: %^t\n"
+                          ":PROPERTIES:\n:CONTACT: %\\1\n:CREATED: %U\n:END:")
+                 :empty-lines 1)
+                ("b" "birthday" entry 
+                 (file+headline ,agenda-path "Birthdays & Recurrences")
+                 ,(concat "* Compleanno %^{Who} :bday:\n"
+                          "%(concat \"<\" (org-read-date) \" +1y>\")")
+                 :empty-lines 1)
+                ("p" "project" entry (file+headline ,agenda-path "Projects")
+                 ,(concat "* TODO %^{Project Name} [%] :proj:\nDEADLINE: %^t\n"
+                          ":PROPERTIES:\n:CREATED: %U\n:END:\n- [ ] %?")
+                 :empty-lines 1))))
+
+      (setq org-blank-before-new-entry '((heading . t) (plain-list-item . nil)))
+      (setq org-use-property-inheritance t)
+      (setq org-hide-emphasis-markers t)
+      (setq org-tags-column 0)
+      (setq org-agenda-tags-column 0)
+
+      ;; Latex math display
+      (setq org-format-latex-options
+            (plist-put org-format-latex-options :scale 1.8))
+      (setq org-format-latex-options
+            (plist-put org-format-latex-options :justify 'center))
+      (setq org-preview-latex-default-process 'dvisvgm)
+      (setq org-format-latex-options
+            (plist-put org-format-latex-options :background "Transparent"))
+
+      ;; Custom Latex package for equation previews (renders buffers correctly)
+      (setq org-format-latex-header
+            (concat org-format-latex-header "\n\\usepackage{melt-setup}"))
+
+      ;; Remove default geometry to avoid conflicts with custom margins
+      (setq org-latex-default-packages-alist
+            (assoc-delete-all "geometry" org-latex-default-packages-alist))
+
+      ;; Custom default Latex packages
+      (setq org-latex-packages-alist
+            '(("margin=1in" "geometry" t)
+              ("" "parskip" t)
+              ("" "melt-setup" t)))
+
+      ;; Set global author variables to resolve "immediate" metadata issue
+      (setq user-full-name "melt")
+      (setq user-login-name "melt")
+
+      ;; Ensure images are centered by default
+      (setq org-latex-images-centered t)
+
+      ;; Custom minimal class for CS papers (uses external cs-paper-template.sty)
+      (with-eval-after-load 'ox-latex
+        (add-to-list 'org-latex-classes
+                     '("cs-paper"
+                       "\\documentclass[11pt]{article}
+    [DEFAULT-PACKAGES]
+    [PACKAGES]
+    [EXTRA]
+    \\usepackage{cs-paper-template}"
+                       ("\\section{%s}" . "\\section*{%s}")
+                       ("\\subsection{%s}" . "\\subsection*{%s}")
+                       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                       ("\\paragraph{%s}" . "\\paragraph*{%s}"))))
+
+      (my/say "Org-mode loaded. Agenda: %s, LaTeX scale: [x%.1f]."
+              org-agenda-files
+              (plist-get org-format-latex-options :scale)))
+  #+end_src
+
+*** Org Roam
+
+  Provides non-linear personal wiki structures following the Zettelkasten note
+  organization method.
+
+  #+begin_src emacs-lisp
+    (use-package org-roam
+      :ensure t
+      :custom
+      (org-roam-directory (expand-file-name "~/zk"))
+      (org-roam-completion-everywhere t)
+      :bind (("C-c n l" . org-roam-buffer-toggle)
+             ("C-c n f" . org-roam-node-find)
+             ("C-c n i" . org-roam-node-insert))
+      :config
+      (setq org-roam-capture-templates
+              `(("u" "uni")
+                ("uu" "uni" plain "%?"
+                 :target (file+head "uni/${slug}.org"
+                                    ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                             ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                             "#+title: ${title}\n#+author: melt\n"
+                                             "#+filetags: :uni:"))
+                 :unnarrowed t)
+                ("ui" "index" plain "%?"
+                 :target (file+head "uni/${slug}.org"
+                                    ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                             ":created: %<%Y-%m-%d %H:%M>\n"
+                                             ":BOOK_TITLE: %^{Book Title}\n:END:\n"
+                                             "#+title: ${title}\n#+author: melt\n"
+                                             "#+filetags: :uni:index:"))
+                 :unnarrowed t)
+                ("up" "paper" plain "%?"
+                 :target (file+head "uni/papers/${slug}.org"
+                                    ,(concat ":PROPERTIES:\n"
+                                             ":ID: %(org-id-new)\n"
+                                             ":created: %<%Y-%m-%d %H:%M>\n"
+                                             ":END:\n"
+                                             "#+title: ${title}\n"
+                                             "#+author: " my/org-author "\n"
+                                             "#+email: " my/org-email "\n"
+                                             "#+latex_class: cs-paper\n"
+                                             "#+latex_header: \\author{"
+                                             my/org-author
+                                             "\\thanks{Equal contribution.}}\n"
+                                             "#+latex_header: \\affil{"
+                                             my/org-university
+                                             " \\\\ \\texttt{" my/org-email "}}\n"
+                                             "#+filetags: :paper:\n\n"
+                                             "#+options: toc:t\n\n"
+                                             "#+begin_abstract\n"
+                                             "This is the abstract. [fn:1]\n"
+                                             "#+end_abstract\n\n"
+                                             "* Introduction\n\n"
+                                             "The paper starts here.\n\n"
+                                             "* Bibliography\n\n"
+                                             "[fn:1] Footnote example.\n"))
+                 :unnarrowed t)
+                ("d" "dream")
+                ("dd" "dream" plain "%?"
+                 :target (file+head "dreams/${slug}.org"
+                                    ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                             ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                             "#+title: ${title}\n#+author: melt\n"
+                                             "#+filetags: :dream:"))
+                 :unnarrowed t)
+                ("dp" "person" plain "%?"
+                 :target (file+head "dreams/${slug}.org"
+                                    ,(concat ":PROPERTIES:\n"
+                                             ":ID: %(org-id-new)\n"
+                                             ":created: %<%Y-%m-%d %H:%M>\n"
+                                             ":END:\n"
+                                             "#+title: ${title}\n"
+                                             "#+filetags: :person:\n\n"
+                                             "* Dreams featuring ${title}\n"))
+                 :unnarrowed t)
+                ("s" "scrap" plain "%?"
+                 :target (file+head "scraps/${slug}.org"
+                                    ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
+                                             ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
+                                             "#+title: ${title}\n#+author: melt\n"
+                                             "#+filetags: :scrap:"))
+                 :unnarrowed t)))
+      (org-roam-setup)
+      (my/say "Zettelkasten (Org-Roam) active. Directory: %s, Database: %s."
+              org-roam-directory
+              (file-name-nondirectory org-roam-db-location)))
+
+  #+end_src
+
+*** Org Roam UI
+
+  Displays dynamic web browser representations of the personal note graph.
+
+  #+begin_src emacs-lisp
+    ;; --------------- org-roam-ui ---------------
+    (use-package org-roam-ui
+      :ensure t
+      :after org-roam
+      :bind ("C-c n g" . org-roam-ui-mode)
+      :config
+
+      ;; Fedora/Sway fix: Use Firefox directly to avoid recursion errors
+      (setq browse-url-generic-program "firefox"
+            org-roam-ui-browser-function #'browse-url-generic)
+
+      ;; Physics and node sizing parameters
+      (setq org-roam-ui-node-size-strategy 'all-links
+            org-roam-ui-extra-config
+            '(:gravity 0.5 :friction 0.9 :link-distance 50))
+
+      ;; Ensure hl-line-face exists to prevent startup crashes
+      (require 'hl-line)
+      (unless (boundp 'hl-line-face) (defvar hl-line-face 'hl-line))
+
+      ;; Status message
+      (let ((cfg org-roam-ui-extra-config))
+        (my/say "Org-Roam-UI ready. Gravity: [%.1f], Friction: [%.1f], Dist: [%d]."
+                (plist-get cfg :gravity)
+                (plist-get cfg :friction)
+                (plist-get cfg :link-distance))))
+    ;; --------------- end org-roam-ui ---------------
+  #+end_src
+  
+** System and Password Management
+
+  Bridges securing sensitive files, directory sync setups, and keychain requests.
+
+*** Pass
+
+  A GPG-oriented layout managing secure keys using git synchronization.
+
+  #+begin_src emacs-lisp
+    ;; --------------- password management ---------------
+    (use-package pass
+      :ensure t
+      :defer t
+      :commands (pass)
+      :after password-store
+      :config
+      (my/say "Password-store (pass) interface ready."))
+
+    ;; Clear clipboard history automatically after 15 seconds
+    (setq password-store-time-before-clipboard-restore 15)
+  #+end_src
+
+*** Password Store
+
+  Executes operating system password commands directly from active buffers.
+
+  #+begin_src emacs-lisp
+    (use-package password-store
+      :ensure t
+      :defer t
+      :config
+      (my/say "Password-store core loaded."))
+  #+end_src
+
+*** Auth Source Pass
+
+  Standardizing password lookup across mu4e, magit, and Tramp.
+
+  #+begin_src emacs-lisp
+    (use-package auth-source-pass
+      :config
+      (auth-source-pass-enable)
+      (my/say "Password-store core loaded."))
+  #+end_src
+
+*** Pinentry
+
+  Directing GPG security queries directly inside the minibuffer prompt.
+
+  #+begin_src emacs-lisp
+    (use-package pinentry
+      :ensure t
+      :config
+      (setenv "EMACS" "t")
+      (pinentry-start)
+      (my/say "Pinentry agent started."))
+    ;; --------------- end password management ---------------
+  #+end_src
+
+*** Vterm
+
+  High-performance terminal emulator based on libvterm. Configured
+  to integrate with Emacs clipboard and scrollback limits.
+
+  #+begin_src emacs-lisp
+    (use-package vterm
+      :ensure t
+      :bind ("C-c v" . vterm)
+      :custom
+      (vterm-max-scrollback 10000)
+      :config
+      ;; Standard yank (paste) bindings
+      (define-key vterm-mode-map (kbd "C-y") #'vterm-yank)
+      (define-key vterm-mode-map (kbd "M-y") #'vterm-yank-pop)
+      (my/say "Vterm terminal emulator ready."))
+  #+end_src
+** Multimedia
+
+  Interactive controls managing audio streams and playback queues.
+
+*** EMMS
+
+  The Emacs Multimedia System, linking background MPV processes to native playlists.
+
+  #+begin_src emacs-lisp
+    ;; --------------- multimedia (emms) ---------------
+    (use-package emms
+      :ensure t
+      :defer t
+      :bind
+      (("C-c e p" . emms-playlist-mode-go)
+       ("C-c e l" . emms-play-file))  
+      :config
+      (require 'emms-setup)
+      (emms-all)
+      (emms-default-players)
+
+      ;; Use MPV as standard backend
+      (setq emms-player-list '(emms-player-mpv))
+
+      ;; Declare standard source path
+      (setq emms-source-file-default-directory "~/clips/")
+
+      ;; Assign active media keys
+      (global-set-key (kbd "C-c e p") 'emms-playlist-mode-go)
+      (global-set-key (kbd "C-c e l") 'emms-play-file)
+      (my/say "EMMS multimedia system ready."))
+    ;; --------------- end multimedia ------------------
+  #+end_src
+
+  #+begin_src emacs-lisp
+    ;; ====================| END PACKAGES |====================
+  #+end_src
+
+  #+begin_src emacs-lisp
+    (provide 'my-packages)
+  #+end_src

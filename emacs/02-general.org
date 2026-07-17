@@ -1,0 +1,146 @@
+#+TITLE: Emacs General Editor Configuration
+#+PROPERTY: header-args :tangle "~/.emacs.d/modules/my-general.el"
+
+* General
+
+  This section configures global editor behavior, spacing parameters, status
+  modelines, and standard formatting hooks.
+
+  #+begin_src emacs-lisp
+    ;; ====================| GENERAL |====================
+  #+end_src
+
+  #+begin_src emacs-lisp
+    ;; --------------- modeline ----------
+    ;; Display line numbers in status bar
+    (setq line-number-mode t)
+
+    ;; Display column numbers in status bar
+    (column-number-mode t)
+
+    ;; Enable system time display
+    (display-time)
+
+    ;; Disable audible bell notifications
+    (setq ring-bell-function 'ignore)
+
+    ;; --------------- end modeline ----------
+
+    ;; --------------- spacing/indentation ---------------
+    ;; Control newline insertions at end of files
+    (setq require-final-newline nil)
+    (setq mode-require-final-newline nil)
+
+    ;; Remove trailing whitespaces and empty lines on save
+    (add-hook 'before-save-hook
+              (lambda ()
+                (save-excursion
+                  (goto-char (point-max))
+                  (skip-chars-backward " \t\n\r")
+                  (delete-region (point) (point-max)))))
+
+    ;; Enable visual line wrap globally
+    (global-visual-line-mode t)
+
+    ;; Set default column limit for text filling
+    (setq-default fill-column 80)
+
+    ;; Enable automatic wrapping in text and programming buffers
+    (add-hook 'text-mode-hook 'turn-on-auto-fill)
+    (add-hook 'prog-mode-hook 'turn-on-auto-fill)
+
+    ;; Use two spaces instead of hard tabs
+    (setq-default tab-width 2)
+    (setq-default indent-tabs-mode nil)
+
+    ;; Set relative offsets for C and Lisp dialects
+    (setq-default c-basic-offset 2)
+    (setq-default lisp-indent-offset 2)
+
+    ;; Specify characters triggering automatic indentation
+    (setq-default electric-indent-chars '(?\n ?\^? ?\}))
+
+    ;; Increase default text size on file opening
+    (add-hook 'find-file-hook
+      (lambda ()
+        (text-scale-set 1)))
+
+    ;; Prevent native graphical dialogs and file selection windows
+        (setq use-dialog-box nil)
+        (setq use-file-dialog nil)
+
+        ;; Disable context menus triggered by mouse clicks
+        (setq context-menu-mode nil)
+
+        ;; Disable popup menus triggered by clicking major or minor modes in the modeline
+        (setq mode-line-major-mode-keymap nil)
+        (setq mode-line-minor-mode-keymap nil)
+
+    (my/say "Indentation rules active. TAB: [%d], COL: [%d], C: [%d], LISP: [%d]."
+            tab-width fill-column c-basic-offset lisp-indent-offset)
+    ;; --------------- end spacing/indentation ---------------
+  #+end_src
+
+  #+begin_src emacs-lisp
+    ;; ====================| END GENERAL |====================
+  #+end_src
+
+** File Management
+
+  Centralize all temporary files (backups, auto-saves, and locks)
+  to keep the file system clean while preventing data loss.
+
+  #+begin_src emacs-lisp
+    ;; Ensure the main temp directory exists
+    (unless (file-exists-p my/temp-dir)
+      (make-directory my/temp-dir t))
+
+    ;; Backups (file.org~) - Includes full path to avoid collisions
+    (setq backup-directory-alist
+          `((".*" . ,(expand-file-name "backups/" my/temp-dir))))
+    (setq backup-by-copying t)    ; Backup by copying to preserve symlinks
+    (setq version-control t)      ; Use numbered backups (.~1~, .~2~, etc.)
+    (setq kept-old-versions 2)    ; Keep the original version
+    (setq kept-new-versions 5)    ; Keep the 5 most recent versions
+    (setq delete-old-versions t)  ; Silently delete excess backups
+
+    ;; Auto-saves (#file.org#)
+    (setq auto-save-file-name-transforms
+          `((".*" ,(expand-file-name "auto-save/" my/temp-dir) t)))
+    (setq auto-save-list-file-prefix
+          (expand-file-name "auto-save-list/.saves-" my/temp-dir))
+
+    ;; Lock files (.#file.org) - Requires Emacs 28+
+    (when (boundp 'lock-file-name-transforms)
+      (setq lock-file-name-transforms
+            `((".*" ,(expand-file-name "locks/" my/temp-dir) t))))
+
+    ;; Initialize subdirectories
+    (dolist (dir '("backups" "auto-save" "locks" "auto-save-list"))
+      (let ((path (expand-file-name dir my/temp-dir)))
+        (unless (file-exists-p path)
+          (make-directory path t))))
+
+    (my/say "Temporary files centralized in %s." my/temp-dir)
+  #+end_src
+
+** Universal Minibuffer Prompts
+
+  Standardize and shorten interaction prompts in the minibuffer, 
+  allowing single-key responses (y/n/s) instead of full words.
+
+  #+begin_src emacs-lisp
+    ;; Use y/n instead of yes/no globally (Emacs 28+)
+    (setq use-short-answers t)
+
+    ;; Ensure 's' (save) is always an option in buffer-related prompts
+    (setq save-some-buffers-default-predicate 'save-some-buffers-root)
+  #+end_src
+
+  #+begin_src emacs-lisp
+    ;; ====================| END GENERAL |====================
+  #+end_src
+
+  #+begin_src emacs-lisp
+    (provide 'my-general)
+  #+end_src

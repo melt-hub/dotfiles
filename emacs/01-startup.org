@@ -1,0 +1,120 @@
+#+TITLE: Emacs Startup Configuration
+#+PROPERTY: header-args :tangle "~/.emacs.d/modules/my-startup.el"
+
+* Startup
+
+  This section contains performance-oriented settings, path registrations, and
+  core variables initialized during the Emacs startup phase.
+
+  #+begin_src emacs-lisp
+    ;; ====================| STARTUP |====================
+  #+end_src
+
+  Core paths, encoding schemes, and primary system behaviors.
+
+  #+begin_src emacs-lisp
+    ;; Set directory paths
+    (defvar os-packages-path "~/dotfiles/emacs/packages/")
+    (defvar org-dir-path "~/zk/")
+
+    ;; Custom variables
+    (defvar my/org-university "Università di Milano Bicocca"
+      "Default university for scientific papers.")
+
+    (defvar my/org-email "melt@campus.unimib.it"
+      "Default email address for academic exports.")
+
+    (defvar my/org-author "melt"
+      "Default author for scientific papers.")
+
+    (defvar my/assistant "CIRO"
+      "Name of the Emacs assistant.")
+
+    (defun my/say (text &rest args)
+      "Display a simple assistant message."
+      (message "[%s]: %s" my/assistant (apply #'format text args)))
+
+    (my/say "Yo melt!")
+
+    (defvar my/temp-dir (expand-file-name ".tmp/" user-emacs-directory)
+      "Central directory for Emacs temporary files.")
+
+    (defvar my/ascii-brain
+      (concat
+       "            ___    ___\n"
+       "        ..\"`)\" `..\" `(``..\n"
+       "      .'; _..=. :: `-'._ ;`.\n"
+       "     : ) ;\"`':._::_.      ( :.\n"
+       "   .:-\"   _.  `\"##\"` \"._   `-:\\\n"
+       "  /.\"   -\"`  ._.::._. .'\"-   \".:\n"
+       " : :    ( -: `\" :: \"` :- )    : )\n"
+       "( .\".:==._' `'=._##_.='` '_.==: .'\n"
+       "(:  `, `\"`    `\"##\"`    `\"` .'`\".)\n"
+       " \\`'  `\"--.  \"- )( -\" ..--\"`  `-/\n"
+       " (\" (_.\" =\"\"-...\"`...-\"\"= \"._) \")\n"
+       "  \"..__..-\"  )%`..'%(  \"-..__..\"\n"
+       "       (#\"...\'\\\\%%%%/`...\"#)\n"
+       "        `######`--'######\"\n"
+       "          \"###\")@@(`###\"\n"
+       "               \\@@/\n"
+       "                )(\n")
+      "Brain ASCII art.")
+
+    ;; Automatically follow file symlinks
+    (setq vc-follow-symlinks t)
+
+    ;; Set default character encoding system
+    (prefer-coding-system 'utf-8-unix)
+
+    ;; Direct pinentry prompts to the minibuffer
+    (setq epa-pinentry-mode 'loopback)
+
+    ;; Suppress startup screen display
+    (setq inhibit-startup-screen t)
+
+    ;; Always display inline images by default
+    (setq org-startup-with-inline-images t)
+
+    (my/say "System variables and paths initialized.")
+  #+end_src
+
+  The path for the declarative package manager =use-package= must be
+  registered prior to loading external packages.
+
+  #+begin_src emacs-lisp
+    ;; Load use-package path
+    (add-to-list 'load-path (concat os-packages-path "use-package/"))
+  #+end_src
+
+  Automatic major mode associations for specific programming language files.
+
+  #+begin_src emacs-lisp
+    ;; --------------- automodes for specific languages ---------------
+        ;; Lisp Dialects
+        (add-to-list 'auto-mode-alist '("\\.rkt\\'"  . racket-mode))
+        (add-to-list 'auto-mode-alist '("\\.ss\\'"   . scheme-mode))
+        (add-to-list 'auto-mode-alist '("\\.cl\\'"   . common-lisp-mode))
+
+        ;; Prolog
+        (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
+
+        ;; Rofi, Sway/Swaylock e file RC generici
+        (add-to-list 'auto-mode-alist '("\\.rasi\\'" . css-mode))
+        (add-to-list 'auto-mode-alist '("config\\'" . conf-mode))
+        (add-to-list 'auto-mode-alist '("\\.*rc\\'" . conf-mode))
+
+        ;; Temporarily disable default perl-mode association for .pl files
+        (setq auto-mode-alist
+          (rassq-delete-all 'perl-mode auto-mode-alist))
+
+        (my/say "Automodes for languages and RC files applied.")
+    ;; --------------- end automodes for specific languages ---------------
+  #+end_src
+
+  #+begin_src emacs-lisp
+    ;; ====================| END STARTUP |====================
+  #+end_src
+
+  #+begin_src emacs-lisp
+    (provide 'my-startup)
+  #+end_src
