@@ -1,0 +1,47 @@
+### ====================| MELT's SWAYLOCK CONFIG (spacemacs-dark) |====================
+
+# wallpaper
+image=/home/melt/pics/wallpapers/moon-blurred.png
+
+# indicator dimensions
+indicator-radius=80
+indicator-thickness=7
+ignore-empty-password
+
+## ---------- ring ----------
+
+# waiting
+ring-color=b2b2b2
+inside-color=292b2e
+text-color=b2b2b2
+
+# typing
+key-hl-color=4f97d7
+bs-hl-color=f2241f
+
+# verifying (success)
+ring-ver-color=67b11d
+inside-ver-color=212026
+text-ver-color=ffffff
+
+# wrong (error)
+ring-wrong-color=f2241f
+inside-wrong-color=212026
+text-wrong-color=ffffff
+
+# cleared (reset)
+ring-clear-color=4f97d7
+inside-clear-color=292b2e
+text-clear-color=4f97d7
+
+## ---------- layout & separators ----------
+
+layout-text-color=00000000
+layout-bg-color=00000000
+layout-border-color=00000000
+
+line-color=00000000
+separator-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+line-clear-color=00000000

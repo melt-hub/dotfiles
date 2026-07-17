@@ -1,0 +1,68 @@
+# vim:ft=kitty
+
+### ====================| MELT's KITTY CONFIG |====================
+
+# (spacemacs-hc)
+
+# --- fonts ---
+font_family      JetBrainsMono Nerd Font
+font_size        11.0
+
+# --- transparency ---
+background_opacity         0.88
+dynamic_background_opacity yes
+window_padding_width       6
+
+# --- core colors ---
+background            #1b1c1e
+foreground            #dcdccc
+selection_background  #444155
+selection_foreground  #ffffff
+url_color             #4f97d7
+cursor                #bc6ec5
+
+# --- borders & tabs ---
+active_border_color   #bc6ec5
+inactive_border_color #212026
+bell_border_color     #f2241f
+
+active_tab_background   #bc6ec5
+active_tab_foreground   #1b1c1e
+inactive_tab_background #212026
+inactive_tab_foreground #5e5079
+
+## ---------- ansi colors (hc spacemacs palette) ----------
+
+# black
+color0 #121214
+color8 #444155
+
+# red
+color1 #f2241f
+color9 #ff5f59
+
+# green
+color2 #67b11d
+color10 #86e320
+
+# yellow
+color3 #b1951d
+color11 #e3c320
+
+# blue (sky blue)
+color4 #4f97d7
+color12 #bc6ec5
+
+# magenta (orchid)
+color5 #bc6ec5
+color13 #d484ff
+
+# cyan
+color6 #2d9574
+color14 #34ba92
+
+# white
+color7 #b2b2b2
+color15 #ffffff
+
+### ====================| END KITTY CONFIG |====================

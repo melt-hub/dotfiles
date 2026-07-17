@@ -6,7 +6,7 @@ DOT_DIR="$HOME/dotfiles"
 # unique notification id to prevent spam in dunst
 NOTIF_ID=9994
 
-# list of files to swap (active <-> .bak)
+# list of files to swap (active <-> .switch)
 FILES=(
     "dunst/dunstrc"
     "kitty/style.conf"
@@ -22,7 +22,7 @@ SUCCESS_COUNT=0
 
 for f in "${FILES[@]}"; do
     TARGET="$DOT_DIR/$f"
-    BACKUP="$TARGET.bak"
+    BACKUP="$TARGET.switch"
     TMP="$TARGET.tmp"
 
     if [[ -f "$TARGET" ]] && [[ -f "$BACKUP" ]]; then
@@ -33,7 +33,7 @@ for f in "${FILES[@]}"; do
     else
         echo "[!!] missing file or backup for: $f" >&2
         notify-send -u normal -t 5000 -r $NOTIF_ID "Theme Switcher" \
-        "Warning: $f was skipped (missing .bak file)"
+        "Warning: $f was skipped (missing .switch file)"
     fi
 done
 

@@ -1,0 +1,85 @@
+/* ====================| MELT's WAYBAR CONFIG |==================== */
+
+/* (spacemacs-dark) */
+
+@define-color background #292b2e;
+@define-color bg-dark     #212026;
+@define-color foreground  #b2b2b2;
+@define-color selection   #444155;
+@define-color comment     #5e5079;
+@define-color border      #444155;
+@define-color accent      #4f97d7;
+@define-color green       #67b11d;
+@define-color red         #f2241f;
+
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 13px;
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+}
+
+window#waybar {
+    background-color: @background;
+    color: @foreground;
+    border-bottom: 1px solid @border;
+}
+
+#workspaces, #mpd, #disk, #cpu, #memory, #temperature, 
+#network, #bluetooth, #pulseaudio, #clock, #tray, #battery,
+#custom-system-updates, #custom-firmware-updates {
+    padding: 0 12px;
+}
+
+#custom-system-updates, #custom-firmware-updates, #window {
+    color: @accent;
+    font-weight: bold;
+}
+
+#workspaces button {
+    color: @foreground;
+    padding: 0 6px;
+}
+
+#workspaces button.visible {
+    color: @comment;
+}
+
+#workspaces button.focused {
+    color: @accent;
+}
+
+#workspaces button.urgent {
+    color: @red;
+}
+
+#mode {
+    background-color: @red;
+    color: @background;
+    font-weight: bold;
+    padding: 0 10px;
+}
+
+#clock {
+    font-weight: bold;
+}
+
+#battery.critical {
+    color: @red;
+    font-weight: bold;
+    animation-name: blink;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+@keyframes blink {
+    to {
+        background-color: @red;
+        color: @background;
+    }
+}

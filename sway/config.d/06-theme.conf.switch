@@ -1,0 +1,26 @@
+### ========== THEME MODULE (spacemacs-dark) ==========
+
+# colors
+set $accent   #4f97d7
+set $bg_dark  #212026
+set $bg_med   #292b2e
+set $border   #444155
+set $fg_light #ffffff
+set $fg_dark  #b2b2b2
+set $red      #f2241f
+
+# window borders and opacity
+for_window [class=".*"] border pixel 2
+# for_window [app_id="kitty"] opacity 0.95
+for_window [app_id="emacs"] opacity 1
+
+# window colors
+client.focused $accent $bg_med $fg_light $accent $accent
+client.unfocused $bg_dark $bg_dark $fg_dark $bg_dark $bg_dark
+client.focused_inactive $border $border $fg_dark $border $border
+client.urgent $red $red $fg_light $red $red
+
+# wallpaper
+output * bg /home/melt/pics/wallpapers/camp.png fill
+
+### ========== END THEME MODULE ==========
