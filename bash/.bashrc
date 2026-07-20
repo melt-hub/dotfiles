@@ -11,6 +11,9 @@ fi
 # add local bins to PATH if they exist
 export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 
+#
+export GTK_USE_PORTAL=1
+
 # cargo/rust environment
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
