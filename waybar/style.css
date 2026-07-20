@@ -1,134 +1,109 @@
 /* ====================| MELT's WAYBAR CONFIG |==================== */
 
-/* (modus-vivendi, electric cyan accent) */
-
 @define-color background #535353;
-@define-color bg-dark     #000000;
-@define-color foreground  #ffffff;
-@define-color selection   #646464;
-@define-color comment     #989898;
-@define-color border      #646464;
-@define-color cyan        #04A9E4;
-@define-color green       #44bc44;
-@define-color red         #ff8059;
+@define-color foreground #ffffff;
+@define-color border     #646464;
+@define-color cyan       #04A9E4;
+@define-color comment    #989898;
+@define-color red        #ff8059;
 
-/* global reset */
+/* Global reset and font settings */
 * {
     border: none;
     border-radius: 0;
     font-family: "JetBrainsMono Nerd Font", monospace;
-    font-size: 13px;
+    font-size: 12px;
     background-color: transparent;
     padding: 0;
     margin: 0;
 }
 
-/* main bar window */
 window#waybar {
     background-color: @background;
     color: @foreground;
     border-bottom: 1px solid @border;
 }
 
-/* common module padding */
-#workspaces, #mpd, #disk, #cpu, #memory, #temperature, 
-#network, #bluetooth, #pulseaudio, #clock, #tray, #battery,
-#custom-system-updates, #custom-firmware-updates {
-    padding: 0 12px;
-}
+/* --- LEFT MODULES (Notifications) --- */
 
-/* custom module colors */
-#custom-system-updates {
-    color: @cyan;
-    font-weight: bold;
-}
-
-#custom-firmware-updates {
-    color: @cyan;
-    font-weight: bold;
-}
-
-/* module separators */
-#custom-system-updates, #custom-firmware-updates, #mpd, #disk, #cpu, #memory, 
-#temperature, #network, #bluetooth, #pulseaudio, #clock, #tray {
+.modules-left > widget > label,
+.modules-left > widget > box,
+#workspaces {
+    padding: 0 6px; /* reduced to 6px */
     border-right: 1px solid @border;
-    border-left: 1px solid @border;
 }
 
-/* mode indicator */
-#mode {
-    background-color: @red;
-    color: @background;
-    font-weight: bold;
-    padding: 0 10px;
-}
-
-/* workspaces */
 #workspaces button {
-    color: @foreground;
-    padding: 0 6px;
-}
-
-#workspaces button.visible {
     color: @comment;
+    padding: 0;
+    margin: 0 2px;
+    min-width: 16px;
 }
-
-#workspaces button.focused {
-    color: @cyan;
-}
-
-#workspaces button.urgent {
-    color: @red;
-}
-
-/* window and module styling */
-#window {
-    color: @cyan;
-    font-weight: bold;
-}
-
-#mpd {
-    color: @comment;
-    font-style: italic;
-}
-
-#clock {
-    font-weight: bold;
-}
-
-#custom-power-profile {
-    font-weight: bold;
-}
-
-#battery {
-    margin-right: 4px;
-}
+#workspaces button.focused { color: @cyan; }
+#workspaces button.urgent  { color: @red; }
 
 #custom-recording {
     color: @red;
-    font-weight: bold;
-    padding: 0 10px;
-    border-right: 1px solid @border;
+    animation: rec_blink 1s linear infinite alternate;
+}
+
+@keyframes rec_blink {
+    from { color: @red; }
+    to   { color: rgba(255, 128, 89, 0.2); }
+}
+
+#custom-system-updates, #custom-firmware-updates {
+    color: @cyan;
+}
+
+/* --- RIGHT MODULES (Status & Pills) --- */
+
+/* Base style for standalone right widgets */
+.modules-right > widget > label,
+.modules-right > widget > box,
+#tray {
+    padding: 0 6px; /* reduced to 6px */
     border-left: 1px solid @border;
 }
 
+/* Internal Pill Normalization: 2px internal, 6px external edges */
+
+/* Network + Ping */
+#network { border-right: none; padding: 0 2px 0 6px; }
+#custom-net-ping { border-left: none; padding: 0 6px 0 2px; }
+
+/* Disk + IO */
+#disk { border-right: none; padding: 0 2px 0 6px; }
+#custom-disk-io { border-left: none; padding: 0 6px 0 2px; }
+
+/* CPU + Freq + Load */
+#cpu { border-right: none; padding: 0 2px 0 6px; }
+#custom-cpu-freq { border: none; padding: 0 2px; }
+#custom-load { border-left: none; padding: 0 6px 0 2px; }
+
+/* Temp + Fan */
+#temperature { border-right: none; padding: 0 2px 0 6px; }
+#custom-fan { border-left: none; padding: 0 6px 0 2px; }
+
+/* Power Pill: [Battery | Usage | Profile] */
+#battery { border-left: 1px solid @border; border-right: none; padding: 0 2px 0 6px; }
+#custom-power-usage { border: none; padding: 0 2px; }
+#custom-power-profile { border-left: none; padding: 0 6px 0 2px; }
+
+/* System Health Pill: [Kernel | Pkgs | Entropy] */
+#custom-kernel { border-left: 1px solid @border; border-right: none; padding: 0 2px 0 6px; }
+#custom-pkgs { border: none; padding: 0 2px; }
+#custom-entropy { border-left: none; padding: 0 6px 0 2px; }
+
+/* Final adjustments */
+#clock { padding: 0 6px; }
+#backlight { color: @foreground; }
+
 #battery.critical {
     color: @red;
-    font-weight: bold;
-    animation-name: blink;
-    animation-duration: 1s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
+    animation: blink 1s linear infinite alternate;
 }
 
 @keyframes blink {
-    to {
-        background-color: @red;
-        color: @background;
-    }
-}
-
-#tray {
-    margin-left: 4px;
+    to { background-color: @red; color: @background; }
 }

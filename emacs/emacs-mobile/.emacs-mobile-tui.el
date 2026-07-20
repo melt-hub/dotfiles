@@ -1,8 +1,4 @@
-;; ~/.emacs-mobile-tui.el --- Visual and dashboard configuration
-
-;; Assistant name
-(defvar my/assistant "CIRO"
-  "Name of the Emacs assistant.")
+;;; ~/.emacs-mobile-tui.el --- Visual and dashboard configuration
 
 ;; Default text scale zoom for the mobile dashboard
 (defvar my/dashboard-zoom 2
@@ -148,3 +144,5 @@
         (goto-char (point-min))
         (setq buffer-read-only t)))
     (switch-to-buffer buf)))
+
+(my/say "TUI visual module loaded.")

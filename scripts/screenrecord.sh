@@ -16,7 +16,7 @@ if [ -f "$REC_FLAG" ]; then
     pkill -RTMIN+$SIGNAL waybar
     
     # small buffer to allow the file to be closed correctly
-    sleep 1.0
+    sleep 0.1
     notify-send -t 5000 -i video-display "Recording saved" "File in $REC_DIR"
     exit 0
 fi

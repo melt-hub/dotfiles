@@ -1,194 +1,164 @@
-  {
+{
     "layer": "top",
     "position": "top",
     "height": 28,
-    "fixed-center": true,
+    "fixed-center": false,
     "spacing": 0,
+
     "modules-left": [
         "sway/workspaces",
-        "sway/mode",
-        "custom/power-profile",
-        "battery",
-        "bluetooth",
-        "network",
         "custom/recording",
         "custom/firmware-updates",
-        "custom/system-updates",        
-        "mpd"
-    ],
-    "modules-center": [
-        "sway/window",
-    ],
-    "modules-right": [
-        "disk#home",
-        "cpu",
-        "memory",
-        "temperature",
-        "pulseaudio",
-        "clock"
+        "custom/system-updates"        
     ],
 
-    "sway/mode": {
-        "format": "<span style=\"italic\">{}</span>",
-        "tooltip": false
-    },
+    "modules-center": [],
+
+    "modules-right": [
+        "network",
+        "custom/net-ping",
+        "bluetooth",
+        "disk#home",
+        "custom/disk-io",
+        "cpu",
+        "custom/cpu-freq",
+        "custom/load",
+        "memory",
+        "temperature",
+        "custom/fan",
+        "pulseaudio",
+        "backlight",        
+        "battery",
+        "custom/power-usage",
+        "custom/power-profile",
+        "custom/kernel",
+        "custom/pkgs",
+        "custom/entropy",
+        "clock",
+        "tray"
+    ],
+
+    /* --- MODULES LEFT --- */
 
     "sway/workspaces": {
         "disable-scroll": true,
-        "all-outputs": false,
         "format": "{icon}",
-        "tooltip": false,
-        "format-icons": {
-            "focused": "",
-            "visible": "",
-            "default": ""
-        }
-    },
-
-    "sway/window": {
-        "format": "{title}",
-        "max-length": 50,
-        "tooltip": true,
-        "rewrite": {
-            "^$": "Let's get to work!",
-
-            "^(.+) — Mozilla Firefox$": "󰈹 $1",
-            "^Mozilla Firefox$": "󰈹 Firefox",
-
-            "^(.+) - GNU Emacs.*$": " $1",
-            "^(.+) - Emacs.*$": " $1",
-            "^GNU Emacs.*$": " Emacs",
-            "^Emacs.*$": " Emacs",
-
-            "^.*melt@fedora: (.+)$": " $1",
-            "^~$": " Kitty",
-            "^kitty$": " Kitty",
-
-            "^Visual Paradigm.*$": "󰒫 Visual Paradigm",
-
-            "^WinBox.*$": "󱘖 WinBox",
-
-            "^btop$": "󰆼 btop",
-
-            "^(.+) - Obsidian.*$": "󱓧 $1",
-            "^Obsidian.*$": "󱓧 Obsidian",
-
-            "^Fedora Media Writer$": "󰛟 Media Writer",
-
-            "^(.+)$": "$1"
-        }
-    },
-
-    "mpd": {
-        "format": "{stateIcon} {artist} - {title}",
-        "format-disconnected": "Disconnected ",
-        "format-stopped": "Stopped ",
-        "tooltip": false,
-        "state-icons": {
-            "paused": "",
-            "playing": ""
-        }
+        "format-icons": { "focused": "", "urgent": "", "default": "" }
     },
 
     "custom/recording": {
-        "exec": "[ -f /tmp/recording_active ] && echo '󰑊 REC' || echo ''",
-        "interval": "once",
-        "signal": 8,
-        "tooltip": false
+        "exec": "[ -f /tmp/recording_active ] && echo \"󰑊 <b>REC</b>\"",
+        "interval": 1,
+        "format": "{}"
     },
 
     "custom/firmware-updates": {
         "exec": "cat /tmp/available_firmware_updates 2>/dev/null",
         "interval": 60,
-        "format": "{}",
-        "on-click": "kitty sh -c '/home/melt/.local/bin/ud-firmware; echo; echo \"Press ENTER to exit...\"; read'",
-        "tooltip": false
+        "format": "<b>FW</b> {}"
     },
 
     "custom/system-updates": {
         "exec": "cat /tmp/available_system_updates 2>/dev/null",
         "interval": 60,
-        "format": "{}",
-        "on-click": "kitty sh -c '/home/melt/.local/bin/ud-system; echo; echo \"Press ENTER to exit...\"; read'",
-        "tooltip": false
+        "format": "<b>OS</b> {}"
     },
 
-    "disk#home": {
-        "format": "DISK {free}",
-        "path": "/home",
-        "tooltip": false
-    },
-
-    "cpu": {
-        "format": "CPU {usage}%",
-        "interval": 2,
-        "tooltip": false
-    },
-
-    "memory": {
-        "format": "MEM {used:0.1f}G",
-        "interval": 30,
-        "tooltip": false
-    },
-
-    "temperature": {
-        "critical-threshold": 80,
-        "format": "TEMP {temperatureC}°C",
-        "hwmon-path": "/sys/class/hwmon/hwmon6/temp1_input",
-        "tooltip": false
-    },
+    /* --- MODULES RIGHT --- */
 
     "network": {
         "interval": 2,
-        "format-wifi": "WIFI {essid}",
-        "format-ethernet": "ETH {ipaddr}",
-        "format-disconnected": "status",
-        "tooltip": false
+        /* Using Bytes instead of Bits saves significant horizontal space */
+        "format-wifi": "<b>WIFI</b> {essid} [D:{bandwidthDownBytes} U:{bandwidthUpBytes}]",
+        "format-ethernet": "<b>ETH</b> {ipaddr} [D:{bandwidthDownBytes} U:{bandwidthUpBytes}]"
+    },
+
+    "custom/net-ping": {
+        "exec": "~/.local/bin/check_ping.sh",
+        "interval": 10,
+        "format": "[P:{}]"
     },
 
     "bluetooth": {
-        "format": "BT {status}",
-        "format-connected": "BT {device_alias}",
-        "format-connected-battery": "BT {device_alias} {device_battery_percentage}%",
-        "on-click": "/home/melt/.local/bin/bluetooth_switch.sh",
-        "on-click-right": "/home/melt/.local/bin/bluetooth_devices.sh",
-        "tooltip": false
-    },
-   
-    "pulseaudio": {
-        "format": "VOL {volume}%",
-        "tooltip": false
+        "format": "<b>BT</b> {status}",
+        "format-connected": "<b>BT</b> {device_alias}",
+        "on-click": "/home/melt/.local/bin/bluetooth_switch.sh"
     },
 
-    "clock": {
-        "format": "{:%a %d.%m %H:%M}",
-        "tooltip": false
+    "disk#home": { "format": "<b>DSK</b> {free}", "path": "/home" },
+
+    "custom/disk-io": {
+        "exec": "~/.local/bin/check_io_rate.sh",
+        "interval": 2,
+        "format": "[{}]"
     },
 
-    "tray": {
-        "spacing": 10
+    "cpu": { "format": "<b>CPU</b> {usage}%", "interval": 2 },
+
+    "custom/cpu-freq": {
+        "exec": "~/.local/bin/check_cpu_rate.sh",
+        "interval": 2,
+        "format": "[{}]"
+    },
+
+    "custom/load": {
+        "exec": "cat /proc/loadavg | awk '{print $1}'",
+        "interval": 5,
+        "format": "[L:{}]"
+    },
+
+    "memory": { "format": "<b>MEM</b> {used:0.1f}G [S:{swapUsed:0.1f}G]" },
+
+    "temperature": { "format": "<b>TP</b> {temperatureC}°C" },
+
+    "custom/fan": {
+        "exec": "~/.local/bin/check_fan_speed.sh",
+        "interval": 5,
+        "format": "[F:{}]"
+    },
+
+    "pulseaudio": { "format": "<b>VL</b> {volume}%" },
+    "backlight": { "format": "<b>BL</b> {percent}%" },
+
+    "battery": {
+        "bat": "BAT0",
+        "format": "<b>BAT</b> {capacity}% ({time})",
+        "format-charging": "<b>BAT</b> {capacity}%",
+        "format-plugged": "<b>AC</b> {capacity}%",
+        "format-full": "<b>FULL</b>"
+    },
+
+    "custom/power-usage": {
+        "exec": "cat /tmp/power_usage_status 2>/dev/null",
+        "interval": 2,
+        "format": "{}"
     },
 
     "custom/power-profile": {
         "exec": "cat /tmp/power_profile_status 2>/dev/null",
         "interval": 5,
-        "format": "{}",
-        "tooltip": false,
+        "format": "[<b>{}</b>]",
         "on-click": "/home/melt/.local/bin/power_profile_switch.sh"
     },
 
-    "battery": {
-        "bat": "BAT0",
-        "states": {
-            "good": 95,
-            "warning": 30,
-            "critical": 15
-        },
-        "format": "BAT {capacity}% ({time}) [{power:.1f}W]",
-        "format-charging": "󱐋 BAT {capacity}% (+{power:.1f}W)",
-        "format-plugged": " {capacity}%",
-        "format-full": "󰁹 FULL",
-        "interval": 5,
-        "tooltip": false
+    "custom/kernel": {
+        "exec": "~/.local/bin/check_kernel_version.sh",
+        "interval": 3600,
+        "format": "<b>SYS</b> [K:{}]"
     },
+
+    "custom/pkgs": {
+        "exec": "~/.local/bin/check_installed_packages.sh",
+        "interval": 1800,
+        "format": "[P:{}]"
+    },
+
+    "custom/entropy": {
+        "exec": "~/.local/bin/check_entropy.sh",
+        "interval": 10,
+        "format": "[E:{}]"
+    },
+
+    "clock": { "format": "<b>{:%a %d.%m %H:%M}</b>" },
+    "tray": { "spacing": 6 }
 }
