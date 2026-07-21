@@ -6,8 +6,8 @@
 ;; Load each module in chronological order
 (require 'my-startup)
 (require 'my-general)
-(require 'my-packages)
 (require 'my-functions)
+(require 'my-packages)
 
 ;;; init.el ends here
 (custom-set-variables

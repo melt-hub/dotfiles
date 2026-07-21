@@ -29,7 +29,6 @@
 
     ;; Setup statistics tracking and load use-package engine
     (setq use-package-compute-statistics t)
-    (package-initialize)
     (require 'use-package)
   #+end_src
 
@@ -100,8 +99,8 @@
   #+begin_src emacs-lisp
     (use-package beacon
       :ensure t
+      :hook (after-init . beacon-mode)
       :config
-      (beacon-mode 1)
       (my/say "Beacon following the cursor."))
 
   #+end_src
@@ -123,7 +122,7 @@
   #+begin_src emacs-lisp
     (use-package doom-modeline
       :ensure t
-      :init (doom-modeline-mode 1)
+      :hook (after-init . doom-modeline-mode)
       :config
       (my/say "Modeline loaded."))
   #+end_src
@@ -229,6 +228,7 @@
   #+begin_src emacs-lisp
     (use-package cc-mode
           :ensure nil
+          :defer t
           :config
           (setq-default c-basic-offset 4)
           (setq-default java-basic-offset 4)
@@ -915,8 +915,10 @@
 
   #+begin_src emacs-lisp
     (use-package auth-source-pass
+      :defer t
+      :init
+      (add-hook 'after-init-hook #'auth-source-pass-enable)
       :config
-      (auth-source-pass-enable)
       (my/say "Password-store core loaded."))
   #+end_src
 
@@ -927,9 +929,10 @@
   #+begin_src emacs-lisp
     (use-package pinentry
       :ensure t
-      :config
+      :init
       (setenv "EMACS" "t")
-      (pinentry-start)
+      :hook (after-init . pinentry-start)
+      :config
       (my/say "Pinentry agent started."))
     ;; --------------- end password management ---------------
   #+end_src

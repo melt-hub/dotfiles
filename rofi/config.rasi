@@ -1,8 +1,7 @@
 /* ====================| MELTs ROFI CONFIG |==================== */
-/* Import palette */
+
 configuration {
-    show-icons: true;
-    /* icon-theme: "Papirus Dark"; */
+    show-icons: false;
     
     /* Display icons for modes */
     display-combi: "󰀻 ";
@@ -20,7 +19,7 @@ configuration {
 
 /* Window configuration */
 window {
-    width: 600px;
+    width: 400px;
     border: 1px;
     border-radius: 8px;
     border-color: @cyan;
@@ -28,15 +27,15 @@ window {
 }
 
 mainbox {
-    padding: 15px;
+    padding: 10px;
     background-color: transparent;
 }
 
 /* Input bar */
 inputbar {
     children: [prompt, entry];
-    spacing: 10px;
-    padding: 10px;
+    spacing: 8px;
+    padding: 8px;
     border-radius: 5px;
     background-color: @selection;
 }
@@ -84,12 +83,6 @@ element selected.normal,
 element selected.active {
     background-color: @selection;
     text-color: @cyan;
-}
-
-element-icon {
-    size: 24px;
-    margin: 0px 10px 0px 0px;
-    background-color: transparent;
 }
 
 element-text {
