@@ -3,7 +3,7 @@
 # Reads Dell SMM fan speed dynamically and hides it if below threshold.
 
 # Threshold in RPM below which the module is hidden (off or silent)
-THRESHOLD=4000
+THRESHOLD=3800
 
 # Locate the dell_smm hwmon directory dynamically to prevent reboot swaps
 HWMON_DIR=""
