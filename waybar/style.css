@@ -1,6 +1,6 @@
 /* ====================| MELT's WAYBAR CONFIG |==================== */
 
-/* Definizione della tavolozza dei colori */
+/* Color palette definitions */
 @define-color background #535353;
 @define-color foreground #ffffff;
 @define-color border     #646464;
@@ -8,45 +8,45 @@
 @define-color comment    #989898;
 @define-color red        #ff8059;
 
-/* Reset globale e tipografia */
+/* Global reset and typography */
 * {
     border: none;
     border-radius: 0;
     font-family: "JetBrainsMono Nerd Font", monospace;
-    font-size: 12px;
+    font-size: 13px;
     background-color: transparent;
     padding: 0;
     margin: 0;
 }
 
-/* Proprietà della finestra principale della barra */
+/* Main bar window properties */
 window#waybar {
     background-color: @background;
     color: @foreground;
     border-bottom: 1px solid @border;
 }
 
-/* --- MODULI A SINISTRA (Notifiche e Workspace) --- */
+/* --- LEFT MODULES (Notifications & Workspaces) --- */
 
-/* Stile di base per i widget sul lato sinistro */
+/* Base style for left-side widgets */
 .modules-left > widget > label,
 .modules-left > widget > box,
 #workspaces {
-    padding: 0 8px; /* Spaziatura esterna aumentata moderatamente */
+    padding: 0 8px; /* Moderately increased padding */
     border-right: 1px solid @border;
 }
 
-/* Proprietà dei singoli pulsanti dei workspace */
+/* Individual workspace button properties */
 #workspaces button {
     color: @comment;
     padding: 0;
-    margin: 0 3px; /* Spazio tra i pulsanti leggermente allargato */
+    margin: 0 3px; /* Slightly wider space between buttons */
     min-width: 16px;
 }
 #workspaces button.focused { color: @cyan; }
 #workspaces button.urgent  { color: @red; }
 
-/* Animazione del modulo di registrazione personalizzato */
+/* Custom recording indicator animation */
 #custom-recording {
     color: @red;
     animation: rec_blink 1s linear infinite alternate;
@@ -57,30 +57,31 @@ window#waybar {
     to   { color: rgba(255, 128, 89, 0.2); }
 }
 
-/* Colore del testo per i moduli di aggiornamento */
+/* Bold text and cyan color for update notifications */
 #custom-system-updates,
 #custom-firmware-updates {
     color: @cyan;
+    font-weight: bold;
 }
 
-/* --- MODULI A DESTRA (Stato e "Pills") --- */
+/* --- RIGHT MODULES (Status & "Pills") --- */
 
-/* Stile di base per i widget indipendenti sul lato destro */
+/* Base style for standalone right-side widgets */
 .modules-right > widget > label,
 .modules-right > widget > box,
 #tray {
-    padding: 0 8px; /* Spaziatura esterna aumentata moderatamente */
+    padding: 0 8px; /* Moderately increased padding */
     border-left: 1px solid @border;
 }
 
 /* 
- * Normalizzazione delle "Pills" (gruppi coesi di widget):
- * Per dare più respiro senza perdere compattezza, abbiamo impostato:
- * - 4px di spaziatura interna tra i componenti della pillola
- * - 8px di spaziatura esterna sui bordi esterni di collegamento
+ * Pill Normalization (cohesive widget groups):
+ * To add breathing room while keeping them compact, we set:
+ * - 4px internal spacing between pill components
+ * - 8px external spacing on outer connecting edges
  */
 
-/* Pillola Rete: [Network | Ping] */
+/* Network Pill: [Network | Ping] */
 #network {
     border-right: none;
     padding: 0 4px 0 8px;
@@ -90,7 +91,7 @@ window#waybar {
     padding: 0 8px 0 4px;
 }
 
-/* Pillola Disco: [Disk | IO] */
+/* Disk Pill: [Disk | IO] */
 #disk {
     border-right: none;
     padding: 0 4px 0 8px;
@@ -100,7 +101,7 @@ window#waybar {
     padding: 0 8px 0 4px;
 }
 
-/* Pillola CPU: [CPU | Freq | Load] */
+/* CPU Pill: [CPU | Freq | Load] */
 #cpu {
     border-right: none;
     padding: 0 4px 0 8px;
@@ -114,7 +115,7 @@ window#waybar {
     padding: 0 8px 0 4px;
 }
 
-/* Pillola Temperatura: [Temp | Fan] */
+/* Temperature Pill: [Temp | Fan] */
 #temperature {
     border-right: none;
     padding: 0 4px 0 8px;
@@ -124,7 +125,7 @@ window#waybar {
     padding: 0 8px 0 4px;
 }
 
-/* Pillola Alimentazione: [Battery | Usage | Profile] */
+/* Power Pill: [Battery | Usage | Profile] */
 #battery {
     border-left: 1px solid @border;
     border-right: none;
@@ -139,7 +140,7 @@ window#waybar {
     padding: 0 8px 0 4px;
 }
 
-/* Pillola Stato Sistema: [Kernel | Pkgs | Entropy] */
+/* System Health Pill: [Kernel | Pkgs | Entropy] */
 #custom-kernel {
     border-left: 1px solid @border;
     border-right: none;
@@ -154,7 +155,7 @@ window#waybar {
     padding: 0 8px 0 4px;
 }
 
-/* Spaziatura dei moduli singoli finali */
+/* Spacing for final standalone modules */
 #clock {
     padding: 0 8px;
 }
@@ -162,7 +163,7 @@ window#waybar {
     color: @foreground;
 }
 
-/* Stato lampeggiante quando la batteria è critica */
+/* Flashing state when the battery is critical */
 #battery.critical {
     color: @red;
     animation: blink 1s linear infinite alternate;

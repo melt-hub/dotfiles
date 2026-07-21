@@ -1,16 +1,17 @@
 #!/bin/bash
+# ====================| WAYBAR PING CHECKER |====================
+# Pings Cloudflare DNS. Outputs empty if offline to let Waybar hide.
 
-# target host (cloudflare dns)
-HOST="1.1.1.1"
+# Ping 1.1.1.1 once with a 2-second timeout
+PING_OUT=$(ping -c 1 -W 2 1.1.1.1 2>/dev/null)
 
-# ping logic: 1 packet, 1s deadline, 1s timeout
-# we extract only the ms part as an integer
-RESULT=$(ping -c 1 -w 1 -W 1 "$HOST" 2>/dev/null | grep -oP 'time=\K\S+')
-
-# error handling: if ping fails or host is unreachable
-if [ -z "$RESULT" ]; then
-    echo "N/A"
-else
-    # round to the nearest integer for a cleaner look
-    echo "${RESULT%.*}ms"
+if [ $? -eq 0 ]; then
+    # Extract the average round-trip time
+    RTT=$(echo "$PING_OUT" | awk -F '/' '/rtt/ {print $5}')
+    
+    # Format to integer
+    PING_MS=$(printf "%.0f" "$RTT" 2>/dev/null || echo "$RTT")
+    
+    # Output formatted string with brackets
+    echo "$PING_MS"
 fi
