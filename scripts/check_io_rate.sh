@@ -24,6 +24,6 @@ echo "$STATS" | awk '{
     r = $3 / 1024;
     w = $4 / 1024;
     if (r >= 0.05 || w >= 0.05) {
-        printf "[R:%.1fMB W:%.1fMB]\n", r, w;
+        printf "R:%.1fMB W:%.1fMB\n", r, w;
     }
 }'

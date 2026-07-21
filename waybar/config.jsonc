@@ -26,11 +26,9 @@
         "custom/memory",
         "temperature",
         "custom/fan",
-        "pulseaudio",
-        "backlight",        
         "battery",
         "custom/power-usage",
-        "custom/power-profile",
+        "power-profiles-daemon",
         "custom/kernel",
         "custom/pkgs",
         "clock",
@@ -140,9 +138,6 @@
         "tooltip": false
     },
 
-    "pulseaudio": { "format": "<b>VL</b> {volume}%", "tooltip": false },
-    "backlight": { "format": "<b>BL</b> {percent}%", "tooltip": false },
-
     "battery": {
         "bat": "BAT0",
         "format": "<b>BAT</b> {capacity}% ({time})",
@@ -159,12 +154,14 @@
         "tooltip": false
     },
 
-    "custom/power-profile": {
-        "exec": "cat /tmp/power_profile_status 2>/dev/null",
-        "interval": 5,
-        "format": "[<b>{}</b>]",
-        "on-click": "/home/melt/.local/bin/power_profile_switch.sh",
-        "tooltip": false
+    "power-profiles-daemon": {
+        "format": "[<b>{icon}</b>]",
+        "tooltip": false,
+        "format-icons": {
+            "default": "B",
+            "performance": "P",
+            "power-saver": "S"
+        }
     },
 
     "custom/kernel": {

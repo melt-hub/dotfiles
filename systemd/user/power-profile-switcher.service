@@ -1,6 +1,0 @@
-[Unit]
-Description=sync power profile based on AC status
-
-[Service]
-Type=oneshot
-ExecStart=/home/melt/.local/bin/power_profile_switcher.sh

@@ -135,7 +135,7 @@ window#waybar {
     border: none;
     padding: 0 4px;
 }
-#custom-power-profile {
+#power-profiles-daemon {
     border-left: none;
     padding: 0 8px 0 4px;
 }
