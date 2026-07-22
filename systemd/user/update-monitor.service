@@ -1,0 +1,7 @@
+[Unit]
+Description=Check for both system and firmware updates and write the amount to tmp
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "/home/melt/dotfiles/scripts/monitors/system_updates_monitor.sh > /tmp/available_system_updates"
+ExecStart=/bin/bash -c "/home/melt/dotfiles/scripts/monitors/firmware_updates_monitor.sh > /tmp/available_firmware_updates"

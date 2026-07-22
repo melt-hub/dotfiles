@@ -3,7 +3,7 @@ Description=Power usage monitor for Waybar
 After=graphical-session.target
 
 [Service]
-ExecStart=%h/.local/bin/check_power_usage.sh
+ExecStart=%h/.local/bin/power_usage_monitor.sh
 Restart=always
 RestartSec=3
 

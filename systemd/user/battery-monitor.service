@@ -3,4 +3,4 @@ Description=Battery level monitor and notifier
 
 [Service]
 Type=oneshot
-ExecStart=/home/melt/.local/bin/check_battery.sh
+ExecStart=/home/melt/.local/bin/battery_monitor.sh

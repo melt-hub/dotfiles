@@ -10,26 +10,45 @@
     ;; ====================| STARTUP |====================
   #+end_src
 
-  Core paths, encoding schemes, and primary system behaviors.
+** Paths and Package Manager Setup
+
+  Core directory paths and registration of the `use-package` engine path.
 
   #+begin_src emacs-lisp
-    ;; Set directory paths
-    (defvar os-packages-path "~/dotfiles/emacs/packages/")
-    (defvar org-dir-path "~/zk/")
+    ;; Core System Paths
+    (defvar os-packages-path "~/dotfiles/emacs/packages/"
+      "Directory containing local/vendor package subdirectories.")
 
-    ;; Compilation buffer autoscroll
-    (setq compilation-scroll-output t)
+    (defvar org-dir-path "~/zk/"
+      "Root directory for Org-mode notes and Zettelkasten.")
 
-    ;; Custom variables
+    (defvar my/temp-dir (expand-file-name ".tmp/" user-emacs-directory)
+      "Central directory for Emacs temporary files.")
+
+    ;; Load use-package path prior to loading modules
+    (add-to-list 'load-path (concat os-packages-path "use-package/"))
+  #+end_src
+
+** Identity and Logging
+
+  Standard Emacs user identity, academic metadata, and the CIRO logging assistant.
+
+  #+begin_src emacs-lisp
+    ;; Standard Emacs User Identity
+    (setq user-full-name "melt")
+    (setq user-mail-address "melt@campus.unimib.it")
+
+    ;; Custom Academic Metadata
     (defvar my/org-university "Università di Milano Bicocca"
       "Default university for scientific papers.")
 
-    (defvar my/org-email "melt@campus.unimib.it"
+    (defvar my/org-email user-mail-address
       "Default email address for academic exports.")
 
-    (defvar my/org-author "melt"
+    (defvar my/org-author user-full-name
       "Default author for scientific papers.")
 
+    ;; Logging system's name
     (defvar my/assistant "CIRO"
       "Name of the Emacs assistant.")
 
@@ -43,9 +62,7 @@
 
     (my/say "Yo melt!")
 
-    (defvar my/temp-dir (expand-file-name ".tmp/" user-emacs-directory)
-      "Central directory for Emacs temporary files.")
-
+    ;; Dashboard banner
     (defvar my/ascii-brain
       (concat
        "            ___    ___\n"
@@ -65,68 +82,46 @@
        "          \"###\")@@(`###\"\n"
        "               \\@@/\n"
        "                )(\n")
-      "Brain ASCII art.")
+      "Brain ASCII art banner.")
+  #+end_src
 
-    ;; Automatically follow file symlinks
-    (setq vc-follow-symlinks t)
+** System Defaults and Environment
 
-    ;; Set default character encoding system
+  Global options for encodings, UI, compilation behavior, and security prompts.
+
+  #+begin_src emacs-lisp
+    ;; Encoding and Buffer Defaults
     (prefer-coding-system 'utf-8-unix)
-
-    ;; Direct pinentry prompts to the minibuffer
+    (setq inhibit-startup-screen t)
+    (setq vc-follow-symlinks t)
     (setq epa-pinentry-mode 'loopback)
 
-    ;; Suppress startup screen display
-    (setq inhibit-startup-screen t)
-
-    ;; Always display inline images by default
-    (setq org-startup-with-inline-images t)
+    ;; Global Compilation Behavior
+    (setq compilation-scroll-output t)
 
     (my/say "System variables and paths initialized.")
   #+end_src
 
-  The path for the declarative package manager =use-package= must be
-  registered prior to loading external packages.
+** File Mode Associations
+
+  Automatic major mode mappings for generic configuration and system files.
 
   #+begin_src emacs-lisp
-    ;; Load use-package path
-    (add-to-list 'load-path (concat os-packages-path "use-package/"))
+    ;; Generic and System File Associations
+    (add-to-list 'auto-mode-alist '("\\.ino\\'" . c++-mode))
+    (add-to-list 'auto-mode-alist '("\\.rasi\\'" . css-mode))
+    (add-to-list 'auto-mode-alist '("config\\'" . conf-mode))
+    (add-to-list 'auto-mode-alist '("\\.*rc\\'" . conf-mode))
+
+    (my/say "System file automodes applied.")
   #+end_src
 
-  Automatic major mode associations for specific programming language files.
+** Module Finalization
 
-  #+begin_src emacs-lisp
-    ;; --------------- automodes for specific languages ---------------
-        ;; Lisp Dialects
-        (add-to-list 'auto-mode-alist '("\\.rkt\\'"  . racket-mode))
-        (add-to-list 'auto-mode-alist '("\\.ss\\'"   . scheme-mode))
-        (add-to-list 'auto-mode-alist '("\\.cl\\'"   . common-lisp-mode))
-
-        ;; Prolog
-        (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
-
-        ;; CPP/INO
-        (add-to-list 'auto-mode-alist '("\\.ino\\'" . c++-mode))
-
-
-        ;; Rofi, Sway/Swaylock e file RC generici
-        (add-to-list 'auto-mode-alist '("\\.rasi\\'" . css-mode))
-        (add-to-list 'auto-mode-alist '("config\\'" . conf-mode))
-        (add-to-list 'auto-mode-alist '("\\.*rc\\'" . conf-mode))
-
-        ;; Temporarily disable default perl-mode association for .pl files
-        (setq auto-mode-alist
-          (rassq-delete-all 'perl-mode auto-mode-alist))
-
-        (my/say "Automodes for languages and RC files applied.")
-    ;; --------------- end automodes for specific languages ---------------
-  #+end_src
+  Provide feature and complete startup loading.
 
   #+begin_src emacs-lisp
     ;; ====================| END STARTUP |====================
-  #+end_src
-
-  #+begin_src emacs-lisp
     (my/say "Startup module loaded.")
     (provide 'my-startup)
   #+end_src

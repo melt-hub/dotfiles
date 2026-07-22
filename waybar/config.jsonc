@@ -9,7 +9,7 @@
         "sway/workspaces",
         "custom/recording",
         "custom/firmware-updates",
-        "custom/system-updates"        
+        "custom/system-updates"
     ],
 
     "modules-center": [],
@@ -19,11 +19,9 @@
         "custom/net-ping",
         "bluetooth",
         "disk#home",
-        "custom/disk-io",
         "cpu",
         "custom/cpu-freq",
-        "custom/load",
-        "custom/memory",
+        "memory",
         "temperature",
         "custom/fan",
         "battery",
@@ -44,7 +42,7 @@
 
     "custom/recording": {
         "exec": "[ -f /tmp/recording_active ] && echo \"󰑊 <b>REC</b>\"",
-        "interval": 1,
+        "signal": 8,
         "format": "{}",
         "tooltip": false
     },
@@ -73,7 +71,7 @@
     },
 
     "custom/net-ping": {
-        "exec": "~/.local/bin/check_ping.sh",
+        "exec": "~/.local/bin/ping_monitor.sh",
         "interval": 10,
         "format": "[P:{}ms]",
         "tooltip": false
@@ -95,33 +93,22 @@
         "tooltip": false
     },
 
-    "custom/disk-io": {
-        "exec": "~/.local/bin/check_io_rate.sh",
+    "cpu": {
         "interval": 2,
-       "format": "[{}]",
-       "tooltip": false
+        "format": "<b>CPU</b> {usage}% [L:{load}]",
+        "tooltip": false
     },
 
-    "cpu": { "format": "<b>CPU</b> {usage}%", "interval": 2 },
-
     "custom/cpu-freq": {
-        "exec": "~/.local/bin/check_cpu_rate.sh",
+        "exec": "~/.local/bin/cpu_monitor.sh",
         "interval": 2,
         "format": "[{}]",
         "tooltip": false
     },
 
-    "custom/load": {
-        "exec": "cat /proc/loadavg | awk '{print $1}'",
+    "memory": {
         "interval": 5,
-        "format": "[L:{}]",
-        "tooltip": false
-    },
-
-    "custom/memory": {
-        "exec": "free -m | awk '/Mem:/ {mem=$3/1024} /Swap:/ {swap=$3/1024; if ($3 > 0) printf \"<b>MEM</b> %.1fG [S:%.1fG]\\n\", mem, swap; else printf \"<b>MEM</b> %.1fG\\n\", mem}'",
-        "interval": 5,
-        "format": "{}",
+        "format": "<b>MEM</b> {used:0.1f}G",
         "tooltip": false
     },
 
@@ -132,7 +119,7 @@
     },
 
     "custom/fan": {
-        "exec": "~/.local/bin/check_fan_speed.sh",
+        "exec": "~/.local/bin/fan_monitor.sh",
         "interval": 5,
         "format": "[F:{}]",
         "tooltip": false
@@ -165,14 +152,14 @@
     },
 
     "custom/kernel": {
-        "exec": "~/.local/bin/check_kernel_version.sh",
+        "exec": "~/.local/bin/kernel_monitor.sh",
         "interval": 3600,
         "format": "<b>SYS</b> [K:{}]",
         "tooltip": false
     },
 
     "custom/pkgs": {
-        "exec": "~/.local/bin/check_installed_packages.sh",
+        "exec": "~/.local/bin/installed_packages_monitor.sh",
         "interval": 1800,
         "format": "[P:{}]",
         "tooltip": false
