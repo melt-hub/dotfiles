@@ -1,7 +1,8 @@
 [Unit]
-Description=Check for both system and firmware updates and write the amount to tmp
+Description=Check for system, firmware, and package updates and write to tmp
 
 [Service]
 Type=oneshot
 ExecStart=/bin/bash -c "/home/melt/dotfiles/scripts/monitors/system_updates_monitor.sh > /tmp/available_system_updates"
 ExecStart=/bin/bash -c "/home/melt/dotfiles/scripts/monitors/firmware_updates_monitor.sh > /tmp/available_firmware_updates"
+ExecStart=/bin/bash -c "/home/melt/dotfiles/scripts/monitors/installed_packages_monitor.sh > /tmp/installed_pkgs"

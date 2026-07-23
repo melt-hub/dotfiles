@@ -16,7 +16,6 @@
 
     "modules-right": [
         "network",
-        "custom/net-ping",
         "bluetooth",
         "disk#home",
         "cpu",
@@ -67,13 +66,6 @@
         "interval": 2,
         "format-wifi": "<b>WIFI</b> {essid} [D:{bandwidthDownBytes} U:{bandwidthUpBytes}]",
         "format-ethernet": "<b>ETH</b> {ipaddr} [D:{bandwidthDownBytes} U:{bandwidthUpBytes}]",
-        "tooltip": false
-    },
-
-    "custom/net-ping": {
-        "exec": "~/.local/bin/ping_monitor.sh",
-        "interval": 10,
-        "format": "[P:{}ms]",
         "tooltip": false
     },
 
@@ -154,13 +146,13 @@
     "custom/kernel": {
         "exec": "~/.local/bin/kernel_monitor.sh",
         "interval": 3600,
-        "format": "<b>SYS</b> [K:{}]",
+        "format": "<b>KNL</b> {}",
         "tooltip": false
     },
 
     "custom/pkgs": {
-        "exec": "~/.local/bin/installed_packages_monitor.sh",
-        "interval": 1800,
+        "exec": "cat /tmp/installed_pkgs 2>/dev/null",
+        "interval": 60,
         "format": "[P:{}]",
         "tooltip": false
     },
