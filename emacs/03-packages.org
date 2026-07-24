@@ -46,7 +46,7 @@
       (gcmh-mode 1)
       (my/say "Garbage Collector Magic Hack active."))
   #+end_src
-  
+
 ** UI and Theming
 
   Packages related to interface styling, themes, icons, and status indicators.
@@ -142,7 +142,7 @@
 *** Dashboard
 **** Dynamic Dashboard Greeting
 
-  Generates a time-aware greeting for the dashboard banner title 
+  Generates a time-aware greeting for the dashboard banner title
   using the assistant name and the author's login.
 
   #+begin_src emacs-lisp
@@ -173,11 +173,11 @@
       :config
       (dashboard-setup-startup-hook)
 
-      ;; ASCII Art banner 
+      ;; ASCII Art banner
       ;; Apply vertical padding and write the art to a temporary file
       (let* ((top-padding (make-string 3 ?\n))
              (bottom-padding (make-string 3 ?\n))
-             (banner-path (expand-file-name "dashboard-banner.txt" 
+             (banner-path (expand-file-name "dashboard-banner.txt"
                                             my/temp-dir)))
         (with-temp-file banner-path
           (insert top-padding my/ascii-brain bottom-padding))
@@ -186,9 +186,9 @@
       ;; Banner title
       (setq dashboard-banner-logo-title (my/get-greeting))
       (add-hook 'dashboard-mode-hook
-                (lambda () (setq dashboard-banner-logo-title 
+                (lambda () (setq dashboard-banner-logo-title
                                  (my/get-greeting))))
-      (set-face-attribute 'dashboard-banner-logo-title nil 
+      (set-face-attribute 'dashboard-banner-logo-title nil
         :height 1.0
         :weight 'normal
         :foreground 'unspecified)
@@ -534,7 +534,7 @@
 
         (setq org-tag-alist
               '((:startgroup)
-                ("call" . ?c) ("appo" . ?a) ("bday" . ?b) 
+                ("call" . ?c) ("appo" . ?a) ("bday" . ?b)
                 ("proj" . ?p) ("task" . ?k)
                 (:endgroup)))
 
@@ -544,7 +544,7 @@
         (setq org-capture-templates
               `(("t" "todo [Inbox]" entry (file+headline ,agenda-path "Inbox")
                  "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:" :empty-lines 1)
-                ("r" "reminder" entry 
+                ("r" "reminder" entry
                  (file+headline ,agenda-path "Tasks & Appointments")
                  ,(concat "* %^{Description} :rem:\n%^t\n:PROPERTIES:\n"
                           ":CONTACT: %^{Who}\n:LOCATION: %^{Where}\n"
@@ -556,12 +556,12 @@
                           ":PROPERTIES:\n:CONTACT: %^{Who}\n"
                           ":LOCATION: %^{Where}\n:CREATED: %U\n:END:")
                  :empty-lines 1)
-                ("c" "call" entry 
+                ("c" "call" entry
                  (file+headline ,agenda-path "Tasks & Appointments")
                  ,(concat "* TODO %^{Name} :call:\nSCHEDULED: %^t\n"
                           ":PROPERTIES:\n:CONTACT: %\\1\n:CREATED: %U\n:END:")
                  :empty-lines 1)
-                ("b" "birthday" entry 
+                ("b" "birthday" entry
                  (file+headline ,agenda-path "Birthdays & Recurrences")
                  ,(concat "* Compleanno %^{Who} :bday:\n"
                           "%(concat \"<\" (org-read-date) \" +1y>\")")
@@ -631,7 +631,7 @@
     (use-package org-roam
       :ensure t
       :custom
-      (org-roam-directory (expand-file-name "~/zk"))
+      (org-roam-directory (expand-file-name org-dir-path))
       (org-roam-completion-everywhere t)
       :bind (("C-c n l" . org-roam-buffer-toggle)
              ("C-c n f" . org-roam-node-find)
@@ -641,36 +641,42 @@
               `(("u" "uni")
                 ("uu" "uni" plain "%?"
                  :target (file+head "uni/${slug}.org"
-                                    ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
-                                             ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
-                                             "#+title: ${title}\n#+author: melt\n"
+                                    ,(concat ":PROPERTIES:\n"
+                                             ":ID: %(org-id-new)\n"
+                                             ":CREATED: %U\n"
+                                             ":END:\n"
+                                             "#+title: ${title}\n"
+                                             "#+author: " my/org-author "\n"
                                              "#+filetags: :uni:"))
                  :unnarrowed t)
                 ("ui" "index" plain "%?"
                  :target (file+head "uni/${slug}.org"
-                                    ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
-                                             ":created: %<%Y-%m-%d %H:%M>\n"
-                                             ":BOOK_TITLE: %^{Book Title}\n:END:\n"
-                                             "#+title: ${title}\n#+author: melt\n"
+                                    ,(concat ":PROPERTIES:\n"
+                                             ":ID: %(org-id-new)\n"
+                                             ":CREATED: %U\n"
+                                             ":BOOK_TITLE: %^{Book Title}\n"
+                                             ":END:\n"
+                                             "#+title: ${title}\n"
+                                             "#+author: " my/org-author "\n"
                                              "#+filetags: :uni:index:"))
                  :unnarrowed t)
                 ("up" "paper" plain "%?"
                  :target (file+head "uni/papers/${slug}.org"
                                     ,(concat ":PROPERTIES:\n"
                                              ":ID: %(org-id-new)\n"
-                                             ":created: %<%Y-%m-%d %H:%M>\n"
+                                             ":CREATED: %U\n"
                                              ":END:\n"
                                              "#+title: ${title}\n"
                                              "#+author: " my/org-author "\n"
                                              "#+email: " my/org-email "\n"
                                              "#+latex_class: cs-paper\n"
-                                             "#+latex_header: \\author{"
-                                             my/org-author
+                                             "#+latex_header: "
+                                             "\\author{" my/org-author
                                              "\\thanks{Equal contribution.}}\n"
-                                             "#+latex_header: \\affil{"
-                                             my/org-university
+                                             "#+latex_header: "
+                                             "\\affil{" my/org-university
                                              " \\\\ \\texttt{" my/org-email "}}\n"
-                                             "#+filetags: :paper:\n\n"
+                                             "#+filetags: :uni:paper:\n\n"
                                              "#+options: toc:t\n\n"
                                              "#+begin_abstract\n"
                                              "This is the abstract. [fn:1]\n"
@@ -683,26 +689,32 @@
                 ("d" "dream")
                 ("dd" "dream" plain "%?"
                  :target (file+head "dreams/${slug}.org"
-                                    ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
-                                             ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
-                                             "#+title: ${title}\n#+author: melt\n"
+                                    ,(concat ":PROPERTIES:\n"
+                                             ":ID: %(org-id-new)\n"
+                                             ":CREATED: %U\n"
+                                             ":END:\n"
+                                             "#+title: ${title}\n"
+                                             "#+author: " my/org-author "\n"
                                              "#+filetags: :dream:"))
                  :unnarrowed t)
                 ("dp" "person" plain "%?"
                  :target (file+head "dreams/${slug}.org"
                                     ,(concat ":PROPERTIES:\n"
                                              ":ID: %(org-id-new)\n"
-                                             ":created: %<%Y-%m-%d %H:%M>\n"
+                                             ":CREATED: %U\n"
                                              ":END:\n"
                                              "#+title: ${title}\n"
-                                             "#+filetags: :person:\n\n"
+                                             "#+filetags: :dream:person:\n\n"
                                              "* Dreams featuring ${title}\n"))
                  :unnarrowed t)
                 ("s" "scrap" plain "%?"
                  :target (file+head "scraps/${slug}.org"
-                                    ,(concat ":PROPERTIES:\n:ID: %(org-id-new)\n"
-                                             ":created: %<%Y-%m-%d %H:%M>\n:END:\n"
-                                             "#+title: ${title}\n#+author: melt\n"
+                                    ,(concat ":PROPERTIES:\n"
+                                             ":ID: %(org-id-new)\n"
+                                             ":CREATED: %U\n"
+                                             ":END:\n"
+                                             "#+author: " my/org-author "\n"
+                                             "#+title: ${title}\n"
                                              "#+filetags: :scrap:"))
                  :unnarrowed t)))
       (org-roam-setup)
@@ -723,29 +735,11 @@
       :after org-roam
       :bind ("C-c n g" . org-roam-ui-mode)
       :config
-
-      ;; Fedora/Sway fix: Use Firefox directly to avoid recursion errors
-      (setq browse-url-generic-program "firefox"
-            org-roam-ui-browser-function #'browse-url-generic)
-
-      ;; Physics and node sizing parameters
-      (setq org-roam-ui-node-size-strategy 'all-links
-            org-roam-ui-extra-config
-            '(:gravity 0.5 :friction 0.9 :link-distance 50))
-
-      ;; Ensure hl-line-face exists to prevent startup crashes
-      (require 'hl-line)
-      (unless (boundp 'hl-line-face) (defvar hl-line-face 'hl-line))
-
       ;; Status message
-      (let ((cfg org-roam-ui-extra-config))
-        (my/say "Org-Roam-UI ready. Gravity: [%.1f], Friction: [%.1f], Dist: [%d]."
-                (plist-get cfg :gravity)
-                (plist-get cfg :friction)
-                (plist-get cfg :link-distance))))
+      (my/say "Org-Roam-UI loaded."))
     ;; --------------- end org-roam-ui ---------------
   #+end_src
-  
+
 ** System and Password Management
 
   Bridges securing sensitive files, directory sync setups, and keychain requests.
@@ -840,7 +834,7 @@
       :defer t
       :bind
       (("C-c e p" . emms-playlist-mode-go)
-       ("C-c e l" . emms-play-file))  
+       ("C-c e l" . emms-play-file))
       :config
       (require 'emms-setup)
       (emms-all)
