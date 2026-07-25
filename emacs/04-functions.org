@@ -12,7 +12,7 @@
 ** General
 
   General-purpose utilities, performance configurations, and system hooks.
-  
+
 *** Automatic Tangle
 
   Monitors file modifications on the core config file and tangles code
@@ -545,26 +545,42 @@
       (lambda (&rest _) (my/org-center-latex)))
   #+end_src
 
-**** LaTeX Preview Scale Switcher
+**** Automatic LaTeX Preview Scale Adjustment
 
-  Quickly increases or decreases rendering sizes of mathematical previews
-  between standard scales (1.1 and 1.8).
+  Automatically detects screen resolution to adjust preview scaling
+  (1.8 for external monitors > 1920px, 1.1 for built-in displays)
+  while preserving a manual toggle command.
 
   #+begin_src emacs-lisp
+    (defun my/get-auto-latex-scale ()
+      "Determine appropriate LaTeX preview scale based on screen width.
+       Returns 1.8 for external displays (> 1920px) and 1.1 for built-in screens."
+      (if (> (display-pixel-width) 1920) 1.8 1.1))
+
+    (defun my/auto-set-latex-scale ()
+      "Automatically configure `org-format-latex-options` scale based on current display."
+      (setq org-format-latex-options
+            (plist-put org-format-latex-options :scale (my/get-auto-latex-scale))))
+
     (defun my/latex-switch-scaling ()
-      "Toggle LaTeX preview scaling between 1.1 and 1.8."
+      "Manually toggle LaTeX preview scaling between 1.1 and 1.8 and refresh buffer."
       (interactive)
       (let* ((current (plist-get org-format-latex-options :scale))
              (next (if (< current 1.5) 1.8 1.1)))
         (setq org-format-latex-options
               (plist-put org-format-latex-options :scale next))
-        (execute-kbd-macro (kbd "C-u C-u C-c C-x C-l"))
+        (if (fboundp 'org-latex-preview)
+            (org-latex-preview '(16))
+          (execute-kbd-macro (kbd "C-u C-u C-c C-x C-l")))
         (message "[CIRO]: LaTeX scaling set to %.1f" next)))
+
+    ;; Auto-set appropriate scale when opening Org buffers
+    (add-hook 'org-mode-hook #'my/auto-set-latex-scale)
   #+end_src
 
 **** LaTeX Export Subdirectory and Cleanup
 
-  Automatically redirects all exported files into an 'export/' 
+  Automatically redirects all exported files into an 'export/'
   subdirectory and cleans up intermediate LaTeX compilation files.
 
   #+begin_src emacs-lisp
@@ -577,7 +593,7 @@
           (unless (file-exists-p pub-dir)
             (make-directory pub-dir t))))
       (let ((output-file (apply orig-fun extension subtreep (list pub-dir))))
-        (message "[CIRO]: Exporting to %s" output-file)
+        (my/say "Exporting to %s" output-file)
         output-file))
 
     ;; Apply advice to redirect export

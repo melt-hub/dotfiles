@@ -426,7 +426,7 @@
       :hook (org-mode . org-fragtog-mode)
       :config
       (setq org-preview-latex-image-directory
-          (concat temporary-file-directory "ltximg/")))
+          (concat "~/docs/" "ltximg/")))
   #+end_src
 
   #+begin_src emacs-lisp
