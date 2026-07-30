@@ -55,7 +55,7 @@
     (defun my/say (text &rest args)
       "Display a colored assistant log message."
       (apply #'message
-             (concat (propertize (concat "[" my/assistant "]") 
+             (concat (propertize (concat "[" my/assistant "]")
                                  'face 'font-lock-keyword-face)
                      ": " text)
              args))
@@ -98,6 +98,7 @@
 
     ;; Global Compilation Behavior
     (setq compilation-scroll-output t)
+    (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 
     (my/say "System variables and paths initialized.")
   #+end_src
