@@ -111,7 +111,7 @@
     ;; Generic and System File Associations
     (add-to-list 'auto-mode-alist '("\\.ino\\'" . c++-mode))
     (add-to-list 'auto-mode-alist '("\\.rasi\\'" . css-mode))
-    (add-to-list 'auto-mode-alist '("config\\'" . conf-mode))
+    (add-to-list 'auto-mode-alist '("/config\\'" . conf-mode))
     (add-to-list 'auto-mode-alist '("\\.*rc\\'" . conf-mode))
 
     (my/say "System file automodes applied.")

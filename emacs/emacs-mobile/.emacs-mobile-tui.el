@@ -44,7 +44,7 @@
         (erase-buffer)
         ;; Set the text scale zoom
         (text-scale-set my/dashboard-zoom)
-        
+
         (insert "\n")
         ;; Centered Brain ASCII Art (using fixed padding to preserve alignment)
         (let* ((art (list "      _---~~(~~-_."
@@ -64,22 +64,22 @@
             (insert (make-string pad ?\s))
             (insert (propertize line 'face 'font-lock-keyword-face))
             (insert "\n")))
-        
+
         (insert "\n")
         ;; Centered dynamic greeting
         (my/insert-centered (my/get-greeting) 'bold)
-        
+
         ;; Centered Emacs startup initialization time
         (my/insert-centered
          (concat "System loaded in " (emacs-init-time)) 'shadow)
         (insert "\n")
-        
+
         ;; Left-aligned but cleanly indented recent files list
         (insert "  ")
         (insert (propertize "Recent Files:"
                             'face 'font-lock-variable-name-face))
         (insert "\n")
-        
+
         ;; List up to 8 recent files with the brain icon (filenames only)
         (if recentf-list
             (let ((count 0))
@@ -98,7 +98,7 @@
                     (insert "\n")
                     (setq count (1+ count))))))
           (insert "    No recent files found.\n"))
-        
+
         (insert "\n")
         ;; Cohesive, left-aligned and centered action items block
         (let* ((width (window-width))
@@ -121,10 +121,14 @@
                               'face 'font-lock-string-face))
           (insert "\n")
           (insert (make-string menu-pad ?\s))
+          (insert (propertize "[p]   Pass"
+                              'face 'font-lock-string-face))
+          (insert "\n")
+          (insert (make-string menu-pad ?\s))
           (insert (propertize "[q]   Exit Dashboard"
                               'face 'font-lock-string-face))
           (insert "\n"))
-        
+
         ;; Setup keybindings for the dashboard
         (special-mode)
         (let ((map (make-sparse-keymap)))
@@ -133,13 +137,14 @@
           (define-key map (kbd "s") 'my/scrap)
           (define-key map (kbd "u") 'my/uni)
           (define-key map (kbd "i") 'my/index)
+          (define-key map (kbd "p") 'pass)
           (define-key map (kbd "q") (lambda ()
                                       (interactive)
                                       (kill-current-buffer)
                                       (save-buffers-kill-terminal)))
           (define-key map (kbd "RET") 'push-button)
           (use-local-map map))
-        
+
         ;; Force the cursor to start at the very top of the dashboard
         (goto-char (point-min))
         (setq buffer-read-only t)))

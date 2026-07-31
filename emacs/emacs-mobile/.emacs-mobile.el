@@ -17,7 +17,7 @@
 (defun my/say (text &rest args)
   "Display a colored assistant log message."
   (apply #'message
-         (concat (propertize (concat "[" my/assistant "]") 
+         (concat (propertize (concat "[" my/assistant "]")
                              'face 'font-lock-keyword-face)
                  ": " text)
          args))
@@ -154,6 +154,23 @@
 ;; Load built-in recentf-mode
 (require 'recentf)
 (recentf-mode 1)
+
+;; Configure Password Store (pass)
+(use-package password-store
+  :ensure t
+  :defer t
+  :config
+  (setq password-store-directory
+    "/storage/emulated/0/Documents/.password-store")
+  (my/say "Password-store core loaded."))
+
+(use-package pass
+  :ensure t
+  :defer t
+  :commands (pass)
+  :after password-store
+  :config
+  (my/say "Password-store (pass) interface ready."))
 
 ;; ----------- Dashboard Startup Configuration --------------
 
@@ -329,7 +346,7 @@ Return a list of unique ID strings."
           (goto-char (point-max))
           (unless (bolp) (insert "\n"))
           (insert "\n" year-heading "\n"))
-        
+
         ;; search within this subtree for the Month heading
         (goto-char (point-min))
         (if (re-search-forward

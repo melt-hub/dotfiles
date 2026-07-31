@@ -47,6 +47,16 @@ function dotpush() {
     cd -
 }
 
+# zettelkasten sync shortcut
+function zkpush() {
+    local msg="${1:-Update: $(date +'%Y-%m-%d %H:%M')}"
+    cd ~/zk && \
+    git add . && \
+    git commit -m "$msg" && \
+    git push origin master && \
+    cd -
+}
+
 # --- bluetooth management ---
 
 bt-on() {
@@ -71,7 +81,7 @@ bt-earbuds() {
 
 bt-earbudsb() {
     bluetoothctl connect 84:0F:2A:71:4A:C1 && \
-    notify-send -i audio-headphones "Bluetooth" "Connected to Oppo Earbuds"    
+    notify-send -i audio-headphones "Bluetooth" "Connected to Oppo Earbuds"
 }
 
 bt-switchto() {
