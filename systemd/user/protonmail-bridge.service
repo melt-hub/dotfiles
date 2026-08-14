@@ -1,0 +1,12 @@
+[Unit]
+Description=Proton Mail Bridge Daemon
+After=network.target network-online.target dbus.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/protonmail-bridge --cli --no-window
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,6 @@
+[Unit]
+Description=Fan Speed Monitor for Waybar
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "/home/melt/.local/bin/fan_monitor.sh > /tmp/fan_speed_status"

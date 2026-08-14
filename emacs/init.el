@@ -8,6 +8,7 @@
 (require 'my-general)
 (require 'my-functions)
 (require 'my-packages)
+(require 'my-email)
 
 ;;; init.el ends here
 (custom-set-variables

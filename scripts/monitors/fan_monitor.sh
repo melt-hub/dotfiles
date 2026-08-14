@@ -1,12 +1,10 @@
 #!/bin/bash
-# ====================| WAYBAR FAN CHECKER |====================
-# Reads Dell SMM fan speed dynamically and hides it if below threshold.
 
-# Threshold in RPM below which the module is hidden (off or silent)
+STATUS_FILE="/tmp/fan_speed_status"
 THRESHOLD=3800
-
-# Locate the dell_smm hwmon directory dynamically to prevent reboot swaps
 HWMON_DIR=""
+
+# Locate the dell_smm hwmon directory dynamically
 for f in /sys/class/hwmon/hwmon*/name; do
     if [ "$(cat "$f" 2>/dev/null)" = "dell_smm" ]; then
         HWMON_DIR=$(dirname "$f")
@@ -14,23 +12,25 @@ for f in /sys/class/hwmon/hwmon*/name; do
     fi
 done
 
-# Fallback if dell_smm is not found
+# Fallback if hardware monitor interface is unavailable
 if [ -z "$HWMON_DIR" ] || [ ! -f "$HWMON_DIR/fan1_input" ]; then
+    echo "" > "$STATUS_FILE"
     exit 0
 fi
 
-# Read fan speeds (supports dual fans if present, taking the max)
+# Read fan inputs safely with fallback defaults
 FAN1=$(cat "$HWMON_DIR/fan1_input" 2>/dev/null || echo 0)
 FAN2=$(cat "$HWMON_DIR/fan2_input" 2>/dev/null || echo 0)
 
-# Use the highest speed among the two fans
-if [ "$FAN2" -gt "$FAN1" ]; then
+# Determine maximum speed between dual fans
+SPEED=$FAN1
+if [ "${FAN2:-0}" -gt "${FAN1:-0}" ]; then
     SPEED=$FAN2
-else
-    SPEED=$FAN1
 fi
 
-# Output only if it exceeds the threshold, otherwise let Waybar hide it
-if [ "$SPEED" -ge "$THRESHOLD" ]; then
-    echo "${SPEED}RPM"
+# Write output if threshold is exceeded, otherwise write empty string
+if [ "${SPEED:-0}" -ge "$THRESHOLD" ]; then
+    echo "${SPEED}RPM" > "$STATUS_FILE"
+else
+    echo "" > "$STATUS_FILE"
 fi

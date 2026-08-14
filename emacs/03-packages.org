@@ -230,10 +230,23 @@
                   ("C-c C-c" . compile)
              :map java-mode-map
                   ("C-c C-c" . compile))
+      :hook ((c-mode-common . (lambda ()
+                                ;; Use K&R style for same-line braces.
+                                (c-set-style "k&r")
+                                (setq c-basic-offset 4)
+
+                                ;; Disable automatic line re-indentation
+                                ;; when typing electric characters.
+                                (setq c-electric-flag nil)
+
+                                ;; Prevent indentation of function headers
+                                ;; returning custom typedefs.
+                                (c-set-offset 'topmost-intro-cont 0))))
       :config
       (setq-default c-basic-offset 4)
       (setq-default java-basic-offset 4)
       (setq compilation-scroll-output t)
+
       (my/say "C-like languages environment ready (C, C++, Java)."))
   #+end_src
 
@@ -707,7 +720,8 @@
                                              "#+filetags: :dream:person:\n\n"
                                              "* Dreams featuring ${title}\n"))
                  :unnarrowed t)
-                ("s" "scrap" plain "%?"
+                ("s" "scrap")
+                ("ss" "simple" plain "%?"
                  :target (file+head "scraps/${slug}.org"
                                     ,(concat ":PROPERTIES:\n"
                                              ":ID: %(org-id-new)\n"
@@ -716,7 +730,40 @@
                                              "#+author: " my/org-author "\n"
                                              "#+title: ${title}\n"
                                              "#+filetags: :scrap:"))
-                 :unnarrowed t)))
+                  :unnarrowed t)
+                ("sm" "manual" plain "%?"
+                 :target (file+head "scraps/manuals/${slug}.org"
+                                    ,(concat ":PROPERTIES:\n"
+                                             ":ID: %(org-id-new)\n"
+                                             ":CREATED: %U\n"
+                                             ":END:\n"
+                                             "#+author: " my/org-author "\n"
+                                             "#+title: ${title}\n"
+                                             "#+filetags: :scrap:manual:\n\n"
+                                             "* Brief manual for: ${title}\n"))
+                 :unnarrowed t)
+                ("sr" "recipe" plain "%?"
+                 :target (file+head "scraps/recipes/${slug}.org"
+                                    ,(concat ":PROPERTIES:\n"
+                                             ":ID: %(org-id-new)\n"
+                                             ":CREATED: %U\n"
+                                             ":END:\n"
+                                             "#+title: ${title}\n"
+                                             "#+author: " my/org-author "\n"
+                                             "#+filetags: :scrap:recipe:\n"
+                                             "#+options: toc:nil num:nil\n\n"
+                                             "* ${title}\n\n"
+                                             "** Ingredients\n\n"
+                                             "  #+attr_latex: :align r l :environment tabular\n"
+                                             "  |----------+------------|\n"
+                                             "  | Quantity | Ingredient |\n"
+                                             "  |----------+------------|\n"
+                                             "  |          |            |\n"
+                                             "  |----------+------------|\n\n"
+                                             "** Preparation\n\n"
+                                             "  1) "))
+                 :unnarrowed t)
+                 ))
       (org-roam-setup)
       (my/say "Zettelkasten (Org-Roam) active. Directory: %s, Database: %s."
               org-roam-directory

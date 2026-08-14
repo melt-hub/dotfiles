@@ -1,0 +1,9 @@
+[Unit]
+Description=Check Kernel Version on boot and every hour
+
+[Timer]
+OnBootSec=5s
+OnUnitActiveSec=1h
+
+[Install]
+WantedBy=timers.target

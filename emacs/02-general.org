@@ -80,15 +80,15 @@
     (setq backup-directory-alist
           `((".*" . ,(expand-file-name "backups/" my/temp-dir))))
     ; Preserve symlinks
-    (setq backup-by-copying t)    
+    (setq backup-by-copying t)
     ; Use numbered backups
-    (setq version-control t)      
+    (setq version-control t)
     ; Keep original version
-    (setq kept-old-versions 2)    
+    (setq kept-old-versions 2)
     ; Keep 5 most recent versions
-    (setq kept-new-versions 5)    
+    (setq kept-new-versions 5)
     ; Delete excess backups
-    (setq delete-old-versions t) 
+    (setq delete-old-versions t)
 
     ;; Auto-Saves Configuration (#file.org#)
     (setq auto-save-file-name-transforms

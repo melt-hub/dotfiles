@@ -17,6 +17,7 @@
     "modules-right": [
         "network",
         "bluetooth",
+        "custom/kernel",
         "disk#home",
         "cpu",
         "custom/cpu-freq",
@@ -26,7 +27,6 @@
         "battery",
         "custom/power-usage",
         "power-profiles-daemon",
-        "custom/kernel",
         "custom/pkgs",
         "clock",
         "tray"
@@ -92,7 +92,7 @@
     },
 
     "custom/cpu-freq": {
-        "exec": "~/.local/bin/cpu_monitor.sh",
+        "exec": "cat /tmp/cpu_freq_status 2>/dev/null",
         "interval": 2,
         "format": "[{}]",
         "tooltip": false
@@ -111,9 +111,16 @@
     },
 
     "custom/fan": {
-        "exec": "~/.local/bin/fan_monitor.sh",
+        "exec": "cat /tmp/fan_speed_status 2>/dev/null",
         "interval": 5,
         "format": "[F:{}]",
+        "tooltip": false
+    },
+
+    "custom/kernel": {
+        "exec": "cat /tmp/kernel_version 2>/dev/null",
+        "interval": 60,
+        "format": "<b>KNL</b> {}",
         "tooltip": false
     },
 
@@ -141,13 +148,6 @@
             "performance": "P",
             "power-saver": "S"
         }
-    },
-
-    "custom/kernel": {
-        "exec": "~/.local/bin/kernel_monitor.sh",
-        "interval": 3600,
-        "format": "<b>KNL</b> {}",
-        "tooltip": false
     },
 
     "custom/pkgs": {
