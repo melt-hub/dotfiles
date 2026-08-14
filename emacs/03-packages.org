@@ -834,6 +834,18 @@
       (my/say "Password-store core loaded."))
   #+end_src
 
+*** Password Store OTP
+
+  Support for 2FA / TOTP authentication tokens inside pass.
+
+  #+begin_src emacs-lisp
+    (use-package password-store-otp
+      :ensure t
+      :after password-store
+      :config
+      (my/say "Password-store OTP (2FA) ready."))
+  #+end_src
+
 *** Pinentry
 
   Directing GPG security queries directly inside the minibuffer prompt.

@@ -18,6 +18,7 @@
         "network",
         "bluetooth",
         "custom/kernel",
+        "custom/pkgs",
         "disk#home",
         "cpu",
         "custom/cpu-freq",
@@ -27,7 +28,6 @@
         "battery",
         "custom/power-usage",
         "power-profiles-daemon",
-        "custom/pkgs",
         "clock",
         "tray"
     ],
@@ -124,6 +124,13 @@
         "tooltip": false
     },
 
+    "custom/pkgs": {
+        "exec": "cat /tmp/installed_pkgs 2>/dev/null",
+        "interval": 60,
+        "format": "[P:{}]",
+        "tooltip": false
+    },
+
     "battery": {
         "bat": "BAT0",
         "format": "<b>BAT</b> {capacity}% ({time})",
@@ -148,13 +155,6 @@
             "performance": "P",
             "power-saver": "S"
         }
-    },
-
-    "custom/pkgs": {
-        "exec": "cat /tmp/installed_pkgs 2>/dev/null",
-        "interval": 60,
-        "format": "[P:{}]",
-        "tooltip": false
     },
 
     "clock": { "format": "<b>{:%a %d.%m %H:%M}</b>", "tooltip": false },
