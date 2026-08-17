@@ -1,0 +1,7 @@
+[Unit]
+Description=Daily Git Sync for dotfiles and Zettelkasten
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "%h/.local/bin/dotpush.sh && %h/.local/bin/zkpush.sh"
