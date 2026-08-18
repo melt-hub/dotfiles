@@ -222,7 +222,6 @@
 
   #+begin_src emacs-lisp
     (use-package cc-mode
-      :ensure nil
       :defer t
       :bind (:map c-mode-map
                   ("C-c C-c" . compile)
@@ -254,7 +253,6 @@
 
   #+begin_src emacs-lisp
     (use-package magit
-      :ensure t
       :defer t
       :bind (("C-x g"   . magit-status)
              ("C-x M-g" . magit-dispatch))
@@ -268,7 +266,7 @@
 
   #+begin_src emacs-lisp
     (use-package js
-      :ensure nil
+      :defer t
       :mode ("\\.js\\'" . js-mode)
       :bind (:map js-mode-map
                   ("C-c C-c" . compile))
@@ -282,10 +280,10 @@
   #+begin_src emacs-lisp
     (use-package julia-mode
       :mode "\\.jl\\'"
-      :ensure t)
+      :defer t)
 
     (use-package julia-repl
-      :ensure t
+      :defer t
       :hook (julia-mode . julia-repl-mode))
   #+end_src
 
@@ -301,7 +299,6 @@
 
     (use-package slime-company
       :ensure t
-      :after (slime company)
       :config
       (setq slime-company-completion 'fuzzy))
 
@@ -322,7 +319,7 @@
 
   #+begin_src emacs-lisp
     (use-package prolog
-      :ensure nil
+      :defer t
       :mode ("\\.pl\\'" . prolog-mode)
       :init
       (setq auto-mode-alist (rassq-delete-all 'perl-mode auto-mode-alist))
@@ -337,7 +334,7 @@
 
   #+begin_src emacs-lisp
     (use-package python
-      :ensure nil
+      :defer t
       :mode ("\\.py\\'" . python-mode)
       :bind (:map python-mode-map
                   ("C-c C-c" . python-shell-send-buffer)
@@ -350,7 +347,7 @@
 
   #+begin_src emacs-lisp
     (use-package rust-mode
-      :ensure t
+      :defer t
       :mode "\\.rs\\'"
       :bind (:map rust-mode-map
                   ("C-c C-c" . compile))
@@ -358,7 +355,7 @@
       (setq rust-format-on-save t))
 
     (use-package cargo
-      :ensure t
+      :after rust-mode
       :hook (rust-mode . cargo-minor-mode)
       :config
       (setq cargo-process--command-flags '("--color" "always")))
@@ -368,7 +365,6 @@
 
   #+begin_src emacs-lisp
     (use-package ess
-      :ensure t
       :defer t
       :mode ("\\.R\\'" . R-mode)
       :bind (:map ess-r-mode-map
@@ -383,6 +379,7 @@
 
   #+begin_src emacs-lisp
     (use-package sql
+      :defer t
       :mode ("\\.sql\\'" . sql-mode)
       :config
       (setq sql-product 'mysql)
@@ -435,7 +432,7 @@
 
   #+begin_src emacs-lisp
     (use-package org-fragtog
-      :ensure t
+      :after org
       :hook (org-mode . org-fragtog-mode)
       :config
       (setq org-preview-latex-image-directory
@@ -461,7 +458,7 @@
 
   #+begin_src emacs-lisp
     (use-package pdf-tools
-      :ensure t
+      :defer t
       :magic ("%PDF" . pdf-view-mode)
       :config
       ;; Trigger backend installation
@@ -506,7 +503,6 @@
 
   #+begin_src emacs-lisp
     (use-package pdf-view-restore
-      :ensure t
       :after pdf-tools
       :hook (pdf-view-mode . pdf-view-restore-mode)
       :config
@@ -642,7 +638,7 @@
 
   #+begin_src emacs-lisp
     (use-package org-roam
-      :ensure t
+      :defer t
       :custom
       (org-roam-directory (expand-file-name org-dir-path))
       (org-roam-completion-everywhere t)
@@ -868,7 +864,7 @@
 
   #+begin_src emacs-lisp
     (use-package vterm
-      :ensure t
+      :defer t
       :bind ("C-c v" . vterm)
       :custom
       (vterm-max-scrollback 10000)
@@ -889,7 +885,6 @@
   #+begin_src emacs-lisp
     ;; --------------- multimedia (emms) ---------------
     (use-package emms
-      :ensure t
       :defer t
       :bind
       (("C-c e p" . emms-playlist-mode-go)
