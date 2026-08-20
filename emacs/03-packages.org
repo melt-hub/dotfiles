@@ -291,14 +291,14 @@
 
   #+begin_src emacs-lisp
     (use-package slime
-      :ensure t
+      :defer t
       :commands (slime slime-mode)
       :config
       (setq inferior-lisp-program "sbcl")
       (slime-setup '(slime-fancy)))
 
     (use-package slime-company
-      :ensure t
+      :after slime
       :config
       (setq slime-company-completion 'fuzzy))
 
