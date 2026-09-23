@@ -1,15 +1,15 @@
-% melt-setup.sty
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{melt-setup}[2026/07/06 Melt Custom Math and TikZ Setup]
 
-% Loads packages
+% Load main packages
 \RequirePackage{clrscode3e}
 \RequirePackage{tikz}
 \RequirePackage{pgfplots}
 \RequirePackage{forest}
 \RequirePackage{authblk}
+\RequirePackage{etoolbox}
 
-% Load libraries
+% Pull in handy TikZ modules
 \usetikzlibrary{
   positioning,
   calc,
@@ -20,10 +20,36 @@
   intersections
 }
 
-% Configure PGFPlots
+% Keep pgfplots up to date
 \usepgfplotslibrary{fillbetween, statistics}
 \pgfplotsset{compat=newest}
 
-% Hide red borders around links globally (ToC and references)
+% Kill the ugly red boxes around links
 \usepackage{hyperref}
 \hypersetup{hidelinks}
+
+% Bump up math sizes so equations pop out a bit more
+\DeclareMathSizes{10}{11.5}{8}{6}
+\DeclareMathSizes{11}{12.5}{9}{7}
+
+% Make codebox fonts slightly larger for readability
+\BeforeBeginEnvironment{codebox}{\fontsize{10.5pt}{13pt}\selectfont}
+
+% Load tcolorbox
+\RequirePackage{tcolorbox}
+\tcbuselibrary{breakable}
+
+% Wrap codeboxes in a clean shaded frame just like the CLRS book
+\tcolorboxenvironment{codebox}{
+  colback=gray!7,
+  colframe=gray!30,
+  boxrule=0.6pt,
+  arc=2mm,
+  left=8pt,
+  right=8pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=12pt,
+  after skip=12pt,
+  breakable
+}
