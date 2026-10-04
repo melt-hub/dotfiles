@@ -29,25 +29,11 @@
     (add-to-list 'load-path (concat os-packages-path "use-package/"))
   #+end_src
 
-** Identity and Logging
+** Logging
 
-  Standard Emacs user identity, academic metadata, and the CIRO logging assistant.
+  The CIRO logging assistant:
 
   #+begin_src emacs-lisp
-    ;; Standard Emacs User Identity
-    (setq user-full-name "melt")
-    (setq user-mail-address "melt@campus.unimib.it")
-
-    ;; Custom Academic Metadata
-    (defvar my/org-university "Università di Milano Bicocca"
-      "Default university for scientific papers.")
-
-    (defvar my/org-email user-mail-address
-      "Default email address for academic exports.")
-
-    (defvar my/org-author user-full-name
-      "Default author for scientific papers.")
-
     ;; Logging system's name
     (defvar my/assistant "CIRO"
       "Name of the Emacs assistant.")

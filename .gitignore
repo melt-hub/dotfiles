@@ -3,5 +3,6 @@
 *_archive
 emacs/packages/
 emacs/05-email.org
+emacs/00-identity.org
 *.bak
 git/

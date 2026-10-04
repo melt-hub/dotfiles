@@ -154,13 +154,13 @@
          ((and (>= hour 4)  (< hour 7))
           (concat prefix " Sei già sveglio o ancora sveglio?"))
          ((and (>= hour 7)  (< hour 12))
-          (concat prefix " Buongiorno " my/org-author "!"))
+          (concat prefix " Buongiorno " my/nickname "!"))
          ((and (>= hour 12) (< hour 18))
-          (concat prefix " Buon pomeriggio " my/org-author "!"))
+          (concat prefix " Buon pomeriggio " my/nickname "!"))
          ((and (>= hour 18) (< hour 24))
-          (concat prefix " Buona sera " my/org-author "!"))
+          (concat prefix " Buona sera " my/nickname "!"))
          (t
-          (concat prefix " Vatt a dorme " my/org-author "!")))))
+          (concat prefix " Vatt a dorme " my/nickname "!")))))
   #+end_src
 
   A clean and responsive startup splash screen featuring list views of
@@ -656,7 +656,7 @@
                                              ":CREATED: %U\n"
                                              ":END:\n"
                                              "#+title: ${title}\n"
-                                             "#+author: " my/org-author "\n"
+                                             "#+author: " my/nickname "\n"
                                              "#+filetags: :uni:"))
                  :unnarrowed t)
                 ("ui" "index" plain "%?"
@@ -667,7 +667,7 @@
                                              ":BOOK_TITLE: %^{Book Title}\n"
                                              ":END:\n"
                                              "#+title: ${title}\n"
-                                             "#+author: " my/org-author "\n"
+                                             "#+author: " my/nickname "\n"
                                              "#+filetags: :uni:index:"))
                  :unnarrowed t)
                 ("up" "paper" plain "%?"
@@ -704,7 +704,7 @@
                                              ":CREATED: %U\n"
                                              ":END:\n"
                                              "#+title: ${title}\n"
-                                             "#+author: " my/org-author "\n"
+                                             "#+author: " my/nickname "\n"
                                              "#+filetags: :dream:"))
                  :unnarrowed t)
                 ("dp" "person" plain "%?"
@@ -724,7 +724,7 @@
                                              ":ID: %(org-id-new)\n"
                                              ":CREATED: %U\n"
                                              ":END:\n"
-                                             "#+author: " my/org-author "\n"
+                                             "#+author: " my/nickname "\n"
                                              "#+title: ${title}\n"
                                              "#+filetags: :scrap:"))
                   :unnarrowed t)
@@ -734,7 +734,7 @@
                                              ":ID: %(org-id-new)\n"
                                              ":CREATED: %U\n"
                                              ":END:\n"
-                                             "#+author: " my/org-author "\n"
+                                             "#+author: " my/nickname "\n"
                                              "#+title: ${title}\n"
                                              "#+filetags: :scrap:manual:\n\n"
                                              "* Brief manual for: ${title}\n"))
@@ -746,7 +746,7 @@
                                              ":CREATED: %U\n"
                                              ":END:\n"
                                              "#+title: ${title}\n"
-                                             "#+author: " my/org-author "\n"
+                                             "#+author: " my/nickname "\n"
                                              "#+filetags: :scrap:recipe:\n"
                                              "#+options: toc:nil num:nil\n\n"
                                              "* ${title}\n\n"

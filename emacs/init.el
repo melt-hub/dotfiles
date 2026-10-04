@@ -4,6 +4,7 @@
 (add-to-list 'load-path (expand-file-name "modules" user-emacs-directory))
 
 ;; Load each module in chronological order
+(require 'my-identity)
 (require 'my-startup)
 (require 'my-general)
 (require 'my-functions)
