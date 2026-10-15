@@ -594,7 +594,9 @@
             (plist-put org-format-latex-options :justify 'center))
       (setq org-preview-latex-default-process 'dvisvgm)
       (setq org-format-latex-options
-            (plist-put org-format-latex-options :background "Transparent"))
+          (plist-put org-format-latex-options :foreground "Black"))
+      (setq org-format-latex-options
+          (plist-put org-format-latex-options :background "Transparent"))
 
       ;; Custom Latex package for equation previews (renders buffers correctly)
       (setq org-format-latex-header

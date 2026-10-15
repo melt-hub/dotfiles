@@ -38,18 +38,3 @@
 % Load tcolorbox
 \RequirePackage{tcolorbox}
 \tcbuselibrary{breakable}
-
-% Wrap codeboxes in a clean shaded frame just like the CLRS book
-\tcolorboxenvironment{codebox}{
-  colback=gray!7,
-  colframe=gray!30,
-  boxrule=0.6pt,
-  arc=2mm,
-  left=8pt,
-  right=8pt,
-  top=6pt,
-  bottom=6pt,
-  before skip=12pt,
-  after skip=12pt,
-  breakable
-}
