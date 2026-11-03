@@ -8,107 +8,30 @@
 
   #+begin_src emacs-lisp
     ;; ====================| STARTUP |====================
-  #+end_src
 
-** Paths and Package Manager Setup
-
-  Core directory paths and registration of the `use-package` engine path.
-
-  #+begin_src emacs-lisp
-    ;; Core System Paths
-    (defvar os-packages-path "~/dotfiles/emacs/packages/"
-      "Directory containing local/vendor package subdirectories.")
-
+    ;; core system paths
     (defvar org-dir-path "~/zk/"
       "Root directory for Org-mode notes and Zettelkasten.")
 
     (defvar my/temp-dir (expand-file-name ".tmp/" user-emacs-directory)
       "Central directory for Emacs temporary files.")
 
-    ;; Load use-package path prior to loading modules
-    (add-to-list 'load-path (concat os-packages-path "use-package/"))
-  #+end_src
-
-** Logging
-
-  The CIRO logging assistant:
-
-  #+begin_src emacs-lisp
-    ;; Logging system's name
-    (defvar my/assistant "CIRO"
-      "Name of the Emacs assistant.")
-
-    (defun my/say (text &rest args)
-      "Display a colored assistant log message."
-      (apply #'message
-             (concat (propertize (concat "[" my/assistant "]")
-                                 'face 'font-lock-keyword-face)
-                     ": " text)
-             args))
-
-    (my/say "Yo melt!")
-
-    ;; Dashboard banner
-    (defvar my/ascii-brain
-      (concat
-       "            ___    ___\n"
-       "        ..\"`)\" `..\" `(``..\n"
-       "      .'; _..=. :: `-'._ ;`.\n"
-       "     : ) ;\"`':._::_.      ( :.\n"
-       "   .:-\"   _.  `\"##\"` \"._   `-:\\\n"
-       "  /.\"   -\"`  ._.::._. .'\"-   \".:\n"
-       " : :    ( -: `\" :: \"` :- )    : )\n"
-       "( .\".:==._' `'=._##_.='` '_.==: .'\n"
-       "(:  `, `\"`    `\"##\"`    `\"` .'`\".)\n"
-       " \\`'  `\"--.  \"- )( -\" ..--\"`  `-/\n"
-       " (\" (_.\" =\"\"-...\"`...-\"\"= \"._) \")\n"
-       "  \"..__..-\"  )%`..'%(  \"-..__..\"\n"
-       "       (#\"...\'\\\\%%%%/`...\"#)\n"
-       "        `######`--'######\"\n"
-       "          \"###\")@@(`###\"\n"
-       "               \\@@/\n"
-       "                )(\n")
-      "Brain ASCII art banner.")
-  #+end_src
-
-** System Defaults and Environment
-
-  Global options for encodings, UI, compilation behavior, and security prompts.
-
-  #+begin_src emacs-lisp
-    ;; Encoding and Buffer Defaults
-    (prefer-coding-system 'utf-8-unix)
+    ;; system defaults and environment
     (setq inhibit-startup-screen t)
     (setq vc-follow-symlinks t)
     (setq epa-pinentry-mode 'loopback)
 
-    ;; Global Compilation Behavior
+    ;; global compilation behavior
     (setq compilation-scroll-output t)
-    (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
+    (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
 
-    (my/say "System variables and paths initialized.")
-  #+end_src
-
-** File Mode Associations
-
-  Automatic major mode mappings for generic configuration and system files.
-
-  #+begin_src emacs-lisp
-    ;; Generic and System File Associations
+    ;; file mode associations
     (add-to-list 'auto-mode-alist '("\\.ino\\'" . c++-mode))
     (add-to-list 'auto-mode-alist '("\\.rasi\\'" . css-mode))
     (add-to-list 'auto-mode-alist '("/config\\'" . conf-mode))
-    (add-to-list 'auto-mode-alist '("\\.*rc\\'" . conf-mode))
+    (add-to-list 'auto-mode-alist '("\\..*rc\\'" . conf-mode))
 
-    (my/say "System file automodes applied.")
-  #+end_src
-
-** Module Finalization
-
-  Provide feature and complete startup loading.
-
-  #+begin_src emacs-lisp
-    ;; ====================| END STARTUP |====================
-    (my/say "Startup module loaded.")
+    ;; module finalization
     (provide 'my-startup)
+    ;; ====================| END STARTUP |====================
   #+end_src

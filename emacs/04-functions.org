@@ -26,7 +26,7 @@
                   "dotfiles/emacs/[0-9]+-.*\\.org\\'"
                   (buffer-file-name)))
         (org-babel-tangle)
-        (my/say "Configuration module tangled successfully!")))
+        (message "Configuration module tangled successfully!")))
 
     (add-hook 'after-save-hook #'my/tangle-dotfiles)
   #+end_src
@@ -572,7 +572,7 @@
         (if (fboundp 'org-latex-preview)
             (org-latex-preview '(16))
           (execute-kbd-macro (kbd "C-u C-u C-c C-x C-l")))
-        (message "[CIRO]: LaTeX scaling set to %.1f" next)))
+        (message "LaTeX scaling set to %.1f" next)))
 
     ;; Auto-set appropriate scale when opening Org buffers
     (add-hook 'org-mode-hook #'my/auto-set-latex-scale)
@@ -593,7 +593,7 @@
           (unless (file-exists-p pub-dir)
             (make-directory pub-dir t))))
       (let ((output-file (apply orig-fun extension subtreep (list pub-dir))))
-        (my/say "Exporting to %s" output-file)
+        (message "Exporting to %s" output-file)
         output-file))
 
     ;; Apply advice to redirect export
@@ -609,9 +609,5 @@
 
   #+begin_src emacs-lisp
     ;; ====================| END MY FUNCTIONS |====================
-  #+end_src
-
-  #+begin_src emacs-lisp
-    (my/say "Custom functions module loaded.")
     (provide 'my-functions)
   #+end_src

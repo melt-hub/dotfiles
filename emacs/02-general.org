@@ -8,126 +8,60 @@
 
   #+begin_src emacs-lisp
     ;; ====================| GENERAL |====================
-  #+end_src
 
-** UI and Modeline Display
-
-  Basic status bar indicators, bell behavior, and dialog suppressions.
-
-  #+begin_src emacs-lisp
-    ;; Modeline Status Indicators
+    ;; modeline status indicators
     (line-number-mode t)
     (column-number-mode t)
     (display-time)
 
-    ;; Silence Audible Bell
+    ;; silence audible bell
     (setq ring-bell-function 'ignore)
 
-    ;; Suppress Graphical Dialogs and Menus
+    ;; suppress graphical dialogs, menus and modeline mouse interactions
     (setq use-dialog-box nil)
     (setq use-file-dialog nil)
     (setq context-menu-mode nil)
-
-    ;; Disable Modeline Popup Menus
     (setq mode-line-major-mode-keymap nil)
     (setq mode-line-minor-mode-keymap nil)
-  #+end_src
 
-** Indentation and Text Formatting
-
-  Spacing, line wrapping rules, whitespace cleanup, and default column limits.
-
-  #+begin_src emacs-lisp
-    ;; Line Wrapping and Column Limits
+    ;; text formatting and column limits
     (global-visual-line-mode t)
     (setq-default fill-column 80)
-
-    ;; Enable Hard Wrapping in Text and Programming Modes
     (add-hook 'text-mode-hook #'turn-on-auto-fill)
-    (add-hook 'prog-mode-hook #'turn-on-auto-fill)
 
-    ;; File Endings and Whitespace Cleanup
-    (setq require-final-newline nil)
-    (setq mode-require-final-newline nil)
+    ;; posix file endings and whitespace cleanup
+    (setq require-final-newline t)
     (add-hook 'before-save-hook #'delete-trailing-whitespace)
 
-    ;; Indentation Rules (Spaces over Tabs)
+    ;; indentation defaults
     (setq-default tab-width 2)
     (setq-default indent-tabs-mode nil)
-
-    ;; Language Offsets
     (setq-default lisp-indent-offset 2)
-    (setq-default electric-indent-chars '(?\n ?\^? ?\}))
 
-    ;; Buffer Text Scaling On File Open
-    (add-hook 'find-file-hook (lambda () (text-scale-set 1)))
+    ;; default font size
+    (set-face-attribute 'default nil :height 120)
 
-    (my/say "Indentation rules active. TAB: [%d], COL: [%d], LISP: [%d]."
-            tab-width fill-column lisp-indent-offset)
-  #+end_src
-
-** File Management and Backups
-
-  Centralize all temporary files (backups, auto-saves, and locks)
-  to keep the file system clean while preventing data loss.
-
-  #+begin_src emacs-lisp
-    ;; Ensure Main Temp Directory Exists
+    ;; centralized temporary files
     (unless (file-exists-p my/temp-dir)
       (make-directory my/temp-dir t))
 
-    ;; Backups Configuration (file.org~)
-    (setq backup-directory-alist
-          `((".*" . ,(expand-file-name "backups/" my/temp-dir))))
-    ; Preserve symlinks
-    (setq backup-by-copying t)
-    ; Use numbered backups
-    (setq version-control t)
-    ; Keep original version
-    (setq kept-old-versions 2)
-    ; Keep 5 most recent versions
-    (setq kept-new-versions 5)
-    ; Delete excess backups
-    (setq delete-old-versions t)
+    (setq backup-directory-alist `((".*" . ,(expand-file-name "backups/" my/temp-dir)))
+          backup-by-copying t
+          version-control t
+          kept-old-versions 2
+          kept-new-versions 5
+          delete-old-versions t
+          auto-save-file-name-transforms `((".*" ,(expand-file-name "auto-save/" my/temp-dir) t))
+          auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" my/temp-dir))
 
-    ;; Auto-Saves Configuration (#file.org#)
-    (setq auto-save-file-name-transforms
-          `((".*" ,(expand-file-name "auto-save/" my/temp-dir) t)))
-    (setq auto-save-list-file-prefix
-          (expand-file-name "auto-save-list/.saves-" my/temp-dir))
-
-    ;; Lock Files Configuration (.#file.org)
     (when (boundp 'lock-file-name-transforms)
-      (setq lock-file-name-transforms
-            `((".*" ,(expand-file-name "locks/" my/temp-dir) t))))
+      (setq lock-file-name-transforms `((".*" ,(expand-file-name "locks/" my/temp-dir) t))))
 
-    ;; Initialize Subdirectories
-    (dolist (dir '("backups" "auto-save" "locks" "auto-save-list"))
-      (let ((path (expand-file-name dir my/temp-dir)))
-        (unless (file-exists-p path)
-          (make-directory path t))))
-
-    (my/say "Temporary files centralized in %s." my/temp-dir)
-  #+end_src
-
-** Universal Minibuffer Prompts
-
-  Standardize and shorten interaction prompts in the minibuffer.
-
-  #+begin_src emacs-lisp
-    ;; Use y/n Instead of yes/no Globally
+    ;; minibuffer prompts
     (setq use-short-answers t)
-
-    ;; Ensure 's' (save) is Always an Option in Buffer Prompts
     (setq save-some-buffers-default-predicate 'save-some-buffers-root)
-  #+end_src
 
-** Module Finalization
-
-  Finalize module loading and register feature.
-
-  #+begin_src emacs-lisp
-    ;; ====================| END GENERAL |====================
-    (my/say "General configuration module loaded.")
+    ;; module finalization
     (provide 'my-general)
+    ;; ====================| END GENERAL |====================
   #+end_src
