@@ -68,22 +68,27 @@
 *** Auto-completion (Company)
 
   #+begin_src emacs-lisp
-    ;; buffer-based completion without lsp or clang overhead
+    ;; in-buffer completion
     (use-package company
       :ensure t
+      :defer t
       :hook (prog-mode . company-mode)
       :bind (:map company-active-map
                   ("C-n" . company-select-next)
                   ("C-p" . company-select-previous)
-                  ("<tab>" . company-complete-selection))
+                  ("RET" . company-complete-selection)
+                  ("<return>" . company-complete-selection))
       :config
       (setq company-idle-delay 0.1)
-      (setq company-minimum-prefix-length 2)
+      (setq company-minimum-prefix-length 1)
       (setq company-tooltip-limit 10)
       (setq company-tooltip-align-annotations t)
 
-      ;; remove clang to rely only on buffer words, keywords and tags
-      (setq company-backends (delete 'company-clang company-backends)))
+      (setq company-backends (delete 'company-clang company-backends))
+
+      (with-eval-after-load 'company-keywords
+        (push `(simpc-mode . ,(cdr (assoc 'c-mode company-keywords-alist)))
+              company-keywords-alist)))
   #+end_src
 
 *** Snippets (YASnippet)
@@ -92,9 +97,9 @@
     ;; snippet expansion engine
     (use-package yasnippet
       :ensure t
+      :defer t
       :hook (prog-mode . yas-minor-mode)
-      :config
-      (yas-reload-all))
+      :config)
 
     (use-package yasnippet-snippets
       :ensure t
@@ -107,10 +112,9 @@
     ;; project indent and whitespace rules
     (use-package editorconfig
       :ensure t
-      :config
-      (editorconfig-mode 1))
+      :defer t
+      :hook (prog-mode . editorconfig-mode))
   #+end_src
-
 *** Git
 
   #+begin_src emacs-lisp
