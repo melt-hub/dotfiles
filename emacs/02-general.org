@@ -61,6 +61,13 @@
     (setq use-short-answers t)
     (setq save-some-buffers-default-predicate 'save-some-buffers-root)
 
+    ;; built in theme
+    (use-package emacs
+      :init
+      (let ((inhibit-message t)
+            (warning-minimum-level :emergency))
+        (load-theme 'modus-vivendi t)))
+
     ;; module finalization
     (provide 'my-general)
     ;; ====================| END GENERAL |====================

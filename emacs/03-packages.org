@@ -31,24 +31,6 @@
     (require 'use-package)
   #+end_src
 
-** UI and Theming
-
-  Packages related to interface styling, themes, icons, and status indicators.
-
-*** Emacs themes
-
-  A high-contrast dark color scheme optimized for readability and extended
-  development.
-
-  #+begin_src emacs-lisp
-    ;; built in theme
-    (use-package emacs
-      :init
-      (let ((inhibit-message t)
-            (warning-minimum-level :emergency))
-        (load-theme 'modus-vivendi t)))
-  #+end_src
-
 ** Software Development
 
   Development systems, compiler interfaces, and languages integrations.
@@ -427,51 +409,4 @@
       :init
       (setenv "EMACS" "t")
       :hook (after-init . pinentry-start))
-  #+end_src
-
-*** Vterm
-
-  High-performance terminal emulator based on libvterm. Configured
-  to integrate with Emacs clipboard and scrollback limits.
-
-  #+begin_src emacs-lisp
-    ;; terminal emulator
-    (use-package vterm
-      :defer t
-      :bind ("C-c v" . vterm)
-      :custom
-      (vterm-max-scrollback 10000)
-      :config
-      (define-key vterm-mode-map (kbd "C-y") #'vterm-yank)
-      (define-key vterm-mode-map (kbd "M-y") #'vterm-yank-pop))
-  #+end_src
-
-** Other
-
-  Interactive controls managing audio streams and playback queues.
-
-*** EMMS
-
-  The Emacs Multimedia System, linking background MPV processes to native playlists.
-
-  #+begin_src emacs-lisp
-    ;; multimedia system
-    (use-package emms
-      :defer t
-      :bind
-      (("C-c e p" . emms-playlist-mode-go)
-       ("C-c e l" . emms-play-file))
-      :config
-      (require 'emms-setup)
-      (emms-all)
-      (emms-default-players)
-      (setq emms-player-list '(emms-player-mpv))
-      (setq emms-source-file-default-directory "~/clips/")
-      (global-set-key (kbd "C-c e p") 'emms-playlist-mode-go)
-      (global-set-key (kbd "C-c e l") 'emms-play-file))
-  #+end_src
-
-  #+begin_src emacs-lisp
-    ;; ====================| END PACKAGES |====================
-    (provide 'my-packages)
   #+end_src
