@@ -409,4 +409,9 @@
       :init
       (setenv "EMACS" "t")
       :hook (after-init . pinentry-start))
+
+    ;; module finalization
+    (provide 'my-packages)
+    ;; ====================| END PACKAGES |====================
+
   #+end_src
