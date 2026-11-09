@@ -65,6 +65,7 @@
       (setq company-minimum-prefix-length 1)
       (setq company-tooltip-limit 10)
       (setq company-tooltip-align-annotations t)
+      (setq company-inhibit-inside-symbols t)
 
       (setq company-backends (delete 'company-clang company-backends))
 
